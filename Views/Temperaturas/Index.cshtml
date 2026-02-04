@@ -1,0 +1,60 @@
+﻿@model List<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>
+
+<h2>Contenedores Refrigerados</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<form asp-action="Create" method="post" class="row g-2 mb-4">
+    <div class="col-md-4">
+        <input name="contenedor" class="form-control" placeholder="Número de contenedor" />
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-primary w-100">Crear</button>
+    </div>
+</form>
+
+<form asp-action="Buscar" method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input name="contenedor" class="form-control" placeholder="Buscar contenedor..." />
+    </div>
+    <div class="col-md-2">
+        <button class="btn btn-primary w-100">Buscar</button>
+    </div>
+    <div class="col-md-2">
+        <a asp-action="Index" class="btn btn-secondary w-100">Limpiar</a>
+    </div>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Contenedor</th>
+            <th>Creación</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>
+                    <a asp-action="Detalle" asp-route-id="@c.Id">
+                        @c.Contenedor
+                    </a>
+                </td>
+                <td>
+                    @(c.FechaHoraIngreso?.ToString("dd/MM/yyyy HH:mm") ?? "-")
+                </td>
+                <td>
+                    <form asp-action="Delete" method="post" onsubmit="return confirm('¿Eliminar contenedor?')">
+                        <input type="hidden" name="id" value="@c.Id" />
+                        <button class="btn btn-sm btn-danger">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

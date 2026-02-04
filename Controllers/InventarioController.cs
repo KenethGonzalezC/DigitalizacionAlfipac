@@ -1,0 +1,588 @@
+﻿using BitacoraAlfipac.Data;
+using BitacoraAlfipac.Models.Entidades;
+using BitacoraAlfipac.Models.ViewModels;
+using ClosedXML.Excel;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+using System.Text;
+
+public class InventarioController : Controller
+{
+    private readonly ApplicationDbContext _context;
+
+    public InventarioController(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    // ===============================
+    // PÁGINA PRINCIPAL
+    // ===============================
+    public IActionResult Index()
+    {
+        var vm = new InventarioIndexVM
+        {
+            ContenedoresSinAsignar = _context.ContenedoresSinAsignarPatio
+                .OrderByDescending(c => c.Id)
+                .ToList()
+        };
+
+        return View(vm);
+    }
+
+    // ===============================
+    // MOVER CONTENEDOR
+    // ===============================
+    [HttpPost]
+public async Task<IActionResult> Mover(
+    int id,
+    string marchamos,
+    string estadoCarga,
+    string ubicacion)
+{
+    var c = await _context.ContenedoresSinAsignarPatio.FindAsync(id);
+    if (c == null)
+        return NotFound();
+
+        if (!string.IsNullOrWhiteSpace(estadoCarga))
+            c.EstadoCarga = estadoCarga;
+
+        if (!string.IsNullOrWhiteSpace(marchamos))
+            c.Marchamos = marchamos;
+
+        // Datos editables
+        c.Marchamos = marchamos;
+    c.EstadoCarga = estadoCarga;
+
+        if (string.IsNullOrWhiteSpace(ubicacion))
+        {
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
+
+        switch (ubicacion)
+    {
+        case "Patio1":
+            _context.Patio1.Add(new Patio1
+            {
+                Contenedor = c.Contenedor,
+                Marchamos = c.Marchamos,
+                Tamano = c.Tamano,
+                Chasis = c.Chasis,
+                Transportista = c.Transportista,
+                EstadoCarga = c.EstadoCarga
+            });
+            break;
+
+        case "Patio2":
+            _context.Patio2.Add(new Patio2
+            {
+                Contenedor = c.Contenedor,
+                Marchamos = c.Marchamos,
+                Tamano = c.Tamano,
+                Chasis = c.Chasis,
+                Transportista = c.Transportista,
+                EstadoCarga = c.EstadoCarga
+            });
+            break;
+
+        case "Anden2000":
+            _context.Anden2000.Add(new Anden2000
+            {
+                Contenedor = c.Contenedor,
+                Marchamos = c.Marchamos,
+                Tamano = c.Tamano,
+                Chasis = c.Chasis,
+                Transportista = c.Transportista,
+                EstadoCarga = c.EstadoCarga
+            });
+            break;
+
+        case "PatioQuimicos":
+            _context.PatioQuimicos.Add(new PatioQuimicos
+            {
+                Contenedor = c.Contenedor,
+                Marchamos = c.Marchamos,
+                Tamano = c.Tamano,
+                Chasis = c.Chasis,
+                Transportista = c.Transportista,
+                EstadoCarga = c.EstadoCarga
+            });
+            break;
+
+            case "SinAsignar":
+                break;
+
+            default:
+            return BadRequest("Ubicación inválida");
+    }
+
+    // Regla clave: NO puede estar en dos lugares
+    _context.ContenedoresSinAsignarPatio.Remove(c);
+
+    await _context.SaveChangesAsync();
+
+    return RedirectToAction("Index");
+}
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ConfirmarEdicionSinAsignar(
+    int Id,
+    string Marchamos,
+    string EstadoCarga,
+    string? Ubicacion,
+    string UbicacionActual,
+    string Chasis,
+    string Transportista)
+    {
+        IContenedorInventario? contenedor = null;
+
+        // 1️⃣ BUSCAR DONDE ESTÁ
+        switch (UbicacionActual)
+        {
+            case "SinAsignar":
+                contenedor = await _context.ContenedoresSinAsignarPatio.FindAsync(Id);
+                break;
+            case "Patio1":
+                contenedor = await _context.Patio1.FindAsync(Id);
+                break;
+            case "Patio2":
+                contenedor = await _context.Patio2.FindAsync(Id);
+                break;
+            case "Anden2000":
+                contenedor = await _context.Anden2000.FindAsync(Id);
+                break;
+            case "PatioQuimicos":
+                contenedor = await _context.PatioQuimicos.FindAsync(Id);
+                break;
+        }
+
+        if (contenedor == null)
+            return Json(new { success = false });
+
+        // 2️⃣ ACTUALIZAR TODOS LOS DATOS
+        contenedor.Marchamos = Marchamos;
+        contenedor.EstadoCarga = EstadoCarga;
+        contenedor.Chasis = Chasis;
+        contenedor.Transportista = Transportista;
+
+        await _context.SaveChangesAsync();
+
+        // 3️⃣ SI HAY MOVIMIENTO
+        if (!string.IsNullOrWhiteSpace(Ubicacion) && Ubicacion != UbicacionActual)
+        {
+            switch (Ubicacion)
+            {
+                case "Patio1":
+                    _context.Patio1.Add(new Patio1
+                    {
+                        Contenedor = contenedor.Contenedor,
+                        Marchamos = contenedor.Marchamos,
+                        Tamano = contenedor.Tamano,
+                        Chasis = contenedor.Chasis,
+                        Transportista = contenedor.Transportista,
+                        EstadoCarga = contenedor.EstadoCarga
+                    });
+                    break;
+
+                case "Patio2":
+                    _context.Patio2.Add(new Patio2
+                    {
+                        Contenedor = contenedor.Contenedor,
+                        Marchamos = contenedor.Marchamos,
+                        Tamano = contenedor.Tamano,
+                        Chasis = contenedor.Chasis,
+                        Transportista = contenedor.Transportista,
+                        EstadoCarga = contenedor.EstadoCarga
+                    });
+                    break;
+
+                case "Anden2000":
+                    _context.Anden2000.Add(new Anden2000
+                    {
+                        Contenedor = contenedor.Contenedor,
+                        Marchamos = contenedor.Marchamos,
+                        Tamano = contenedor.Tamano,
+                        Chasis = contenedor.Chasis,
+                        Transportista = contenedor.Transportista,
+                        EstadoCarga = contenedor.EstadoCarga
+                    });
+                    break;
+
+                case "PatioQuimicos":
+                    _context.PatioQuimicos.Add(new PatioQuimicos
+                    {
+                        Contenedor = contenedor.Contenedor,
+                        Marchamos = contenedor.Marchamos,
+                        Tamano = contenedor.Tamano,
+                        Chasis = contenedor.Chasis,
+                        Transportista = contenedor.Transportista,
+                        EstadoCarga = contenedor.EstadoCarga
+                    });
+                    break;
+
+                case "SinAsignar":
+                    _context.ContenedoresSinAsignarPatio.Add(new ContenedorSinAsignarPatio
+                    {
+                        Contenedor = contenedor.Contenedor,
+                        Marchamos = contenedor.Marchamos,
+                        Tamano = contenedor.Tamano,
+                        Chasis = contenedor.Chasis,
+                        Transportista = contenedor.Transportista,
+                        EstadoCarga = contenedor.EstadoCarga
+                    });
+                    break;
+            }
+
+            _context.Remove(contenedor);
+            await _context.SaveChangesAsync();
+        }
+
+
+        return Json(new { success = true });
+    }
+
+    [HttpPost]
+    public IActionResult ConfirmarEdicion(int id, string marchamos, string estadoCarga, string chasis, string transportista)
+    {
+        var contenedor = _context.ContenedoresSinAsignarPatio.FirstOrDefault(c => c.Id == id);
+
+        if (contenedor == null)
+            return NotFound();
+
+        contenedor.Marchamos = marchamos;
+        contenedor.EstadoCarga = estadoCarga;
+        contenedor.Chasis = chasis;
+        contenedor.Transportista = transportista;
+
+        _context.SaveChanges();
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> BuscarGlobal(string contenedor)
+    {
+        if (string.IsNullOrWhiteSpace(contenedor))
+            return PartialView("_ResultadoBusquedaGlobal", null);
+
+        // SIN ASIGNAR
+        var sinAsignar = await _context.ContenedoresSinAsignarPatio
+            .FirstOrDefaultAsync(c => c.Contenedor == contenedor);
+
+        if (sinAsignar != null)
+            return PartialView("_ResultadoBusquedaGlobal", Mapear(sinAsignar, "SinAsignar"));
+
+        // PATIO 1
+        var p1 = await _context.Patio1
+            .FirstOrDefaultAsync(c => c.Contenedor == contenedor);
+
+        if (p1 != null)
+            return PartialView("_ResultadoBusquedaGlobal", Mapear(p1, "Patio1"));
+
+        // PATIO 2
+        var p2 = await _context.Patio2
+            .FirstOrDefaultAsync(c => c.Contenedor == contenedor);
+
+        if (p2 != null)
+            return PartialView("_ResultadoBusquedaGlobal", Mapear(p2, "Patio2"));
+
+        // ANDEN 2000
+        var anden = await _context.Anden2000
+            .FirstOrDefaultAsync(c => c.Contenedor == contenedor);
+
+        if (anden != null)
+            return PartialView("_ResultadoBusquedaGlobal", Mapear(anden, "Anden2000"));
+
+        // QUIMICOS
+        var quimicos = await _context.PatioQuimicos
+            .FirstOrDefaultAsync(c => c.Contenedor == contenedor);
+
+        if (quimicos != null)
+            return PartialView("_ResultadoBusquedaGlobal", Mapear(quimicos, "PatioQuimicos"));
+
+        return PartialView("_ResultadoBusquedaGlobal", null);
+    }
+
+    private BusquedaGlobalContenedorVM Mapear(
+    IContenedorInventario c,
+    string ubicacion)
+    {
+        return new BusquedaGlobalContenedorVM
+        {
+            Id = c.Id,
+            Contenedor = c.Contenedor,
+            Marchamos = c.Marchamos,
+            Tamano = c.Tamano,
+            Chasis = c.Chasis,
+            Transportista = c.Transportista,
+            EstadoCarga = c.EstadoCarga,
+            UbicacionActual = ubicacion
+        };
+    }
+
+    private void CopiarDatosBase(IContenedorInventario origen, dynamic destino)
+    {
+        destino.Contenedor = origen.Contenedor;
+        destino.Marchamos = origen.Marchamos;
+        destino.Tamano = origen.Tamano;
+        destino.Chasis = origen.Chasis;
+        destino.Transportista = origen.Transportista;
+        destino.EstadoCarga = origen.EstadoCarga;
+    }
+
+    // Metodo para empezar a exportar
+    private List<ContenedorGeneralVM> ObtenerInventarioGeneral()
+    {
+        var lista = new List<ContenedorGeneralVM>();
+
+        lista.AddRange(_context.ContenedoresSinAsignarPatio.Select(c => new ContenedorGeneralVM
+        {
+            Contenedor = c.Contenedor,
+            Marchamos = c.Marchamos,
+            Tamano = c.Tamano,
+            Chasis = c.Chasis,
+            Transportista = c.Transportista,
+            Estado = c.EstadoCarga,
+            Ubicacion = "Sin asignar"
+        }));
+
+        lista.AddRange(_context.Patio1.Select(c => new ContenedorGeneralVM
+        {
+            Contenedor = c.Contenedor,
+            Marchamos = c.Marchamos,
+            Tamano = c.Tamano,
+            Chasis = c.Chasis,
+            Transportista = c.Transportista,
+            Estado = c.EstadoCarga,
+            Ubicacion = "Patio 1"
+        }));
+
+        lista.AddRange(_context.Patio2.Select(c => new ContenedorGeneralVM
+        {
+            Contenedor = c.Contenedor,
+            Marchamos = c.Marchamos,
+            Tamano = c.Tamano,
+            Chasis = c.Chasis,
+            Transportista = c.Transportista,
+            Estado = c.EstadoCarga,
+            Ubicacion = "Patio 2"
+        }));
+
+        lista.AddRange(_context.Anden2000.Select(c => new ContenedorGeneralVM
+        {
+            Contenedor = c.Contenedor,
+            Marchamos = c.Marchamos,
+            Tamano = c.Tamano,
+            Chasis = c.Chasis,
+            Transportista = c.Transportista,
+            Estado = c.EstadoCarga,
+            Ubicacion = "Andén 2000"
+        }));
+
+        lista.AddRange(_context.PatioQuimicos.Select(c => new ContenedorGeneralVM
+        {
+            Contenedor = c.Contenedor,
+            Marchamos = c.Marchamos,
+            Tamano = c.Tamano,
+            Chasis = c.Chasis,
+            Transportista = c.Transportista,
+            Estado = c.EstadoCarga,
+            Ubicacion = "Patio Químicos"
+        }));
+
+        return lista.OrderBy(c => c.Contenedor).ToList();
+    }
+
+    //EXPORTAR A PDF
+    [HttpPost]
+    public IActionResult ExportarGeneralPDF(string nombre, DateTime fecha, string turno)
+    {
+        var datos = ObtenerInventarioGeneral();
+
+        int total = datos.Count;
+        int cargados = datos.Count(c => c.Estado == "Cargado");
+        int vacios = datos.Count(c => c.Estado == "Vacio");
+
+        QuestPDF.Settings.License = LicenseType.Community;
+
+        var pdf = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4.Landscape()); // Horizontal
+                page.Margin(20);
+
+                page.Header().Column(col =>
+                {
+                    col.Item().Text("ALFIPAC – INVENTARIO GENERAL DE CONTENEDORES").Bold().FontSize(18);
+                    col.Item().LineHorizontal(1);
+
+                    col.Item().Text($"Responsable: {nombre}");
+                    col.Item().Text($"Fecha operativa: {fecha:dd/MM/yyyy}");
+                    col.Item().Text($"Turno: {turno}");
+                    col.Item().Text($"Impreso: {DateTime.Now:dd/MM/yyyy HH:mm}");
+
+                    col.Item().LineHorizontal(1);
+
+                    col.Item().Row(row =>
+                    {
+                        row.RelativeItem().Border(1).Padding(5).Column(x =>
+                        {
+                            x.Item().Text("TOTAL").Bold();
+                            x.Item().Text(total.ToString()).FontSize(16);
+                        });
+                        row.RelativeItem().Border(1).Padding(5).Column(x =>
+                        {
+                            x.Item().Text("CARGADOS").Bold();
+                            x.Item().Text(cargados.ToString()).FontSize(16);
+                        });
+                        row.RelativeItem().Border(1).Padding(5).Column(x =>
+                        {
+                            x.Item().Text("VACÍOS").Bold();
+                            x.Item().Text(vacios.ToString()).FontSize(16);
+                        });
+                    });
+                });
+
+                page.Content().Table(table =>
+                {
+                    table.ColumnsDefinition(c =>
+                    {
+                        c.RelativeColumn(2);
+                        c.RelativeColumn(2);
+                        c.RelativeColumn(1);
+                        c.RelativeColumn(2);
+                        c.RelativeColumn(2);
+                        c.RelativeColumn(1);
+                        c.RelativeColumn(2); // 📍 Ubicación
+                    });
+
+                    void H(string t) => table.Cell().Element(Cell).Text(t).Bold();
+
+                    H("Contenedor");
+                    H("Marchamos");
+                    H("Tamaño");
+                    H("Chasis");
+                    H("Transportista");
+                    H("Estado");
+                    H("Ubicación");
+
+                    foreach (var c in datos)
+                    {
+                        table.Cell().Element(Cell).Text(c.Contenedor);
+                        table.Cell().Element(Cell).Text(c.Marchamos);
+                        table.Cell().Element(Cell).Text(c.Tamano);
+                        table.Cell().Element(Cell).Text(c.Chasis);
+                        table.Cell().Element(Cell).Text(c.Transportista);
+                        table.Cell().Element(Cell).Text(c.Estado);
+                        table.Cell().Element(Cell).Text(c.Ubicacion);
+                    }
+
+                    static IContainer Cell(IContainer c) => c.Border(1).Padding(3);
+                });
+            });
+        }).GeneratePdf();
+
+        return File(pdf, "application/pdf",
+            $"Inventario_General_{DateTime.Now:ddMMyyyy_HHmm}.pdf");
+    }
+
+    //EXPORTAR A EXCEL
+    [HttpPost]
+    public IActionResult ExportarGeneralExcel(string nombre, DateTime fecha, string turno)
+    {
+        var datos = ObtenerInventarioGeneral();
+
+        using var workbook = new XLWorkbook();
+        var ws = workbook.Worksheets.Add("Inventario General");
+
+        ws.Cell("A1").Value = "ALFIPAC – INVENTARIO GENERAL DE CONTENEDORES";
+        ws.Range("A1:G1").Merge().Style.Font.SetBold().Font.SetFontSize(16)
+            .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+        ws.Cell("A3").Value = "Responsable:";
+        ws.Cell("B3").Value = nombre;
+        ws.Cell("D3").Value = "Fecha:";
+        ws.Cell("E3").Value = fecha.ToString("dd/MM/yyyy");
+
+        ws.Cell("A4").Value = "Turno:";
+        ws.Cell("B4").Value = turno;
+
+        int fila = 6;
+
+        ws.Cell(fila, 1).Value = "Contenedor";
+        ws.Cell(fila, 2).Value = "Marchamos";
+        ws.Cell(fila, 3).Value = "Tamaño";
+        ws.Cell(fila, 4).Value = "Chasis";
+        ws.Cell(fila, 5).Value = "Transportista";
+        ws.Cell(fila, 6).Value = "Estado";
+        ws.Cell(fila, 7).Value = "Ubicación";
+
+        ws.Range(fila, 1, fila, 7).Style.Font.SetBold()
+            .Fill.SetBackgroundColor(XLColor.LightGray);
+
+        fila++;
+
+        foreach (var c in datos)
+        {
+            ws.Cell(fila, 1).Value = c.Contenedor;
+            ws.Cell(fila, 2).Value = c.Marchamos;
+            ws.Cell(fila, 3).Value = c.Tamano;
+            ws.Cell(fila, 4).Value = c.Chasis;
+            ws.Cell(fila, 5).Value = c.Transportista;
+            ws.Cell(fila, 6).Value = c.Estado;
+            ws.Cell(fila, 7).Value = c.Ubicacion;
+            fila++;
+        }
+
+        ws.Columns().AdjustToContents();
+
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+
+        return File(stream.ToArray(),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            $"Inventario_General_{DateTime.Now:ddMMyyyy_HHmm}.xlsx");
+    }
+
+    //EXPORTAR A CSV
+    [HttpPost]
+    public IActionResult ExportarGeneralCSV(string nombre, DateTime fecha, string turno)
+    {
+        var datos = ObtenerInventarioGeneral();
+
+        int total = datos.Count;
+        int cargados = datos.Count(c => c.Estado == "Cargado");
+        int vacios = datos.Count(c => c.Estado == "Vacio");
+
+        var sb = new StringBuilder();
+
+        sb.AppendLine("ALFIPAC – INVENTARIO GENERAL");
+        sb.AppendLine($"Responsable,{nombre}");
+        sb.AppendLine($"Fecha operativa,{fecha:dd/MM/yyyy}");
+        sb.AppendLine($"Turno,{turno}");
+        sb.AppendLine($"Impreso,{DateTime.Now:dd/MM/yyyy HH:mm}");
+        sb.AppendLine("");
+        sb.AppendLine($"TOTAL,{total}");
+        sb.AppendLine($"CARGADOS,{cargados}");
+        sb.AppendLine($"VACÍOS,{vacios}");
+        sb.AppendLine("");
+        sb.AppendLine("Contenedor,Marchamos,Tamaño,Chasis,Transportista,Estado,Ubicación");
+
+        foreach (var c in datos)
+        {
+            sb.AppendLine($"{c.Contenedor},{c.Marchamos},{c.Tamano},{c.Chasis},{c.Transportista},{c.Estado},{c.Ubicacion}");
+        }
+
+        return File(Encoding.UTF8.GetBytes(sb.ToString()), "text/csv",
+            $"Inventario_General_{DateTime.Now:ddMMyyyy_HHmm}.csv");
+    }
+
+}
+
+

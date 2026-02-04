@@ -1,0 +1,233 @@
+﻿@model BitacoraAlfipac.Models.ViewModels.BitacoraDespachosViewModel
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Formulario de Despacho</h2>
+
+        <a asp-controller="BitacoraDespachos"
+           asp-action="Backups"
+           class="btn btn-warning btn-sm shadow-sm">
+            🗂 Backups de seguridad
+        </a>
+    </div>
+
+    <form asp-action="Registrar" method="post" class="card p-4 mb-4 shadow-sm">
+
+        @Html.AntiForgeryToken()
+
+        <div class="row g-3">
+
+            <div class="col-md-4">
+                <label>Contenedor</label>
+                <div class="input-group">
+                    <input asp-for="Contenedor" id="contenedorInput" class="form-control" required />
+                    <button type="button" id="btnBuscarContenedor" class="btn btn-outline-primary">
+                        Buscar
+                    </button>
+                </div>
+                <small id="infoPatio" class="text-muted fw-bold"></small>
+            </div>
+
+            <div class="col-md-4">
+                <label>Marchamo</label>
+                <input asp-for="Marchamos" id="marchamosInput" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label>Fecha y hora despacho</label>
+                <input asp-for="FechaHoraDespacho"
+                       type="datetime-local"
+                       step="60"
+                       value="@Model.FechaHoraDespacho.ToString("yyyy-MM-ddTHH:mm")"
+                       class="form-control" required />
+            </div>
+
+            <div class="col-md-4">
+                <label>Transportista</label>
+                <input asp-for="Transportista" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label>Información</label>
+                <input asp-for="Informacion" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label>Chofer</label>
+                <input asp-for="Chofer" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label>Placa cabezal</label>
+                <input asp-for="PlacaCabezal" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label>Chasis</label>
+                <input asp-for="Chasis" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label>Viaje / DUA</label>
+                <input asp-for="ViajeDua" class="form-control" />
+            </div>
+
+            <div class="col-md-4 form-check mt-4">
+                <input asp-for="EsSalidaEnFurgon" class="form-check-input" />
+                <label class="form-check-label">Mercadería salió en furgón</label>
+            </div>
+
+            <div class="col-md-4">
+                <label>Contenedor referencia</label>
+                <input asp-for="ContenedorReferencia" class="form-control" />
+            </div>
+
+        </div>
+
+        <button class="btn btn-primary mt-3">Registrar despacho</button>
+    </form>
+
+    <form method="get" class="d-flex align-items-center gap-3 mb-4">
+        <h2 class="fw-semibold mb-0">
+            Despachos del día – @Model.FechaSeleccionada.ToString("dd/MM/yyyy")
+        </h2>
+
+        <input type="date" name="fecha" class="form-control w-auto"
+               value="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" />
+
+        <button type="submit" class="btn btn-outline-primary">Confirmar</button>
+
+        <a asp-action="ExportarPdf" asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" class="btn btn-danger">PDF</a>
+        <a asp-action="ExportarExcel" asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" class="btn btn-success">Excel</a>
+        <a asp-action="ExportarCsv" asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" class="btn btn-outline-secondary">CSV</a>
+    </form>
+
+    <table class="table table-striped align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Hora</th>
+                <th>Contenedor</th>                       
+                <th>Marchamos</th>
+                <th>Transportista</th>
+                <th>Información</th>
+                <th>Chasis</th>
+                <th>Viaje / DUA</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Despachos.Any())
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        No existen despachos para esta fecha
+                    </td>
+                </tr>
+            }
+            else
+            {
+                foreach (var d in Model.Despachos)
+                {
+                    <tr>
+                        <td>@d.FechaHoraDespacho.ToString("HH:mm")</td>
+                        <td>@d.Contenedor</td>                                             
+                        <td>@d.Marchamos</td>
+                        <td>@d.Transportista</td>
+                        <td>@d.Informacion</td>
+                        <td>@d.Chasis</td>
+                        <td>@d.ViajeDua</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger"
+                                    data-id="@d.Id"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="Delete" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="modal-header bg-danger text-white">
+                        <h5>Eliminar despacho</h5>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" name="id" id="deleteId" />
+                        ¿Seguro que desea eliminar este despacho?
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button class="btn btn-danger">Eliminar</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('deleteModal').addEventListener('show.bs.modal', e => {
+            document.getElementById('deleteId').value = e.relatedTarget.dataset.id;
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            function buscarContenedor() {
+
+                const contenedor = document.getElementById("contenedorInput").value.trim();
+                if (!contenedor) return;
+
+                fetch(`/BitacoraDespachos/BuscarParaDespacho?contenedor=${contenedor}`)
+                    .then(r => r.json())
+                    .then(data => {
+
+                        const infoPatio = document.getElementById("infoPatio");
+
+                        if (!data.encontrado) {
+                            infoPatio.innerText = data.mensaje ?? "⚠ Contenedor no está en inventario";
+                            return;
+                        }
+
+                        infoPatio.innerText = `Ubicación actual: ${data.patio} | Estado: ${data.estado}`;
+
+                        // Referencias seguras
+                        const marchamosInput = document.getElementById("marchamosInput");
+                        const transportistaInput = document.querySelector("[name='Transportista']");
+                        const chasisInput = document.querySelector("[name='Chasis']");
+
+                        if (marchamosInput) marchamosInput.value = data.marchamos || "";
+                        if (transportistaInput) transportistaInput.value = data.transportista || "";
+                        if (chasisInput) chasisInput.value = data.chasis || "";
+                    })
+                    .catch(() => {
+                        document.getElementById("infoPatio").innerText =
+                            "Error consultando el contenedor";
+                    });
+            }
+
+            document.getElementById("btnBuscarContenedor")
+                ?.addEventListener("click", buscarContenedor);
+
+            document.getElementById("contenedorInput")
+                ?.addEventListener("keypress", e => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                        buscarContenedor();
+                    }
+                });
+        });
+    </script>
+

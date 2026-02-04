@@ -1,0 +1,217 @@
+﻿@model IEnumerable<BitacoraAlfipac.Models.Entidades.Anden2000>
+
+<h2>Inventario de Contenedores</h2>
+
+<div class="row mb-4">
+    <div class="col">
+        <a asp-controller="Inventario" asp-action="Index" class="btn btn-outline-primary w-100">Inventario</a>
+    </div>
+    <div class="col">
+        <a asp-controller="Patio1" asp-action="Index" class="btn btn-outline-success w-100">Patio 1</a>
+    </div>
+    <div class="col">
+        <a asp-controller="Patio2" asp-action="Index" class="btn btn-outline-dark w-100">Patio 2</a>
+    </div>
+    <div class="col">
+        <a asp-controller="PatioQuimicos" asp-action="Index" class="btn btn-outline-danger w-100">Patio Químicos</a>
+    </div>
+</div>
+
+<h4>Andén 2000</h4>
+
+<!-- BUSQUEDA GLOBAL -->
+<form id="formBusquedaGlobal">
+    <div class="row align-items-end">
+        <div class="col-md-4">
+            <input name="contenedor" class="form-control" placeholder="Buscar contenedor..." />
+        </div>
+
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-fill">Buscar</button>
+            <a asp-action="Index" class="btn btn-secondary flex-fill">Limpiar</a>
+        </div>
+    </div>
+</form>
+
+<div>
+    <h4></h4>
+</div>
+<div>
+<form asp-action="LimpiarPatio" method="post"
+      onsubmit="return confirm('¿Está seguro que desea limpiar TODO el andén?');">
+    <button class="btn btn-danger mb-3">🧹 Limpiar andén</button>
+</form>
+</div>
+
+<button class="btn btn-warning mb-3" data-bs-toggle="modal" data-bs-target="#modalExportar">
+    📄 Exportar Inventario
+</button>
+
+<div class="modal fade" id="modalExportar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Datos de exportación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label>Nombre del responsable</label>
+                        <input name="nombre" class="form-control" required />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Fecha operativa</label>
+                        <input type="date" name="fecha" class="form-control" required />
+                    </div>
+
+                    <div class="mb-2">
+                        <label>Turno</label>
+                        <input name="turno" class="form-control" placeholder="Ej: Turno A, Noche..." />
+                    </div>
+                </div>
+
+                <div class="modal-footer d-flex gap-2">
+                    <button formaction="/Anden2000/ExportarPDF" class="btn btn-danger flex-fill">PDF</button>
+                    <button formaction="/Anden2000/ExportarExcel" class="btn btn-success flex-fill">Excel</button>
+                    <button formaction="/Anden2000/ExportarCSV" class="btn btn-primary flex-fill">CSV</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<table class="table table-sm table-bordered">
+    <thead>
+        <tr>
+            <th>Contenedor</th>
+            <th>Marchamos</th>
+            <th>Tamaño</th>
+            <th>Chasis</th>
+            <th>Transportista</th>
+            <th>Estado</th>
+            <th>Confirmar</th>
+            <th>Ubicación</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <!-- FORM EDICIÓN -->
+                <form asp-action="ConfirmarEdicion" method="post">
+                    <input type="hidden" name="id" value="@c.Id" />
+
+                <td>@c.Contenedor</td>
+
+                <td>
+                    <input name="marchamos" value="@c.Marchamos" class="form-control form-control-sm" />
+                </td>
+
+                <td>@c.Tamano</td>
+
+                <td>
+                    <input name="chasis" value="@c.Chasis" class="form-control form-control-sm" />
+                </td>
+
+                <td>
+                    <input name="transportista" value="@c.Transportista" class="form-control form-control-sm" />
+                </td>
+
+                <td>
+                    <select name="estadoCarga" class="form-select form-select-sm">
+                        <option value="Vacio" selected="@(c.EstadoCarga == "Vacio")">Vacío</option>
+                        <option value="Cargado" selected="@(c.EstadoCarga == "Cargado")">Cargado</option>
+                    </select>
+                </td>
+
+                <td class="text-center">
+                    <button type="submit" class="btn btn-sm btn-primary">✔</button>
+                </td>
+                </form>
+
+                <!-- MOVER -->
+                <td>
+                    <form asp-action="MoverDesdeAnden2000" method="post" class="d-flex gap-1">
+                        <input type="hidden" name="id" value="@c.Id" />
+
+                        <select name="destino" class="form-select form-select-sm">
+                            <option value="">No mover</option>
+                            <option value="SinAsignar">Sin asignar</option>
+                            <option value="Patio1">Patio 1</option>
+                            <option value="Patio2">Patio 2</option>
+                            <option value="Anden2000">Andén 2000</option>
+                            <option value="PatioQuimicos">Patio Químicos</option>
+                        </select>
+
+                        <button type="submit" class="btn btn-sm btn-success">Mover</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- MODAL GLOBAL -->
+<div class="modal fade" id="modalBusquedaGlobal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Resultado de búsqueda global</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="contenidoModalBusqueda"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const formBusqueda = document.getElementById("formBusquedaGlobal");
+            const modalBusqueda = document.getElementById("modalBusquedaGlobal");
+
+            // BUSQUEDA GLOBAL
+            if (formBusqueda) {
+                formBusqueda.addEventListener("submit", function (e) {
+                    e.preventDefault();
+
+                    const contenedor = this.contenedor.value;
+
+                    fetch(`/Inventario/BuscarGlobal?contenedor=${contenedor}`)
+                        .then(r => r.text())
+                        .then(html => {
+                            document.getElementById("contenidoModalBusqueda").innerHTML = html;
+                            new bootstrap.Modal(modalBusqueda).show();
+                        });
+                });
+            }
+
+            // 🔥 SOLO formularios del modal
+            if (modalBusqueda) {
+                modalBusqueda.addEventListener("submit", function (e) {
+                    if (e.target.tagName === "FORM") {
+                        e.preventDefault();
+
+                        fetch(e.target.action, {
+                            method: "POST",
+                            body: new FormData(e.target)
+                        })
+                        .then(r => r.json())
+                        .then(res => {
+                            if (res.success) {
+                                bootstrap.Modal.getInstance(modalBusqueda).hide();
+                                location.reload();
+                            }
+                        });
+                    }
+                });
+            }
+
+        });
+    </script>
+}
+

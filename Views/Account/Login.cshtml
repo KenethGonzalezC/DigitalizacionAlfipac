@@ -1,0 +1,82 @@
+﻿@model BitacoraAlfipac.Models.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Inicio de sesión";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - ALFIPAC</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/login.css" />
+</head>
+<body class="login-bg">
+
+    <div class="login-container">
+        <div class="login-card">
+
+            <h3 class="text-center mb-1">ALFIPAC</h3>
+            <p class="text-center text-muted mb-3">
+                Sistema de Bitácora Aduanera
+            </p>
+
+            <!-- ERRORES GENERALES -->
+            @if (!ViewData.ModelState.IsValid || ViewBag.Error != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show text-center mb-3" role="alert">
+                    @if (ViewBag.Error != null)
+                    {
+                        <div>@ViewBag.Error</div>
+                    }
+
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <div>@error.ErrorMessage</div>
+                    }
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Cerrar"></button>
+                </div>
+            }
+
+            <form asp-action="Login" method="post" novalidate>
+
+                <div class="mb-3">
+                    <label asp-for="NombreUsuario" class="form-label"></label>
+                    <input asp-for="NombreUsuario"
+                           class="form-control"
+                           autocomplete="username" />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password"
+                           type="password"
+                           class="form-control"
+                           autocomplete="current-password" />
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">
+                    Iniciar sesión
+                </button>
+
+            </form>
+
+            <hr />
+
+            <p class="text-center text-muted small mb-0">
+                © @DateTime.Now.Year ALFIPAC · Almacén Fiscal del Pacífico
+            </p>
+
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

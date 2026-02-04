@@ -1,0 +1,353 @@
+﻿@model BitacoraAlfipac.Models.ViewModels.BitacoraIngresosViewModel
+
+@{
+    ViewData["Title"] = $"Ingresos del día - {Model.FechaSeleccionada:dd/MM/yyyy}";
+}
+
+<div class="container mt-4">
+
+    <!-- FORMULARIO INGRESO -->
+    <h2>Formulario de Ingresos</h2>
+
+    <form method="post" class="card p-4 mb-4 shadow-sm">
+        @Html.AntiForgeryToken()
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Contenedor</label>
+                <input asp-for="Contenedor" class="form-control" required />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Marchamos</label>
+                <input asp-for="Marchamos" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Fecha y hora</label>
+                <input asp-for="FechaHoraIngreso"
+                       type="datetime-local"
+                       step="60"
+                       class="form-control"
+                       value="@Model.FechaHoraIngreso.ToString("yyyy-MM-ddTHH:mm")"
+                       required />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Transportista</label>
+                <input asp-for="Transportista" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Tamaño</label>
+                <input asp-for="Tamano" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Chofer</label>
+                <input asp-for="Chofer" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Placa cabezal</label>
+                <input asp-for="PlacaCabezal" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Chasis</label>
+                <input asp-for="Chasis" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Viaje / DUA</label>
+                <input asp-for="ViajeDua" class="form-control" />
+            </div>
+        </div>
+
+        <div class="form-check mt-2">
+            <input asp-for="EsRefrigerado" class="form-check-input" type="checkbox" />
+            <label asp-for="EsRefrigerado" class="form-check-label">
+                Contenedor Refrigerado
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">
+            Registrar ingreso
+        </button>
+    </form>
+
+    <!-- TÍTULO + CALENDARIO -->
+    <form method="get" class="d-flex align-items-center gap-3 mb-4">
+        <h2 class="fw-semibold mb-0">
+            Ingresos del día – @Model.FechaSeleccionada.ToString("dd/MM/yyyy")
+        </h2>
+
+        <input type="date"
+               name="fecha"
+               class="form-control w-auto"
+               value="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" />
+
+        <button type="submit" class="btn btn-outline-primary">
+            Confirmar
+        </button>
+
+        <a asp-action="ExportarPdf"
+           asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")"
+           class="btn btn-danger">
+            Exportar PDF
+        </a>
+
+        <a asp-action="ExportarExcel"
+           asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")"
+           class="btn btn-success">
+            Exportar Excel
+        </a>
+
+        <a asp-action="ExportarCsv"
+           asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")"
+           class="btn btn-outline-secondary">
+            Exportar CSV
+        </a>
+    </form>
+
+    <!-- TABLA -->
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Hora</th>
+                    <th>Contenedor</th>
+                    <th>Marchamos</th>
+                    <th>Transportista</th>
+                    <th>Tamaño</th>
+                    <th>Chasis</th>
+                    <th>Viaje / DUA</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Ingresos.Any())
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            No existen ingresos para esta fecha
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in Model.Ingresos)
+                    {
+                        <tr>
+                            <td>@item.FechaHoraIngreso.ToString("HH:mm")</td>
+                            <td>@item.Contenedor</td>
+                            <td>@item.Marchamos</td>
+                            <td>@item.Transportista</td>
+                            <td>@item.Tamaño</td>
+                            <td>@item.Chasis</td>
+                            <td>@item.ViajeDua</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-secondary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editarModal"
+                                        onclick="cargarEditar(@item.Id)">
+                                    Editar
+                                </button>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal"
+                                        data-id="@item.Id"
+                                        data-contenedor="@item.Contenedor"
+                                        data-marchamos="@item.Marchamos"
+                                        data-fecha="@item.FechaHoraIngreso.ToString("yyyy-MM-dd HH:mm")"
+                                        data-transportista="@item.Transportista"
+                                        data-tamano="@item.Tamaño"
+                                        data-chasis="@item.Chasis"
+                                        data-viaje="@item.ViajeDua">
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL ELIMINAR -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <form asp-action="Delete" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirmar eliminación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="deleteId" />
+                    <input type="hidden" name="fecha" value="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" />
+
+                    <p class="text-danger fw-semibold">
+                        ⚠️ Esta acción eliminará completamente el ingreso y toda su información asociada.
+                    </p>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Contenedor</label>
+                            <input class="form-control" id="deleteContenedor" readonly />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Marchamos</label>
+                            <input class="form-control" id="deleteMarchamos" readonly />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Fecha / Hora</label>
+                            <input class="form-control" id="deleteFecha" readonly />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Transportista</label>
+                            <input class="form-control" id="deleteTransportista" readonly />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Tamaño</label>
+                            <input class="form-control" id="deleteTamano" readonly />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Chasis</label>
+                            <input class="form-control" id="deleteChasis" readonly />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Viaje / DUA</label>
+                            <input class="form-control" id="deleteViaje" readonly />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        Eliminar definitivamente
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    const deleteModal = document.getElementById('deleteModal');
+
+    deleteModal.addEventListener('show.bs.modal', event => {
+        const button = event.relatedTarget;
+
+        document.getElementById('deleteId').value = button.dataset.id;
+        document.getElementById('deleteContenedor').value = button.dataset.contenedor;
+        document.getElementById('deleteMarchamos').value = button.dataset.marchamos;
+        document.getElementById('deleteFecha').value = button.dataset.fecha;
+        document.getElementById('deleteTransportista').value = button.dataset.transportista;
+        document.getElementById('deleteTamano').value = button.dataset.tamano;
+        document.getElementById('deleteChasis').value = button.dataset.chasis;
+        document.getElementById('deleteViaje').value = button.dataset.viaje;
+    });
+</script>
+
+<!-- MODAL EDITAR -->
+<div class="modal fade" id="editarModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" asp-action="Editar">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar ingreso</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="Id" id="editId" />
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label>Contenedor</label>
+                            <input name="Contenedor" id="editContenedor" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Marchamos</label>
+                            <input name="Marchamos" id="editMarchamos" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Fecha y hora</label>
+                            <input type="datetime-local" step="60" name="FechaHoraIngreso" id="editFechaHora" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Transportista</label>
+                            <input name="Transportista" id="editTransportista" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Tamaño</label>
+                            <input name="Tamano" id="editTamano" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Chasis</label>
+                            <input name="Chasis" id="editChasis" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Viaje / DUA</label>
+                            <input name="ViajeDua" id="editViaje" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Actualizar datos
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ingresos = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Ingresos));
+
+    function cargarEditar(id) {
+        const item = ingresos.find(x => x.Id === id);
+        if (!item) return;
+
+        document.getElementById("editId").value = item.Id;
+        document.getElementById("editContenedor").value = item.Contenedor;
+        document.getElementById("editMarchamos").value = item.Marchamos;
+        document.getElementById("editFechaHora").value = item.FechaHoraIngreso.substring(0, 16);
+        document.getElementById("editTransportista").value = item.Transportista;
+        document.getElementById("editTamano").value = item.Tamaño;
+        document.getElementById("editChasis").value = item.Chasis;
+        document.getElementById("editViaje").value = item.ViajeDua;
+    }
+</script>

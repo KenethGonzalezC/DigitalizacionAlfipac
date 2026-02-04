@@ -1,0 +1,203 @@
+﻿@model List<BitacoraAlfipac.Models.Entidades.HistorialContenedor>
+
+@{
+    ViewData["Title"] = "Historial de Contenedores";
+    var paginaActual = ViewBag.PaginaActual as int? ?? 1;
+    var totalPaginas = ViewBag.TotalPaginas as int? ?? 1;
+    var contenedorBuscado = ViewBag.ContenedorBuscado as string;
+    var totalRegistros = ViewBag.TotalRegistros as int? ?? 0;
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-3">Historial de Contenedores</h2>
+
+    <div class="d-flex gap-2 mb-3">
+
+        <a asp-action="ExportarPdf"
+           asp-route-contenedor="@ViewBag.ContenedorBuscado"
+           class="btn btn-danger btn-sm shadow-sm">
+            📄 Exportar PDF
+        </a>
+
+        <a asp-action="ExportarExcel"
+           asp-route-contenedor="@ViewBag.ContenedorBuscado"
+           class="btn btn-success btn-sm shadow-sm">
+            📊 Exportar Excel
+        </a>
+
+        <button class="btn btn-warning btn-sm shadow-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#limpiarHistorialModal">
+            🧹 Limpiar registros antiguos
+        </button>
+
+    </div>
+
+    <!-- BUSCADOR -->
+    <form method="get" class="d-flex align-items-end gap-3 mb-4">
+        <div>
+            <label class="form-label">Buscar contenedor</label>
+            <input type="text"
+                   name="contenedor"
+                   class="form-control"
+                   value="@contenedorBuscado"/>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Buscar
+        </button>
+
+        @if (!string.IsNullOrWhiteSpace(contenedorBuscado))
+        {
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                Limpiar
+            </a>
+        }
+    </form>
+
+    <p class="text-muted">
+        Mostrando <strong>@Model.Count</strong> de <strong>@totalRegistros</strong> registros
+    </p>
+
+    <!-- TABLA -->
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Estado</th>
+                    <th>Contenedor</th>
+                    <th>Ingreso</th>
+                    <th>Salida</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            No se encontraron registros
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        bool activo = item.FechaHoraSalida == null;
+
+                        <tr>
+                            <td>
+                                @if (activo)
+                                {
+                                    <span class="badge bg-success">
+                                        ACTIVO
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        DESPACHADO
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                <strong>@item.Contenedor</strong>
+                            </td>
+
+                            <td>
+                                @if (item.FechaHoraIngreso != null)
+                                {
+                                    @item.FechaHoraIngreso.Value.ToString("dd/MM/yyyy HH:mm")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+
+                            <td>
+                                @if (item.FechaHoraSalida != null)
+                                {
+                                    @item.FechaHoraSalida.Value.ToString("dd/MM/yyyy HH:mm")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    @if (totalPaginas > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination">
+
+                <li class="page-item @(paginaActual == 1 ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-page="@(paginaActual - 1)"
+                       asp-route-contenedor="@contenedorBuscado">
+                        Anterior
+                    </a>
+                </li>
+
+                @for (int i = 1; i <= totalPaginas; i++)
+                {
+                    <li class="page-item @(i == paginaActual ? "active" : "")">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-page="@i"
+                           asp-route-contenedor="@contenedorBuscado">
+                            @i
+                        </a>
+                    </li>
+                }
+
+                <li class="page-item @(paginaActual == totalPaginas ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-page="@(paginaActual + 1)"
+                       asp-route-contenedor="@contenedorBuscado">
+                        Siguiente
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+    }
+
+</div>
+
+<div class="modal fade" id="limpiarHistorialModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="LimpiarAntiguos" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header bg-warning">
+                    <h5>Limpiar historial antiguo</h5>
+                </div>
+
+                <div class="modal-body">
+                    Se eliminarán registros con más de
+                    <strong>6 meses</strong> desde su salida.
+                    ¿Desea continuar?
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-warning">Sí, limpiar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+

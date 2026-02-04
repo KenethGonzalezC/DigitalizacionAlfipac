@@ -1,0 +1,214 @@
+﻿@using BitacoraAlfipac.Models.ViewModels
+@model InventarioIndexVM
+
+<h2>Inventario de Contenedores</h2>
+
+<div class="row mb-4">
+    <div class="col">
+        <a asp-controller="Patio1" asp-action="Index" class="btn btn-outline-primary w-100">Patio 1</a>
+    </div>
+    <div class="col">
+        <a asp-controller="Patio2" asp-action="Index"class="btn btn-outline-success w-100">Patio 2</a>
+    </div>
+    <div class="col">
+        <a asp-controller="Anden2000" asp-action="Index" class="btn btn-outline-warning w-100">Andén 2000</a>
+    </div>
+    <div class="col">
+        <a asp-controller="PatioQuimicos" asp-action="Index" class="btn btn-outline-danger w-100">Patio Químicos</a>
+    </div>
+</div>
+
+<!-- BUSQUEDA GLOBAL -->
+<form id="formBusquedaGlobal">
+    <div class="row align-items-end">
+        <div class="col-md-4">
+            <input name="contenedor" class="form-control" placeholder="Buscar contenedor..." />
+        </div>
+
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-fill">
+                Buscar
+            </button>
+
+            <a asp-action="Index" class="btn btn-secondary flex-fill">
+                Limpiar
+            </a>
+        </div>
+    </div>
+</form>
+
+<div>
+    <h5></h5>
+</div>
+
+<button class="btn btn-dark mb-3" data-bs-toggle="modal" data-bs-target="#modalExportarGeneral">
+    🌎 Exportar Inventario General
+</button>
+
+<div class="modal fade" id="modalExportarGeneral" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">Reporte General de Contenedores</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input name="nombre" class="form-control mb-2" placeholder="Responsable" required />
+                    <input type="date" name="fecha" class="form-control mb-2" required />
+                    <input name="turno" class="form-control" placeholder="Turno" />
+                </div>
+
+                <div class="modal-footer d-flex gap-2">
+                    <button formaction="/Inventario/ExportarGeneralPDF" class="btn btn-danger flex-fill">PDF</button>
+                    <button formaction="/Inventario/ExportarGeneralExcel" class="btn btn-success flex-fill">Excel</button>
+                    <button formaction="/Inventario/ExportarGeneralCSV" class="btn btn-primary flex-fill">CSV</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<h4 class="mt-4">Contenedores sin asignar patio</h4>
+
+<table class="table table-sm table-bordered">
+    <thead>
+        <tr>
+            <th>Contenedor</th>
+            <th>Marchamos</th>
+            <th>Tamaño</th>
+            <th>Chasis</th>
+            <th>Transportista</th>
+            <th>Estado</th>
+            <th>Confirmar</th>
+            <th>Ubicación</th>
+            <th>Acción Mover</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model.ContenedoresSinAsignar)
+        {
+            <tr>
+                <form method="post">
+                    <input type="hidden" name="id" value="@c.Id" />
+
+                <td>@c.Contenedor</td>
+
+                <td>
+                    <input name="marchamos" value="@c.Marchamos" class="form-control form-control-sm" />
+                </td>
+
+                <td>@c.Tamano</td>
+
+                <td>
+                    <input name="chasis" value="@c.Chasis" class="form-control form-control-sm" />
+                </td>
+
+                <td>
+                    <input name="transportista" value="@c.Transportista" class="form-control form-control-sm" />
+                </td>
+
+                <td>
+                    <select name="estadoCarga" class="form-select form-select-sm">
+                        <option value="Vacio" selected="@(c.EstadoCarga == "Vacio")">Vacío</option>
+                        <option value="Cargado" selected="@(c.EstadoCarga == "Cargado")">Cargado</option>
+                    </select>
+                </td>
+
+                <!-- BOTÓN CONFIRMAR EDICIÓN -->
+                <td class="text-center">
+                    <button type="submit"
+                            formaction="@Url.Action("ConfirmarEdicion", "Inventario")"
+                            class="btn btn-sm btn-primary">
+                        ✔
+                    </button>
+                </td>
+
+                <!-- UBICACIÓN -->
+                <td>
+                    <select name="ubicacion" class="form-select form-select-sm">
+                        <option value="">No mover</option>
+                        <option value="SinAsignar">Sin asignar</option>
+                        <option value="Patio1">Patio 1</option>
+                        <option value="Patio2">Patio 2</option>
+                        <option value="Anden2000">Andén 2000</option>
+                        <option value="PatioQuimicos">Patio Químicos</option>
+                    </select>
+                </td>
+
+                <!-- BOTÓN MOVER -->
+                <td>
+                    <button type="submit"
+                            formaction="@Url.Action("Mover", "Inventario")"
+                            class="btn btn-sm btn-success">
+                        Mover
+                    </button>
+                </td>
+
+                </form>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- MODAL -->
+<div class="modal fade" id="modalBusquedaGlobal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Resultado de búsqueda</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="contenidoModalBusqueda"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("formBusquedaGlobal").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const contenedor = this.querySelector("input[name='contenedor']").value;
+
+            fetch(`/Inventario/BuscarGlobal?contenedor=${contenedor}`)
+                .then(r => r.text())
+                .then(html => {
+                    document.getElementById("contenidoModalBusqueda").innerHTML = html;
+                    new bootstrap.Modal(document.getElementById('modalBusquedaGlobal')).show();
+                });
+        });
+
+        // 👉 ESTE MANEJA SOLO EL FORM DEL MODAL (dinámico)
+                    document.addEventListener("submit", function (e) {
+            const form = e.target.closest("#modalBusquedaGlobal form");
+            if (!form) return;
+
+            e.preventDefault();
+
+            fetch(form.action, {
+                method: "POST",
+                body: new FormData(form)
+            })
+            .then(async r => {
+                const text = await r.text();
+
+                try {
+                    return JSON.parse(text);
+                } catch {
+                    console.error("El servidor no devolvió JSON:", text);
+                    throw new Error("Respuesta inválida");
+                }
+            })
+            .then(res => {
+                if (res.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('modalBusquedaGlobal')).hide();
+                    location.reload();
+                }
+            })
+            .catch(err => console.error("ERROR REAL:", err));
+        });
+
+    </script>
+}

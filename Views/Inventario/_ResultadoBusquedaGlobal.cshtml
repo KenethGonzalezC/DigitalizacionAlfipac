@@ -1,0 +1,72 @@
+﻿@using BitacoraAlfipac.Models.ViewModels
+@model BusquedaGlobalContenedorVM
+
+@if (Model == null)
+{
+    <div class="alert alert-warning mt-3 shadow-sm">
+        Contenedor no encontrado
+    </div>
+}
+else
+{
+    <div class="card mt-3 shadow-sm border-primary">    
+        <div class="card-body">
+            <form asp-controller="Inventario" asp-action="ConfirmarEdicionSinAsignar" method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" name="id" value="@Model.Id" />
+                <input type="hidden" name="ubicacionActual" value="@Model.UbicacionActual" />
+
+                <div class="row mb-2">
+                    <div class="col-md-6">
+                        <strong>Contenedor:</strong> @Model.Contenedor
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Ubicación:</strong> @Model.UbicacionActual
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Chasis</label>
+                        <input name="Chasis" value="@Model.Chasis" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Transportista</label>
+                        <input name="Transportista" value="@Model.Transportista" class="form-control form-control-sm" />
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Marchamos</label>
+                        <input name="Marchamos" value="@Model.Marchamos" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Estado</label>
+                        <select name="EstadoCarga" class="form-select form-select-sm">
+                            <option selected="@(Model.EstadoCarga == "Vacio")">Vacio</option>
+                            <option selected="@(Model.EstadoCarga == "Cargado")">Cargado</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Mover a</label>
+                        <select name="Ubicacion" class="form-select form-select-sm">
+                            <option value="">No mover</option>
+                            <option>SinAsignar</option>
+                            <option>Patio1</option>
+                            <option>Patio2</option>
+                            <option>Anden2000</option>
+                            <option>PatioQuimicos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn btn-success w-100">
+                    Confirmar cambios
+                </button>
+            </form>
+        </div>
+    </div>
+}

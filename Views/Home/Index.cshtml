@@ -1,0 +1,188 @@
+﻿@{
+    ViewData["Title"] = "Inicio";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4 fw-semibold">
+        Panel principal
+    </h2>
+
+    <div class="row g-4">
+
+        <!-- INVENTARIO -->
+        @if (
+            User.IsInRole("Administrador") ||
+            User.IsInRole("Digitador") ||
+            User.IsInRole("Usuario") ||
+            User.IsInRole("Patio")
+        )
+        {
+            <div class="col-md-6 col-lg-4">
+                <a asp-controller="Inventario"
+                   asp-action="Index"
+                   class="text-decoration-none">
+
+                    <div class="card h-100 shadow-sm dashboard-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Inventario de contenedores</h5>
+                            <p class="card-text text-muted">
+                                Registro y control de contenedores almacenados.
+                            </p>
+                        </div>
+                    </div>
+
+                </a>
+            </div>
+        }
+
+        <!-- INGRESOS -->
+        @if (
+            User.IsInRole("Administrador") ||
+            User.IsInRole("Digitador") ||
+            User.IsInRole("Usuario")
+        )
+        {
+            <div class="col-md-6 col-lg-4">
+                <a asp-controller="BitacoraIngresos"
+                   asp-action="Index"
+                   class="text-decoration-none">
+
+                    <div class="card h-100 shadow-sm dashboard-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Bitácora de ingresos</h5>
+                            <p class="card-text text-muted">
+                                Registro de ingresos a almacén fiscal.
+                            </p>
+                        </div>
+                    </div>
+
+                </a>
+            </div>
+        }
+
+        <!-- DESPACHOS -->
+        @if (
+            User.IsInRole("Administrador") ||
+            User.IsInRole("Digitador") ||
+            User.IsInRole("Usuario")
+        )
+        {
+            <div class="col-md-6 col-lg-4">
+                <a asp-controller="BitacoraDespachos"
+                   asp-action="Index"
+                   class="text-decoration-none">
+
+                    <div class="card h-100 shadow-sm dashboard-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Bitácora de despachos</h5>
+                            <p class="card-text text-muted">
+                                Control de salidas y despachos autorizados.
+                            </p>
+                        </div>
+                    </div>
+
+                </a>
+            </div>
+        }
+
+        <!-- TEMPERATURAS -->
+        @if (
+            User.IsInRole("Administrador") ||
+            User.IsInRole("Digitador") ||
+            User.IsInRole("Usuario") ||
+            User.IsInRole("Patio")
+        )
+        {
+            <div class="col-md-6 col-lg-4">
+                <a asp-controller="Temperaturas"
+                   asp-action="Index"
+                   class="text-decoration-none">
+
+                    <div class="card h-100 shadow-sm dashboard-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Temperaturas refrigerados</h5>
+                            <p class="card-text text-muted">
+                                Seguimiento de contenedores refrigerados.
+                            </p>
+                        </div>
+                    </div>
+
+                </a>
+            </div>
+        }
+
+        <!-- Historial de contenedores -->
+        @if (
+                User.IsInRole("Administrador") ||
+                User.IsInRole("Digitador") ||
+                User.IsInRole("Usuario") ||
+                User.IsInRole("Patio")
+                )
+        {
+            <div class="col-md-6 col-lg-4">
+                <a asp-controller="HistorialContenedores"
+                   asp-action="Index"
+                   class="text-decoration-none">
+
+                    <div class="card h-100 shadow-sm dashboard-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Historial de Contenedores</h5>
+                            <p class="card-text text-muted">
+                                Historial de Contenedores.
+                            </p>
+                        </div>
+                    </div>
+
+                </a>
+            </div>
+        }
+
+        <!-- Actas y Permanencias -->
+        @if (
+                User.IsInRole("Administrador") ||
+                User.IsInRole("Digitador") ||
+                User.IsInRole("Usuario")
+                )
+        {
+            <div class="col-md-6 col-lg-4">
+                <a asp-controller="ActasPermanencias"
+                   asp-action="Index"
+                   class="text-decoration-none">
+
+                    <div class="card h-100 shadow-sm dashboard-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Actas y Permanencias</h5>
+                            <p class="card-text text-muted">
+                                Gestion de Actas y Permanencias.
+                            </p>
+                        </div>
+                    </div>
+
+                </a>
+            </div>
+        }
+
+        <!-- USUARIOS (ADMIN) -->
+        @if (User.IsInRole("Administrador"))
+        {
+            <div class="col-md-6 col-lg-4">
+                <a asp-controller="Usuarios"
+                   asp-action="Index"
+                   class="text-decoration-none">
+
+                    <div class="card h-100 shadow-sm dashboard-card border-danger">
+                        <div class="card-body">
+                            <h5 class="card-title text-danger">Gestión de usuarios</h5>
+                            <p class="card-text text-muted">
+                                Administración de accesos y roles del sistema.
+                            </p>
+                        </div>
+                    </div>
+
+                </a>
+            </div>
+        }
+
+    </div>
+</div>

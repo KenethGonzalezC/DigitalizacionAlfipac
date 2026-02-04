@@ -1,0 +1,59 @@
+﻿@model List<BitacoraAlfipac.Models.Entidades.ContenedorBackupDespacho>
+
+<h3 class="mb-3">Backups de Despachos (Zona de Seguridad)</h3>
+
+<table class="table table-bordered table-sm table-striped shadow-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>Contenedor</th>
+            <th>Marchamos</th>
+            <th>Transportista</th>
+            <th>Chasis</th>
+            <th>Patio Origen</th>
+            <th>Fecha Backup</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var b in Model)
+        {
+            <tr>
+                <td>@b.Contenedor</td>
+                <td>@b.Marchamos</td>
+                <td>@b.Transportista</td>
+                <td>@b.Chasis</td>
+                <td>@b.PatioOrigen</td>
+                <td>@b.FechaRespaldo.ToString("dd/MM/yyyy HH:mm")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<button class="btn btn-danger mt-3"
+        data-bs-toggle="modal"
+        data-bs-target="#limpiarModal">
+    🧹 Limpiar Backups
+</button>
+
+<div class="modal fade" id="limpiarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="LimpiarBackups" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header bg-danger text-white">
+                    <h5>Eliminar TODOS los backups</h5>
+                </div>
+
+                <div class="modal-body">
+                    ⚠ Esta acción eliminará la capacidad de restaurar despachos incorrectos.
+                    ¿Desea continuar?
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-danger">Sí, limpiar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

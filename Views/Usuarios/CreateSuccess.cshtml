@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Usuario creado";
+}
+
+<div class="alert alert-success mt-4">
+    <h4>Usuario creado correctamente</h4>
+
+    <p><strong>Usuario:</strong> @TempData["UsuarioCreado"]</p>
+    <p><strong>Contraseña:</strong></p>
+
+    <div class="alert alert-warning">
+        <strong>@TempData["PasswordCreada"]</strong>
+    </div>
+
+    <p class="text-danger">
+        ⚠️ Copie esta contraseña ahora. No volverá a mostrarse.
+    </p>
+
+    <a asp-action="Index" class="btn btn-primary">
+        Volver al listado
+    </a>
+</div>

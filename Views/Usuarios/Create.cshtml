@@ -1,0 +1,35 @@
+﻿@using BitacoraAlfipac.ViewModels
+@model UsuarioCreateViewModel
+
+<h2>Nuevo Usuario</h2>
+
+<form asp-action="Create" method="post" class="card p-4 shadow-sm">
+
+    <div class="mb-3">
+        <label asp-for="NombreUsuario" class="form-label"></label>
+        <input asp-for="NombreUsuario" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Rol" class="form-label">Rol</label>
+        <select asp-for="Rol"
+                asp-items="Model.RolesDisponibles"
+                class="form-select">
+            <option value="">-- Seleccione un rol --</option>
+        </select>
+        <span asp-validation-for="Rol" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        Crear usuario
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary ms-2">
+        Cancelar
+    </a>
+</form>

@@ -1,0 +1,35 @@
+﻿/* Fondo general */
+.login-bg {
+    height: 100vh;
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont;
+}
+
+/* Contenedor */
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 15px;
+}
+
+/* Tarjeta */
+.login-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 30px 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+    /* Inputs */
+    .login-card .form-control {
+        border-radius: 6px;
+    }
+
+    /* Botón */
+    .login-card .btn-primary {
+        border-radius: 6px;
+        font-weight: 600;
+    }

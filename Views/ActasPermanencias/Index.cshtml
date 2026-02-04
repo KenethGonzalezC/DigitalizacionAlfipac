@@ -1,0 +1,216 @@
+﻿@using BitacoraAlfipac.Models.Entidades
+@model List<ActaPermanencia>
+
+@{
+    var actas = Model.Where(x => x.Tipo == "ACTA").ToList();
+    var pabs = Model.Where(x => x.Tipo == "PAB").ToList();
+}
+
+<h2>Actas y Permanencias</h2>
+
+<form asp-action="Create" method="post" class="card p-3 mb-4 shadow-sm">
+    <div class="row g-2">
+
+        <div class="col-md-2">
+            <select name="Tipo" class="form-control">
+                <option value="ACTA">ACTA</option>
+                <option value="PAB">PAB</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <input name="Contenedor" class="form-control" placeholder="Contenedor" required />
+        </div>
+
+        <div class="col-md-2">
+            <input name="Numero" class="form-control" placeholder="Número" required />
+        </div>
+
+        <div class="col-md-2">
+            <input name="Viaje" class="form-control" placeholder="Viaje" />
+        </div>
+
+        <div class="col-md-2">
+            <input name="Cliente" class="form-control" placeholder="Cliente" />
+        </div>
+
+        <div class="col-md-12">
+            <textarea name="Detalles" class="form-control" placeholder="Detalles" required></textarea>
+        </div>
+    </div>
+
+    <button class="btn btn-primary mt-3">Guardar</button>
+</form>
+
+<hr />
+
+<h4 class="mt-4">ACTAS</h4>
+
+<table class="table table-bordered table-sm">
+    <thead class="table-danger">
+        <tr>
+            <th>Contenedor</th>
+            <th>Número</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in actas)
+        {
+            <tr>
+                <td>@item.Contenedor</td>
+                <td>@item.Numero</td>
+                <td>
+                    @if (item.Aplicada)
+                    {
+                        <span class="text-success">Aplicada</span>
+                    }
+                    else
+                    {
+                        <span class="text-warning">Pendiente</span>
+                    }
+                </td>
+                <td>
+                    @if (!item.Aplicada)
+                    {
+                        <button class="btn btn-sm btn-success btnAplicar"
+                                data-id="@item.Id"
+                                data-bs-toggle="modal"
+                                data-bs-target="#aplicarModal">
+                            Marcar ingreso
+                        </button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<hr />
+<h4 class="mt-5">Permanencias a Bordo (PAB)</h4>
+
+<table class="table table-bordered table-sm">
+    <thead class="table-primary">
+        <tr>
+            <th>Contenedor</th>
+            <th>Número</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in pabs)
+        {
+            <tr>
+                <td>@item.Contenedor</td>
+                <td>@item.Numero</td>
+                <td>
+                    @if (item.Aplicada)
+                    {
+                        <span class="text-success">Aplicada</span>
+                    }
+                    else
+                    {
+                        <span class="text-warning">Pendiente</span>
+                    }
+                </td>
+                <td>
+                    @if (!item.Aplicada)
+                    {
+                        <button class="btn btn-sm btn-success btnAplicar"
+                                data-id="@item.Id"
+                                data-bs-toggle="modal"
+                                data-bs-target="#aplicarModal">
+                            Marcar ingreso
+                        </button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="modal fade" id="aplicarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="Aplicar" method="post">
+                <div class="modal-header bg-success text-white">
+                    <h5>Registrar ingreso de contenedor</h5>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" name="id" id="aplicarId" />
+
+                    <div class="mb-3">
+                        <label>Fecha y hora de ingreso</label>
+                        <input type="datetime-local"
+                               name="fechaIngreso"
+                               class="form-control"
+                               required />
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               name="correcta"
+                               value="true" />
+                        <label class="form-check-label">
+                            Aplicada correctamente
+                        </label>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-success">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="aplicarModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="Aplicar" method="post">
+                <div class="modal-header bg-success text-white">
+                    <h5>Registrar ingreso de contenedor</h5>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" name="id" id="aplicarId" />
+
+                    <div class="mb-3">
+                        <label>Fecha y hora de ingreso</label>
+                        <input type="datetime-local"
+                               name="fechaIngreso"
+                               class="form-control"
+                               required />
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               name="correcta"
+                               value="true" />
+                        <label class="form-check-label">
+                            Aplicada correctamente
+                        </label>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-success">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+

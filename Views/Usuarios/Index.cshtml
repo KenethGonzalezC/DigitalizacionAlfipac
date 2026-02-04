@@ -1,0 +1,46 @@
+﻿@using BitacoraAlfipac.Models.Entidades
+@model IEnumerable<Usuario>
+
+<h2 class="mb-4">Gestión de Usuarios</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">
+    Nuevo usuario
+</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Usuario</th>
+            <th>Rol</th>
+            <th>Activo</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td>@u.NombreUsuario</td>
+                <td>@u.Rol</td>
+                <td>
+                    @if (u.Activo)
+                    {
+                        <span class="badge bg-success">Activo</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Inactivo</span>
+                    }
+                </td>
+                <td>
+                    <form asp-action="ToggleActivo" method="post">
+                        <input type="hidden" name="id" value="@u.Id" />
+                        <button class="btn btn-sm btn-outline-warning">
+                            Cambiar estado
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
