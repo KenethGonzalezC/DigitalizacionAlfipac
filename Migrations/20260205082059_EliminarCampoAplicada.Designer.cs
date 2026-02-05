@@ -4,6 +4,7 @@ using BitacoraAlfipac.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BitacoraAlfipac.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260205082059_EliminarCampoAplicada")]
+    partial class EliminarCampoAplicada
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace BitacoraAlfipac.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("BitacoraAlfipac.Models.Entidades.ActasPermanencias", b =>
+            modelBuilder.Entity("BitacoraAlfipac.Models.Entidades.ActaPermanencia", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -30,7 +33,7 @@ namespace BitacoraAlfipac.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("AplicadoCorrectamente")
+                    b.Property<bool?>("AplicadaCorrectamente")
                         .HasColumnType("bit");
 
                     b.Property<string>("Cliente")
@@ -40,9 +43,12 @@ namespace BitacoraAlfipac.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Detalle")
+                    b.Property<string>("Detalles")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("FechaHoraIngresoContenedor")
                         .HasColumnType("datetime2");

@@ -1,18 +1,34 @@
-﻿@using BitacoraAlfipac.Models.Entidades
-@model List<ActaPermanencia>
+﻿@model List<BitacoraAlfipac.Models.Entidades.ActasPermanencias>
 
 @{
     var actas = Model.Where(x => x.Tipo == "ACTA").ToList();
     var pabs = Model.Where(x => x.Tipo == "PAB").ToList();
 }
 
-<h2>Actas y Permanencias</h2>
+@if (TempData["Ok"] != null)
+{
+    <div class="alert alert-success">@TempData["Ok"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
 
-<form asp-action="Create" method="post" class="card p-3 mb-4 shadow-sm">
-    <div class="row g-2">
+<div class="container mt-4">
+
+    <h2 class="mb-3">Actas y Permanencias a Bordo</h2>
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <!-- ================= CREAR ================= -->
+    <form asp-action="Create" method="post" class="row g-2 mb-4">
+        @Html.AntiForgeryToken()
 
         <div class="col-md-2">
-            <select name="Tipo" class="form-control">
+            <select name="Tipo" class="form-select" required>
                 <option value="ACTA">ACTA</option>
                 <option value="PAB">PAB</option>
             </select>
@@ -35,136 +51,170 @@
         </div>
 
         <div class="col-md-12">
-            <textarea name="Detalles" class="form-control" placeholder="Detalles" required></textarea>
+            <textarea name="Detalle" class="form-control" placeholder="Detalle"></textarea>
+        </div>
+
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100">Crear</button>
+        </div>
+    </form>
+
+    <!-- ================= BUSCAR + HISTORIAL ================= -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <input id="buscarContenedor" class="form-control" placeholder="Buscar contenedor" />
+        </div>
+        <div class="col-md-2">
+            <button id="btnBuscar" class="btn btn-warning w-100">Buscar</button>
+        </div>
+        <div class="col-md-2">
+            <a asp-action="Historial" class="btn btn-dark w-100">Ir a Historial</a>
+        </div>
+        <div class="col-md-2">
+            <form method="post" asp-action="ExportarPendientesPDF">
+                <input type="hidden" name="nombre" value="@User.Identity.Name" />
+                <button type="submit" class="btn btn-success mb-3">Exportar Pendientes a PDF</button>
+            </form>
         </div>
     </div>
 
-    <button class="btn btn-primary mt-3">Guardar</button>
-</form>
-
-<hr />
-
-<h4 class="mt-4">ACTAS</h4>
-
-<table class="table table-bordered table-sm">
-    <thead class="table-danger">
-        <tr>
-            <th>Contenedor</th>
-            <th>Número</th>
-            <th>Estado</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in actas)
-        {
+    <!-- ================= TABLA ACTAS ================= -->
+    <h4>ACTAS</h4>
+    <table class="table table-bordered table-sm">
+        <thead class="table-danger">
             <tr>
-                <td>@item.Contenedor</td>
-                <td>@item.Numero</td>
-                <td>
-                    @if (item.Aplicada)
-                    {
-                        <span class="text-success">Aplicada</span>
-                    }
-                    else
-                    {
-                        <span class="text-warning">Pendiente</span>
-                    }
-                </td>
-                <td>
-                    @if (!item.Aplicada)
-                    {
-                        <button class="btn btn-sm btn-success btnAplicar"
-                                data-id="@item.Id"
-                                data-bs-toggle="modal"
-                                data-bs-target="#aplicarModal">
-                            Marcar ingreso
-                        </button>
-                    }
-                </td>
+                <th>Contenedor</th>
+                <th>Número</th>
+                <th>Viaje</th>
+                <th>Detalle</th>
+                <th>Cliente</th>
+                <th>Estado</th>
+                <th>Acción</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in actas)
+            {
+                <tr>
+                    <td>@item.Contenedor</td>
+                    <td>@item.Numero</td>
+                    <td>@item.Viaje</td>
+                    <td>@item.Detalle</td>
+                    <td>@item.Cliente</td>
+                    <td><span class="text-warning fw-bold">Pendiente</span></td>
+                    <td class="d-flex gap-2">
+                        <button class="btn btn-info btn-sm btnEditar" data-id="@item.Id">Editar</button>
 
-<hr />
-<h4 class="mt-5">Permanencias a Bordo (PAB)</h4>
+                        <form asp-action="EliminarPendiente" method="post" onsubmit="return confirmarEliminacion();" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button class="btn btn-danger btn-sm">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 
-<table class="table table-bordered table-sm">
-    <thead class="table-primary">
-        <tr>
-            <th>Contenedor</th>
-            <th>Número</th>
-            <th>Estado</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in pabs)
-        {
+    <!-- ================= TABLA PAB ================= -->
+    <h4 class="mt-5">Permanencias a Bordo (PAB)</h4>
+    <table class="table table-bordered table-sm">
+        <thead class="table-primary">
             <tr>
-                <td>@item.Contenedor</td>
-                <td>@item.Numero</td>
-                <td>
-                    @if (item.Aplicada)
-                    {
-                        <span class="text-success">Aplicada</span>
-                    }
-                    else
-                    {
-                        <span class="text-warning">Pendiente</span>
-                    }
-                </td>
-                <td>
-                    @if (!item.Aplicada)
-                    {
-                        <button class="btn btn-sm btn-success btnAplicar"
-                                data-id="@item.Id"
-                                data-bs-toggle="modal"
-                                data-bs-target="#aplicarModal">
-                            Marcar ingreso
-                        </button>
-                    }
-                </td>
+                <th>Contenedor</th>
+                <th>Número</th>
+                <th>Viaje</th>
+                <th>Detalle</th>
+                <th>Cliente</th>
+                <th>Estado</th>
+                <th>Acción</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in pabs)
+            {
+                <tr>
+                    <td>@item.Contenedor</td>
+                    <td>@item.Numero</td>
+                    <td>@item.Viaje</td>
+                    <td>@item.Detalle</td>
+                    <td>@item.Cliente</td>
+                    <td><span class="text-warning fw-bold">Pendiente</span></td>
+                    <td class="d-flex gap-2">
+                        <button class="btn btn-info btn-sm btnEditar" data-id="@item.Id">Editar</button>
 
-<div class="modal fade" id="aplicarModal" tabindex="-1">
-    <div class="modal-dialog">
+                        <form asp-action="EliminarPendiente" method="post" onsubmit="return confirmarEliminacion();" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button class="btn btn-danger btn-sm">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+<div class="modal fade" id="editarModal">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form asp-action="Aplicar" method="post">
-                <div class="modal-header bg-success text-white">
-                    <h5>Registrar ingreso de contenedor</h5>
+            <form asp-action="EditarRegistro" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" id="editId" />
+
+                <div class="modal-header bg-primary text-white">
+                    <h5>Editar Acta / PAB</h5>
                 </div>
 
-                <div class="modal-body">
+                <div class="modal-body row g-3">
 
-                    <input type="hidden" name="id" id="aplicarId" />
-
-                    <div class="mb-3">
-                        <label>Fecha y hora de ingreso</label>
-                        <input type="datetime-local"
-                               name="fechaIngreso"
-                               class="form-control"
-                               required />
+                    <div class="col-md-4">
+                        <label>Tipo</label>
+                        <input id="editTipo" class="form-control" readonly />
                     </div>
 
-                    <div class="form-check">
-                        <input class="form-check-input"
-                               type="checkbox"
-                               name="correcta"
-                               value="true" />
-                        <label class="form-check-label">
-                            Aplicada correctamente
-                        </label>
+                    <div class="col-md-4">
+                        <label>Contenedor</label>
+                        <input id="editContenedor" class="form-control" readonly />
                     </div>
 
+                    <div class="col-md-4">
+                        <label>Número</label>
+                        <input name="Numero" id="editNumero" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label>Viaje</label>
+                        <input name="Viaje" id="editViaje" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label>Cliente</label>
+                        <input name="Cliente" id="editCliente" class="form-control" />
+                    </div>
+
+                    <div class="col-md-12">
+                        <label>Detalle</label>
+                        <textarea name="Detalle" id="editDetalle" class="form-control"></textarea>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label>Fecha Ingreso</label>
+                        <input type="datetime-local" name="FechaIngreso" id="editFechaIngreso" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label>¿Aplicada correctamente?</label>
+                        <select name="AplicadoCorrectamente" id="editAplicadoCorrectamente" class="form-select">
+                            <option value="true">Correcta</option>
+                            <option value="false">Incorrecta</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     <button class="btn btn-success">Guardar</button>
                 </div>
             </form>
@@ -172,45 +222,41 @@
     </div>
 </div>
 
-<div class="modal fade" id="aplicarModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form asp-action="Aplicar" method="post">
-                <div class="modal-header bg-success text-white">
-                    <h5>Registrar ingreso de contenedor</h5>
-                </div>
+<script>
+    function abrirModal(data){
+        document.getElementById("editId").value = data.id;
+        document.getElementById("editTipo").value = data.tipo;
+        document.getElementById("editContenedor").value = data.contenedor;
+        document.getElementById("editNumero").value = data.numero;
+        document.getElementById("editViaje").value = data.viaje;
+        document.getElementById("editCliente").value = data.cliente;
+        document.getElementById("editDetalle").value = data.detalle;
+        document.getElementById("editFechaIngreso").value = data.fechaIngreso ?? "";
+        document.getElementById("editAplicadoCorrectamente").value =
+    (data.aplicadoCorrectamente ?? false).toString();
 
-                <div class="modal-body">
+        new bootstrap.Modal(document.getElementById('editarModal')).show();
+    }
 
-                    <input type="hidden" name="id" id="aplicarId" />
+    document.getElementById("btnBuscar").addEventListener("click", () => {
+        const cont = document.getElementById("buscarContenedor").value.trim();
+        fetch(`/ActasPermanencias/BuscarContenedor?contenedor=${cont}`)
+            .then(r => r.json())
+            .then(data => data.encontrado ? abrirModal(data) : alert("No existe"));
+    });
 
-                    <div class="mb-3">
-                        <label>Fecha y hora de ingreso</label>
-                        <input type="datetime-local"
-                               name="fechaIngreso"
-                               class="form-control"
-                               required />
-                    </div>
+    document.querySelectorAll(".btnEditar").forEach(btn => {
+        btn.addEventListener("click", () => {
+            fetch(`/ActasPermanencias/BuscarContenedor?contenedor=${btn.closest("tr").children[0].innerText}`)
+                .then(r => r.json())
+                .then(data => abrirModal(data));
+        });
+    });
+</script>
 
-                    <div class="form-check">
-                        <input class="form-check-input"
-                               type="checkbox"
-                               name="correcta"
-                               value="true" />
-                        <label class="form-check-label">
-                            Aplicada correctamente
-                        </label>
-                    </div>
-
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button class="btn btn-success">Guardar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
+<script>
+    function confirmarEliminacion() {
+        return confirm("¿Seguro que deseas eliminar este registro? Esta acción no se puede deshacer.");
+    }
+</script>
 

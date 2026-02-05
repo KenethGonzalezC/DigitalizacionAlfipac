@@ -15,7 +15,11 @@
         <div class="row g-3">
             <div class="col-md-4">
                 <label class="form-label">Contenedor</label>
-                <input asp-for="Contenedor" class="form-control" required />
+                <div class="input-group">
+                    <input asp-for="Contenedor" id="inputContenedor" class="form-control" required />
+                    <button type="button" id="btnBuscarActa" class="btn btn-secondary">Buscar</button>
+                </div>
+                <small id="resultadoBusqueda" class="text-info"></small>
             </div>
 
             <div class="col-md-4">
@@ -351,3 +355,30 @@
         document.getElementById("editViaje").value = item.ViajeDua;
     }
 </script>
+
+<script>
+    document.getElementById("btnBuscarActa").addEventListener("click", () => {
+        const contenedor = document.getElementById("inputContenedor").value.trim();
+        const resultado = document.getElementById("resultadoBusqueda");
+
+        if (!contenedor) {
+            resultado.textContent = "";
+            return;
+        }
+
+        fetch(`/ActasPermanencias/BuscarContenedorEnPendientes?contenedor=${contenedor}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.encontrado) {
+                    resultado.textContent = `Contenedor con ${data.tipo} #${data.numero}`;
+                } else {
+                    resultado.textContent = "No se encontró contenedor en Actas/PAB";
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                resultado.textContent = "Error al buscar contenedor";
+            });
+    });
+</script>
+

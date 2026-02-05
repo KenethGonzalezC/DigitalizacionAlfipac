@@ -25,7 +25,6 @@ namespace BitacoraAlfipac.Data
         public DbSet<RegistroTemperatura> RegistrosTemperatura { get; set; }
         public DbSet<ContenedorBackupDespacho> ContenedoresBackupDespacho { get; set; }
 
-        public DbSet<ActaPermanencia> ActasPermanencias { get; set; }
-
+        public DbSet<ActasPermanencias> ActasPermanencias { get; set; }
     }
 }
