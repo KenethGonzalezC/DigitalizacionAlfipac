@@ -138,6 +138,56 @@
             </div>
         }
 
+        <!-- BitacoraGeneral -->
+        @if (
+                User.IsInRole("Administrador") ||
+                User.IsInRole("Digitador") ||
+                User.IsInRole("Usuario")
+                )
+        {
+            <div class="col-md-6 col-lg-4">
+                <a asp-controller="Bitacora"
+                   asp-action="Index"
+                   class="text-decoration-none">
+
+                    <div class="card h-100 shadow-sm dashboard-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Bitácora del día</h5>
+                            <p class="card-text text-muted">
+                                Registro de todos los movimientos del almacén fiscal.
+                            </p>
+                        </div>
+                    </div>
+
+                </a>
+            </div>
+        }
+
+        <!-- Datos -->
+        @if (
+                User.IsInRole("Administrador") ||
+                User.IsInRole("Digitador") ||
+                User.IsInRole("Usuario")
+                )
+        {
+            <div class="col-md-6 col-lg-4">
+                <a asp-controller="Datos"
+                   asp-action="Index"
+                   class="text-decoration-none">
+
+                    <div class="card h-100 shadow-sm dashboard-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Datos</h5>
+                            <p class="card-text text-muted">
+                                Precargar informacion de ingresos y despachos.
+                            </p>
+                        </div>
+                    </div>
+
+                </a>
+            </div>
+        }
+
         <!-- Actas y Permanencias -->
         @if (
                 User.IsInRole("Administrador") ||

@@ -26,5 +26,8 @@ namespace BitacoraAlfipac.Data
         public DbSet<ContenedorBackupDespacho> ContenedoresBackupDespacho { get; set; }
 
         public DbSet<ActasPermanencias> ActasPermanencias { get; set; }
+
+        public DbSet<DatosIngresoViaje> DatosIngresosViajes { get; set; }
+
     }
 }

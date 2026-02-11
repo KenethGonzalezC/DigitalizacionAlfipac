@@ -36,23 +36,32 @@ public class ContenedorTemperaturasPdf : IDocument
 
                 col.Item().Table(t =>
                 {
-                    t.ColumnsDefinition(c =>
-                    {
-                        c.RelativeColumn();
-                        c.RelativeColumn();
-                    });
+                t.ColumnsDefinition(c =>
+                {
+                    c.RelativeColumn();
+                    c.RelativeColumn();
+                });
 
-                    void Row(string label, string value)
+                void Row(string label, string value)
+                {
+                    t.Cell().Text(label).Bold();
+                    t.Cell().Text(value);
+                }
+
+                    string tiempoFormateado = "-";
+
+                    if (_c.FechaHoraConexion != null && _c.FechaHoraDesconexion != null)
                     {
-                        t.Cell().Text(label).Bold();
-                        t.Cell().Text(value);
+                        var ts = _c.FechaHoraDesconexion.Value - _c.FechaHoraConexion.Value;
+                        tiempoFormateado = $"{(int)ts.TotalHours:D2}:{ts.Minutes:D2}";
                     }
 
                     Row("Fecha / Hora Ingreso", _c.FechaHoraIngreso?.ToString("dd/MM/yyyy HH:mm") ?? "-");
-                    Row("Fecha / Hora Conexión", _c.FechaHoraConexion?.ToString("dd/MM/yyyy HH:mm") ?? "-");
-                    Row("Set Point (°C)", _c.SetPoint?.ToString() ?? "-");
-                    Row("Fecha / Hora Despacho", _c.FechaHoraDespacho?.ToString("dd/MM/yyyy HH:mm") ?? "-");
-                    Row("Fecha / Hora Desconexión", _c.FechaHoraDesconexion?.ToString("dd/MM/yyyy HH:mm") ?? "-");
+                Row("Fecha / Hora Conexión", _c.FechaHoraConexion?.ToString("dd/MM/yyyy HH:mm") ?? "-");
+                Row("Set Point (°C)", _c.SetPoint?.ToString() ?? "-");
+                Row("Fecha / Hora Despacho", _c.FechaHoraDespacho?.ToString("dd/MM/yyyy HH:mm") ?? "-");
+                Row("Fecha / Hora Desconexión", _c.FechaHoraDesconexion?.ToString("dd/MM/yyyy HH:mm") ?? "-");
+                Row("Horas totales", tiempoFormateado);
                 });
 
                 col.Item().PaddingTop(15).Text("REGISTROS DE TEMPERATURA")

@@ -100,6 +100,28 @@
                         {
                             <li class="nav-item">
                                 <a class="nav-link"
+                                   asp-controller="Bitacora"
+                                   asp-action="Index">
+                                    Bitacora
+                                </a>
+                            </li>
+                        }
+
+                        @if (User.IsInRole("Administrador") || (User.IsInRole("Digitador") || (User.IsInRole("Usuario"))))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                   asp-controller="Datos"
+                                   asp-action="Index">
+                                    Datos
+                                </a>
+                            </li>
+                        }
+
+                        @if (User.IsInRole("Administrador") || (User.IsInRole("Digitador") || (User.IsInRole("Usuario"))))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link"
                                    asp-controller="ActasPermanencias"
                                    asp-action="Index">
                                     Actas y PAB
