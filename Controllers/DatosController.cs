@@ -23,6 +23,7 @@ public class DatosController : Controller
     // Página hija → Ingresos
     public IActionResult Ingresos(
     string viaje,
+    string contenedor,
     string recinto,
     DateTime? fechaCreacion,
     string declarante,
@@ -49,6 +50,7 @@ public class DatosController : Controller
         // 🧠 Detectar si NO hay filtros (para cargar HOY por defecto)
         bool sinFiltros =
             string.IsNullOrEmpty(viaje) &&
+            string.IsNullOrEmpty(contenedor) &&
             string.IsNullOrEmpty(recinto) &&
             !fechaCreacion.HasValue &&
             string.IsNullOrEmpty(declarante) &&
@@ -65,6 +67,9 @@ public class DatosController : Controller
         // 🔎 FILTROS
         if (!string.IsNullOrEmpty(viaje))
             query = query.Where(x => x.Viaje.Contains(viaje));
+
+        if (!string.IsNullOrEmpty(contenedor))
+            query = query.Where(x => x.Contenedor.Contains(contenedor));
 
         if (!string.IsNullOrEmpty(recinto))
             query = query.Where(x => x.RecintoOrigen.Contains(recinto));
@@ -118,6 +123,7 @@ public class DatosController : Controller
         if (registro == null) return NotFound();
 
         registro.Viaje = model.Viaje;
+        registro.Contenedor = model.Contenedor;
         registro.RecintoOrigen = model.RecintoOrigen;
         registro.FechaCreacionViaje = model.FechaCreacionViaje;
         registro.Declarante = model.Declarante;
@@ -169,9 +175,11 @@ public class DatosController : Controller
 
             var ultimaFila = hoja.LastRowUsed().RowNumber();
 
-            //Llos viajes existentes UNA SOLA VEZ (mucho más rápido)
-            var viajesExistentes = _context.DatosIngresosViajes
-                .Select(x => x.Viaje.Trim())
+            // 🔥 Obtener combinaciones existentes (Viaje + Contenedor)
+            var existentes = _context.DatosIngresosViajes
+                .Select(x => new { x.Viaje, x.Contenedor })
+                .ToList()
+                .Select(x => $"{x.Viaje.Trim()}|{x.Contenedor.Trim()}")
                 .ToHashSet();
 
             var nuevosRegistros = new List<DatosIngresoViaje>();
@@ -181,37 +189,40 @@ public class DatosController : Controller
                 var row = hoja.Row(fila);
 
                 var viaje = row.Cell(1).GetValue<string>()?.Trim();
+                var contenedor = row.Cell(2).GetValue<string>()?.Trim() ?? "";
 
-                // ⛔ Saltar filas vacías
                 if (string.IsNullOrWhiteSpace(viaje))
                     continue;
 
-                // ⛔ Evitar duplicados BD + Excel
-                if (viajesExistentes.Contains(viaje))
+                var clave = $"{viaje}|{contenedor}";
+
+                // ❌ Si ya existe esa combinación exacta, lo saltamos
+                if (existentes.Contains(clave))
                     continue;
 
-                // 🧠 Manejo profesional de fecha
+                // 📅 Fecha
                 DateTime fechaCreacion;
-                var celdaFecha = row.Cell(3);
+                var celdaFecha = row.Cell(4);
 
                 if (celdaFecha.DataType == XLDataType.DateTime)
                     fechaCreacion = celdaFecha.GetDateTime();
                 else if (!DateTime.TryParse(celdaFecha.GetValue<string>(), out fechaCreacion))
-                    fechaCreacion = DateTime.Now; // fallback seguro
+                    fechaCreacion = DateTime.Now;
 
                 var registro = new DatosIngresoViaje
                 {
                     Viaje = viaje,
-                    RecintoOrigen = row.Cell(2).GetValue<string>()?.Trim() ?? "",
+                    Contenedor = contenedor,
+                    RecintoOrigen = row.Cell(3).GetValue<string>()?.Trim() ?? "",
                     FechaCreacionViaje = fechaCreacion,
-                    Declarante = row.Cell(4).GetValue<string>()?.Trim() ?? "",
-                    Transportista = row.Cell(5).GetValue<string>()?.Trim() ?? "",
-                    Mercancia = row.Cell(6).GetValue<string>()?.Trim() ?? "",
+                    Declarante = row.Cell(5).GetValue<string>()?.Trim() ?? "",
+                    Transportista = row.Cell(6).GetValue<string>()?.Trim() ?? "",
+                    Mercancia = row.Cell(7).GetValue<string>()?.Trim() ?? "",
                     FechaRegistroSistema = DateTime.Now
                 };
 
                 nuevosRegistros.Add(registro);
-                viajesExistentes.Add(viaje); // evita duplicados dentro del mismo archivo
+                existentes.Add(clave); // 🔥 Lo agregamos al hash para evitar duplicados dentro del mismo Excel
             }
 
             if (nuevosRegistros.Any())

@@ -8,6 +8,7 @@ namespace BitacoraAlfipac.Models.Entidades
 
         // Información del viaje (la que el usuario escribe)
         public string Viaje { get; set; }
+        public string Contenedor { get; set; }
         public string RecintoOrigen { get; set; }
         public DateTime FechaCreacionViaje { get; set; } // NO es la del sistema
         public string Declarante { get; set; }
