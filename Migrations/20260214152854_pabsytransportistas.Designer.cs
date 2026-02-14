@@ -4,6 +4,7 @@ using BitacoraAlfipac.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BitacoraAlfipac.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260214152854_pabsytransportistas")]
+    partial class pabsytransportistas
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,9 +75,6 @@ namespace BitacoraAlfipac.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Chasis")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Cliente")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Contenedor")
@@ -171,10 +171,6 @@ namespace BitacoraAlfipac.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Cliente")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Contenedor")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -217,9 +213,6 @@ namespace BitacoraAlfipac.Migrations
 
                     b.Property<string>("Chasis")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Cliente")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Contenedor")
@@ -295,9 +288,6 @@ namespace BitacoraAlfipac.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Chasis")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Cliente")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Contenedor")
@@ -393,27 +383,6 @@ namespace BitacoraAlfipac.Migrations
                     b.ToTable("HistorialContenedores");
                 });
 
-            modelBuilder.Entity("BitacoraAlfipac.Models.Entidades.PabMercanciaSusceptible", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Codigo")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Descripcion")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PabMercanciasSusceptibles");
-                });
-
             modelBuilder.Entity("BitacoraAlfipac.Models.Entidades.Patio1", b =>
                 {
                     b.Property<int>("Id")
@@ -423,9 +392,6 @@ namespace BitacoraAlfipac.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Chasis")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Cliente")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Contenedor")
@@ -463,9 +429,6 @@ namespace BitacoraAlfipac.Migrations
                     b.Property<string>("Chasis")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Cliente")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Contenedor")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -499,9 +462,6 @@ namespace BitacoraAlfipac.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Chasis")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Cliente")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Contenedor")
@@ -553,34 +513,6 @@ namespace BitacoraAlfipac.Migrations
                     b.HasIndex("ContenedorRefrigeradoId");
 
                     b.ToTable("RegistrosTemperatura");
-                });
-
-            modelBuilder.Entity("BitacoraAlfipac.Models.Entidades.TransportistaAutorizado", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CedulaJuridica")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Codigo")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TransportistasAutorizados");
                 });
 
             modelBuilder.Entity("BitacoraAlfipac.Models.Entidades.Usuario", b =>

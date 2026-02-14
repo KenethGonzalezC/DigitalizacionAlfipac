@@ -74,6 +74,7 @@ public class BitacoraIngresosController : Controller
             Marchamos = model.Marchamos,
             FechaHoraIngreso = fechaHora,
             Transportista = model.Transportista,
+            Cliente = model.Cliente,
             Tamaño = model.Tamano,
             Chofer = model.Chofer,
             PlacaCabezal = model.PlacaCabezal,
@@ -95,6 +96,7 @@ public class BitacoraIngresosController : Controller
             Marchamos = model.Marchamos,
             Tamano = model.Tamano,
             Transportista = model.Transportista,
+            Cliente = model.Cliente,
             Chasis = model.Chasis,
             EstadoCarga = "Cargado",
             Ubicacion = "Sin asignar"
@@ -135,6 +137,7 @@ public class BitacoraIngresosController : Controller
         ingreso.Contenedor = model.Contenedor;
         ingreso.Marchamos = model.Marchamos;
         ingreso.Transportista = model.Transportista;
+        ingreso.Cliente = model.Cliente;
         ingreso.Tamaño = model.Tamano;
         ingreso.Chasis = model.Chasis;
         ingreso.ViajeDua = model.ViajeDua;
@@ -207,6 +210,7 @@ public class BitacoraIngresosController : Controller
         contenedorActivo.Marchamos = ingreso.Marchamos;
         contenedorActivo.Tamano = ingreso.Tamaño;
         contenedorActivo.Transportista = ingreso.Transportista;
+        contenedorActivo.Cliente = ingreso.Cliente;
         contenedorActivo.Chasis = ingreso.Chasis;
     }
 
@@ -230,11 +234,12 @@ public class BitacoraIngresosController : Controller
         ws.Cell(1, 2).Value = "Marchamos";
         ws.Cell(1, 3).Value = "Fecha/Hora";
         ws.Cell(1, 4).Value = "Transportista";
-        ws.Cell(1, 5).Value = "Tamaño";
-        ws.Cell(1, 6).Value = "Chofer";
-        ws.Cell(1, 7).Value = "Placa Cabezal";
-        ws.Cell(1, 8).Value = "Chasis";
-        ws.Cell(1, 9).Value = "Viaje / DUA";
+        ws.Cell(1, 5).Value = "Cliente";
+        ws.Cell(1, 6).Value = "Tamaño";
+        ws.Cell(1, 7).Value = "Chofer";
+        ws.Cell(1, 8).Value = "Placa Cabezal";
+        ws.Cell(1, 9).Value = "Chasis";
+        ws.Cell(1, 10).Value = "Viaje / DUA";
 
         int fila = 2;
 
@@ -244,11 +249,12 @@ public class BitacoraIngresosController : Controller
             ws.Cell(fila, 2).Value = i.Marchamos;
             ws.Cell(fila, 3).Value = i.FechaHoraIngreso.ToString("yyyy-MM-dd HH:mm");
             ws.Cell(fila, 4).Value = i.Transportista;
-            ws.Cell(fila, 5).Value = i.Tamaño;
-            ws.Cell(fila, 6).Value = i.Chofer;
-            ws.Cell(fila, 7).Value = i.PlacaCabezal;
-            ws.Cell(fila, 8).Value = i.Chasis;
-            ws.Cell(fila, 9).Value = i.ViajeDua;
+            ws.Cell(fila, 5).Value = i.Cliente;
+            ws.Cell(fila, 6).Value = i.Tamaño;
+            ws.Cell(fila, 7).Value = i.Chofer;
+            ws.Cell(fila, 8).Value = i.PlacaCabezal;
+            ws.Cell(fila, 9).Value = i.Chasis;
+            ws.Cell(fila, 10).Value = i.ViajeDua;
             fila++;
         }
 
@@ -261,7 +267,7 @@ public class BitacoraIngresosController : Controller
         return File(
             stream.ToArray(),
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            $"Bitacora_{fecha:yyyyMMdd}.xlsx"
+            $"Ingresos{fecha:yyyyMMdd}.xlsx"
         );
     }
 
@@ -274,7 +280,7 @@ public class BitacoraIngresosController : Controller
 
         var sb = new StringBuilder();
         sb.AppendLine(
-            "Contenedor,Marchamos,FechaHora,Transportista,Tamaño,Chofer,PlacaCabezal,Chasis,ViajeDUA"
+            "Contenedor,Marchamos,FechaHora,Transportista,Cliente,Tamaño,Chofer,PlacaCabezal,Chasis,ViajeDUA"
         );
 
         foreach (var i in ingresos)
@@ -284,6 +290,7 @@ public class BitacoraIngresosController : Controller
                 $"{i.Marchamos}," +
                 $"{i.FechaHoraIngreso:yyyy-MM-dd HH:mm}," +
                 $"{i.Transportista}," +
+                $"{i.Cliente}," +
                 $"{i.Tamaño}," +
                 $"{i.Chofer}," +
                 $"{i.PlacaCabezal}," +
@@ -295,7 +302,7 @@ public class BitacoraIngresosController : Controller
         return File(
             Encoding.UTF8.GetBytes(sb.ToString()),
             "text/csv",
-            $"Bitacora_{fecha:yyyyMMdd}.csv"
+            $"Ingresos{fecha:yyyyMMdd}.csv"
         );
     }
 
@@ -316,6 +323,34 @@ public class BitacoraIngresosController : Controller
             "application/pdf",
             $"Ingresos_{fechaSeleccionada:yyyy/MM/dd}.pdf"
         );
+
     }
+
+    [HttpGet]
+    public IActionResult ObtenerDatosPorContenedor(string contenedor)
+    {
+        if (string.IsNullOrWhiteSpace(contenedor))
+            return Json(null);
+
+        var ingreso = _context.DatosIngresosViajes
+            .FirstOrDefault(x => x.Contenedor == contenedor);
+
+        if (ingreso == null)
+            return Json(null);
+
+        // Buscar transportista autorizado por cédula jurídica
+        var transportistaAutorizado = _context.TransportistasAutorizados
+            .FirstOrDefault(t => t.CedulaJuridica == ingreso.Transportista);
+
+        var resultado = new
+        {
+            cliente = ingreso.Declarante,
+            transportista = transportistaAutorizado?.Codigo ?? ingreso.Transportista,
+            viaje = ingreso.Viaje
+        };
+
+        return Json(resultado);
+    }
+
 
 }

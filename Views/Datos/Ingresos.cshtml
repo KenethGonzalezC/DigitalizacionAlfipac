@@ -4,6 +4,13 @@
     ViewData["Title"] = "Datos de Ingresos por Viaje";
 }
 
+@if (TempData["Warning"] != null)
+{
+    <div class="alert alert-warning">
+        @TempData["Warning"]
+    </div>
+}
+
 <div class="container mt-4">
 
     <h2 class="mb-3">Datos Anticipados de Ingresos</h2>
@@ -348,3 +355,21 @@
         document.getElementById('deleteViaje').textContent = button.dataset.viaje;
     });
 </script>
+
+@if (TempData["Confirmacion"] != null)
+{
+    <div class="alert alert-warning">
+        @TempData["Confirmacion"]
+
+        <form asp-action="ImportarExcel" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="forzar" value="true" />
+            <button class="btn btn-danger mt-2">
+                Sí, reinsertar
+            </button>
+            <a asp-action="Ingresos" class="btn btn-secondary mt-2">
+                Cancelar
+            </a>
+        </form>
+    </div>
+}

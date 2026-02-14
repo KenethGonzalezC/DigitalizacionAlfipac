@@ -1,0 +1,208 @@
+﻿@model IEnumerable<BitacoraAlfipac.Models.Entidades.TransportistaAutorizado>
+
+@{
+    ViewData["Title"] = "Transportistas Autorizados";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-3">Transportistas Autorizados</h2>
+
+    <button class="btn btn-primary mb-3"
+            data-bs-toggle="modal"
+            data-bs-target="#crearModal">
+        Nuevo Transportista
+    </button>
+
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Nombre</th>
+                <th>Cédula Jurídica</th>
+                <th>Código</th>
+                <th style="width:150px;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Nombre</td>
+                    <td>@item.CedulaJuridica</td>
+                    <td>@item.Codigo</td>
+                    <td>
+
+                        <button class="btn btn-warning btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editarModal"
+                                data-id="@item.Id"
+                                data-nombre="@item.Nombre"
+                                data-cedula="@item.CedulaJuridica"
+                                data-codigo="@item.Codigo">
+                            Editar
+                        </button>
+
+                        <button class="btn btn-danger btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#eliminarModal"
+                                data-id="@item.Id">
+                            Eliminar
+                        </button>
+
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+</div>
+
+<!-- ========================= -->
+<!-- MODAL CREAR -->
+<!-- ========================= -->
+<div class="modal fade" id="crearModal">
+    <div class="modal-dialog">
+        <form asp-action="Create" method="post" class="modal-content">
+
+            @Html.AntiForgeryToken()
+
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Nuevo Transportista</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="mb-2">
+                    <label class="form-label">Nombre</label>
+                    <input name="Nombre" class="form-control" required />
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label">Cédula Jurídica</label>
+                    <input name="CedulaJuridica" class="form-control" />
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label">Código</label>
+                    <input name="Codigo" class="form-control" />
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary">Guardar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- ========================= -->
+<!-- MODAL EDITAR -->
+<!-- ========================= -->
+<div class="modal fade" id="editarModal">
+    <div class="modal-dialog">
+        <form asp-action="Edit" method="post" class="modal-content">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="Id" id="editId" />
+
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">Editar Transportista</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="mb-2">
+                    <label class="form-label">Nombre</label>
+                    <input name="Nombre" id="editNombre" class="form-control" required />
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label">Cédula Jurídica</label>
+                    <input name="CedulaJuridica" id="editCedula" class="form-control" />
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label">Código</label>
+                    <input name="Codigo" id="editCodigo" class="form-control" />
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-warning">Actualizar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- ========================= -->
+<!-- MODAL ELIMINAR -->
+<!-- ========================= -->
+<div class="modal fade" id="eliminarModal">
+    <div class="modal-dialog">
+        <form asp-action="Delete" method="post" class="modal-content">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="id" id="deleteId" />
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Eliminar Transportista</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                ¿Seguro que deseas eliminar este transportista?
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-danger">Eliminar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- ========================= -->
+<!-- SCRIPTS -->
+<!-- ========================= -->
+@section Scripts {
+
+    <script>
+
+        var editarModal = document.getElementById('editarModal');
+
+        editarModal.addEventListener('show.bs.modal', function (event) {
+
+            var button = event.relatedTarget;
+
+            document.getElementById('editId').value = button.getAttribute('data-id');
+            document.getElementById('editNombre').value = button.getAttribute('data-nombre');
+            document.getElementById('editCedula').value = button.getAttribute('data-cedula');
+            document.getElementById('editCodigo').value = button.getAttribute('data-codigo');
+        });
+
+
+        var eliminarModal = document.getElementById('eliminarModal');
+
+        eliminarModal.addEventListener('show.bs.modal', function (event) {
+
+            var button = event.relatedTarget;
+
+            document.getElementById('deleteId').value = button.getAttribute('data-id');
+        });
+
+    </script>
+
+}

@@ -29,5 +29,9 @@ namespace BitacoraAlfipac.Data
 
         public DbSet<DatosIngresoViaje> DatosIngresosViajes { get; set; }
 
+        public DbSet<PabMercanciaSusceptible> PabMercanciasSusceptibles { get; set; }
+        public DbSet<TransportistaAutorizado> TransportistasAutorizados { get; set; }
+
+
     }
 }

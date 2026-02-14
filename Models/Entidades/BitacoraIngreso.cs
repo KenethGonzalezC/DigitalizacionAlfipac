@@ -7,6 +7,7 @@ public class BitacoraIngreso
     public string Marchamos { get; set; } = null!;
     public DateTime FechaHoraIngreso { get; set; }
     public string Transportista { get; set; } = null!;
+    public string Cliente { get; set; } = null!;   
     public string Tamaño { get; set; } = null!;
     public string Chofer { get; set; } = null!;
     public string PlacaCabezal { get; set; } = null!;

@@ -20,6 +20,7 @@ public class BitacoraIngresosViewModel
     public DateTime FechaHoraIngreso { get; set; }
 
     public string? Transportista { get; set; }
+    public string? Cliente { get; set; }
 
     // Texto libre (20, 40, furgón, lowboy, etc.)
     public string? Tamano { get; set; }

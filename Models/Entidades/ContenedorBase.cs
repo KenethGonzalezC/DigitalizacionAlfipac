@@ -9,7 +9,7 @@ public abstract class ContenedorBase
     public string Tamano { get; set; } = null!;
     public string Chasis { get; set; } = null!;
     public string Transportista { get; set; } = null!;
-
+    public string? Cliente { get; set; } = null;
     public string EstadoCarga { get; set; } = null!; // Vacio / Cargado
     public string Ubicacion { get; set; } = null!;
 }

@@ -43,6 +43,11 @@
             </div>
 
             <div class="col-md-4">
+                <label class="form-label">Cliente</label>
+                <input asp-for="Cliente" class="form-control" />
+            </div>
+
+            <div class="col-md-4">
                 <label class="form-label">Tamaño</label>
                 <input asp-for="Tamano" class="form-control" />
             </div>
@@ -123,6 +128,7 @@
                     <th>Contenedor</th>
                     <th>Marchamos</th>
                     <th>Transportista</th>
+                    <th>Cliente</th>
                     <th>Tamaño</th>
                     <th>Chasis</th>
                     <th>Viaje / DUA</th>
@@ -133,7 +139,7 @@
                 @if (!Model.Ingresos.Any())
                 {
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">
+                        <td colspan="9" class="text-center text-muted py-4">
                             No existen ingresos para esta fecha
                         </td>
                     </tr>
@@ -147,6 +153,7 @@
                             <td>@item.Contenedor</td>
                             <td>@item.Marchamos</td>
                             <td>@item.Transportista</td>
+                            <td>@item.Cliente</td>
                             <td>@item.Tamaño</td>
                             <td>@item.Chasis</td>
                             <td>@item.ViajeDua</td>
@@ -167,6 +174,7 @@
                                         data-marchamos="@item.Marchamos"
                                         data-fecha="@item.FechaHoraIngreso.ToString("yyyy-MM-dd HH:mm")"
                                         data-transportista="@item.Transportista"
+                                        data-cliente="" @item.Cliente"
                                         data-tamano="@item.Tamaño"
                                         data-chasis="@item.Chasis"
                                         data-viaje="@item.ViajeDua">
@@ -224,6 +232,11 @@
                         </div>
 
                         <div class="col-md-4">
+                            <label class="form-label">Cliente</label>
+                            <input class="form-control" id="deleteCliente" readonly />
+                        </div>
+
+                        <div class="col-md-4">
                             <label class="form-label">Tamaño</label>
                             <input class="form-control" id="deleteTamano" readonly />
                         </div>
@@ -266,6 +279,7 @@
         document.getElementById('deleteMarchamos').value = button.dataset.marchamos;
         document.getElementById('deleteFecha').value = button.dataset.fecha;
         document.getElementById('deleteTransportista').value = button.dataset.transportista;
+        document.getElementById('deleteCliente').value = button.dataset.cliente;
         document.getElementById('deleteTamano').value = button.dataset.tamano;
         document.getElementById('deleteChasis').value = button.dataset.chasis;
         document.getElementById('deleteViaje').value = button.dataset.viaje;
@@ -306,6 +320,11 @@
                         <div class="col-md-4">
                             <label>Transportista</label>
                             <input name="Transportista" id="editTransportista" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Cliente</label>
+                            <input name="Cliente" id="editCliente" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
@@ -350,6 +369,7 @@
         document.getElementById("editMarchamos").value = item.Marchamos;
         document.getElementById("editFechaHora").value = item.FechaHoraIngreso.substring(0, 16);
         document.getElementById("editTransportista").value = item.Transportista;
+        document.getElementById("editCliente").value = item.Cliente;
         document.getElementById("editTamano").value = item.Tamaño;
         document.getElementById("editChasis").value = item.Chasis;
         document.getElementById("editViaje").value = item.ViajeDua;
@@ -357,7 +377,8 @@
 </script>
 
 <script>
-    document.getElementById("btnBuscarActa").addEventListener("click", () => {
+    document.getElementById("btnBuscarActa").addEventListener("click", async () => {
+
         const contenedor = document.getElementById("inputContenedor").value.trim();
         const resultado = document.getElementById("resultadoBusqueda");
 
@@ -366,19 +387,36 @@
             return;
         }
 
-        fetch(`/ActasPermanencias/BuscarContenedorEnPendientes?contenedor=${contenedor}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.encontrado) {
-                    resultado.textContent = `Contenedor con ${data.tipo} #${data.numero}`;
-                } else {
-                    resultado.textContent = "No se encontró contenedor en Actas/PAB";
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                resultado.textContent = "Error al buscar contenedor";
-            });
+        try {
+
+            // Ejecutar ambas consultas en paralelo (más eficiente)
+            const [actaRes, ingresoRes] = await Promise.all([
+                fetch(`/ActasPermanencias/BuscarContenedorEnPendientes?contenedor=${contenedor}`),
+                fetch(`/BitacoraIngresos/ObtenerDatosPorContenedor?contenedor=${contenedor}`)
+            ]);
+
+            const actaData = await actaRes.json();
+            const ingresoData = await ingresoRes.json();
+
+            // Resultado búsqueda Actas/PAB
+            if (actaData.encontrado) {
+                resultado.textContent = `Contenedor con ${actaData.tipo} #${actaData.numero}`;
+            } else {
+                resultado.textContent = "No se encontró contenedor en Actas/PAB";
+            }
+
+            // Autocompletar datos ingreso
+            if (ingresoData) {
+                document.getElementById("Cliente").value = ingresoData.cliente ?? "";
+                document.getElementById("Transportista").value = ingresoData.transportista ?? "";
+                document.getElementById("ViajeDua").value = ingresoData.viaje ?? "";
+            }
+
+        } catch (error) {
+            console.error(error);
+            resultado.textContent = "Error al buscar información";
+        }
+
     });
 </script>
 

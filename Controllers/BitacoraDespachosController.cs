@@ -82,6 +82,7 @@ namespace BitacoraAlfipac.Controllers
                     Estado = inventario.EstadoCarga ?? "",
                     Tamaño = inventario.Tamano ?? "",
                     Transportista = inventario.Transportista ?? "",
+                    Cliente = inventario.Cliente ?? "",
                     Chasis = inventario.Chasis ?? "",
                     FechaRespaldo = DateTime.Now
                 };
@@ -210,6 +211,7 @@ namespace BitacoraAlfipac.Controllers
                 marchamos = c.Marchamos ?? "",
                 chasis = c.Chasis ?? "",
                 transportista = c.Transportista ?? "",
+                cliente = c.Cliente ?? "",
                 estado = c.EstadoCarga ?? "",
                 patio
             });
@@ -367,6 +369,7 @@ namespace BitacoraAlfipac.Controllers
                                 EstadoCarga = backup.Estado,
                                 Tamano = backup.Tamaño,
                                 Transportista = backup.Transportista,
+                                Cliente = backup.Cliente,
                                 Chasis = backup.Chasis
                             });
                             break;
@@ -379,6 +382,7 @@ namespace BitacoraAlfipac.Controllers
                                 EstadoCarga = backup.Estado,
                                 Tamano = backup.Tamaño,
                                 Transportista = backup.Transportista,
+                                Cliente = backup.Cliente,
                                 Chasis = backup.Chasis
                             });
                             break;
@@ -391,6 +395,7 @@ namespace BitacoraAlfipac.Controllers
                                 EstadoCarga = backup.Estado,
                                 Tamano = backup.Tamaño,
                                 Transportista = backup.Transportista,
+                                Cliente = backup.Cliente,
                                 Chasis = backup.Chasis
                             });
                             break;
@@ -403,6 +408,7 @@ namespace BitacoraAlfipac.Controllers
                                 EstadoCarga = backup.Estado,
                                 Tamano = backup.Tamaño,
                                 Transportista = backup.Transportista,
+                                Cliente = backup.Cliente,
                                 Chasis = backup.Chasis
                             });
                             break;
@@ -415,6 +421,7 @@ namespace BitacoraAlfipac.Controllers
                                 EstadoCarga = backup.Estado,
                                 Tamano = backup.Tamaño,
                                 Transportista = backup.Transportista,
+                                Cliente = backup.Cliente,
                                 Chasis = backup.Chasis
                             });
                             break;
@@ -441,14 +448,44 @@ namespace BitacoraAlfipac.Controllers
             return RedirectToAction("Index");
         }
 
-        public async Task<IActionResult> Backups()
+        private const int PageSize = 50;
+
+        public async Task<IActionResult> Backups(DateTime? fecha, int page = 1)
         {
-            var backups = await _context.ContenedoresBackupDespacho
-                .OrderByDescending(x => x.FechaRespaldo)
+            if (page < 1) page = 1;
+
+            var query = _context.ContenedoresBackupDespacho.AsQueryable();
+
+            // 🔍 Filtrar por fecha
+            if (fecha.HasValue)
+            {
+                // Filtrar por día completo
+                var inicio = fecha.Value.Date;
+                var fin = inicio.AddDays(1).AddTicks(-1);
+                query = query.Where(x => x.FechaRespaldo >= inicio && x.FechaRespaldo <= fin);
+            }
+
+            query = query.OrderByDescending(x => x.FechaRespaldo);
+
+            int totalRegistros = await query.CountAsync();
+            int totalPaginas = (int)Math.Ceiling(totalRegistros / (double)PageSize);
+
+            if (page > totalPaginas && totalPaginas > 0)
+                page = totalPaginas;
+
+            var backups = await query
+                .Skip((page - 1) * PageSize)
+                .Take(PageSize)
                 .ToListAsync();
+
+            ViewBag.FechaSeleccionada = fecha?.ToString("yyyy-MM-dd");
+            ViewBag.PaginaActual = page;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.TotalRegistros = totalRegistros;
 
             return View(backups);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

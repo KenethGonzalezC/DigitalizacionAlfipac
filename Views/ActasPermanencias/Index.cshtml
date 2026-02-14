@@ -18,6 +18,17 @@
 
     <h2 class="mb-3">Actas y Permanencias a Bordo</h2>
 
+    <div>
+        <div class="mb-3">
+            <a asp-controller="PabMercanciaSuceptible"
+               asp-action="Index"
+               class="btn btn-secondary">
+                Informacion de Codigos
+            </a>
+        </div>
+
+    </div>
+
     @if (TempData["Error"] != null)
     {
         <div class="alert alert-danger">@TempData["Error"]</div>
@@ -28,30 +39,37 @@
         @Html.AntiForgeryToken()
 
         <div class="col-md-2">
-            <select name="Tipo" class="form-select" required>
+            <select name="Tipo" id="tipoSelect" class="form-select" required>
                 <option value="ACTA">ACTA</option>
                 <option value="PAB">PAB</option>
             </select>
         </div>
 
         <div class="col-md-2">
-            <input name="Contenedor" class="form-control" placeholder="Contenedor" required />
+            <div class="input-group">
+                <input name="Contenedor" id="contenedorInput"
+                       class="form-control" placeholder="Contenedor" required />
+
+                <button type="button" class="btn btn-outline-secondary" id="btnBuscarContenedor">
+                    🔍
+                </button>
+            </div>
         </div>
 
         <div class="col-md-2">
-            <input name="Numero" class="form-control" placeholder="Número" required />
+            <input name="Numero" id="numeroInput" class="form-control" placeholder="Número" required />
         </div>
 
         <div class="col-md-2">
-            <input name="Viaje" class="form-control" placeholder="Viaje" />
+            <input name="Viaje" id="viajeInput" class="form-control" placeholder="Viaje" />
         </div>
 
         <div class="col-md-2">
-            <input name="Cliente" class="form-control" placeholder="Cliente" />
+            <input name="Cliente" id="clienteInput" class="form-control" placeholder="Cliente" />
         </div>
 
         <div class="col-md-12">
-            <textarea name="Detalle" class="form-control" placeholder="Detalle"></textarea>
+            <textarea name="Detalle" id="detalleTextarea" class="form-control" placeholder="Detalle"></textarea>
         </div>
 
         <div class="col-md-2">
@@ -260,3 +278,54 @@
     }
 </script>
 
+<script>
+    document.getElementById("numeroInput").addEventListener("blur", function () {
+
+        let tipo = document.getElementById("tipoSelect").value;
+        let numero = this.value;
+
+        if (tipo !== "PAB" || numero === "")
+            return;
+
+        fetch(`/ActasPermanencias/ObtenerDescripcionPab?codigo=${numero}`)
+            .then(response => response.json())
+            .then(data => {
+
+                if (data.success) {
+                    document.getElementById("detalleTextarea").value = data.descripcion;
+                } else {
+                    alert("⚠️ No se encontró un PAB con ese código.");
+                }
+
+            })
+            .catch(error => console.error(error));
+    });
+</script>
+
+<script>
+    document.getElementById("btnBuscarContenedor").addEventListener("click", function () {
+
+        let contenedor = document.getElementById("contenedorInput").value;
+
+        if (contenedor === "")
+            return;
+
+        fetch(`/ActasPermanencias/ObtenerDatosContenedor?contenedor=${contenedor}`)
+            .then(response => response.json())
+            .then(data => {
+
+                if (data.success) {
+
+                    document.getElementById("viajeInput").value = data.viaje;
+                    document.getElementById("clienteInput").value = data.cliente;
+
+                } else {
+
+                    alert("⚠️ No se encontró información para ese contenedor.");
+
+                }
+
+            })
+            .catch(error => console.error(error));
+    });
+</script>

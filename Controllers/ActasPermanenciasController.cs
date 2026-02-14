@@ -64,6 +64,23 @@ namespace BitacoraAlfipac.Controllers
         }
 
         // =========================
+        // 🔍 OBTENER DESCRIPCIÓN PAB POR CÓDIGO
+        // =========================
+        [HttpGet]
+        public async Task<IActionResult> ObtenerDescripcionPab(int codigo)
+        {
+            var pab = await _context.PabMercanciasSusceptibles
+                .Where(x => x.Codigo == codigo)
+                .Select(x => new { x.Descripcion })
+                .FirstOrDefaultAsync();
+
+            if (pab == null)
+                return Json(new { success = false });
+
+            return Json(new { success = true, descripcion = pab.Descripcion });
+        }
+
+        // =========================
         // 🔍 BUSCAR CONTENEDOR
         // =========================
         public async Task<IActionResult> BuscarContenedor(string contenedor)
@@ -175,17 +192,21 @@ namespace BitacoraAlfipac.Controllers
                     page.Size(PageSizes.A4.Landscape());
                     page.Margin(20);
 
-                    // HEADER
+                    // ===== HEADER =====
                     page.Header().Column(col =>
                     {
-                        col.Item().Text("ALFIPAC – ACTAS Y PAB PENDIENTES").Bold().FontSize(18);
+                        col.Item().Text("ALFIPAC – ACTAS Y PAB PENDIENTES")
+                            .Bold().FontSize(18);
+
                         col.Item().LineHorizontal(1);
+
                         col.Item().Text($"Impreso por: {nombre}");
                         col.Item().Text($"Fecha de impresión: {DateTime.Now:dd/MM/yyyy HH:mm}");
+
                         col.Item().LineHorizontal(1);
                     });
 
-                    // TABLA
+                    // ===== TABLA =====
                     page.Content().Table(table =>
                     {
                         table.ColumnsDefinition(columns =>
@@ -196,11 +217,11 @@ namespace BitacoraAlfipac.Controllers
                             columns.RelativeColumn(2); // Viaje
                             columns.RelativeColumn(2); // Cliente
                             columns.RelativeColumn(3); // Detalle
-                            //columns.RelativeColumn(1); // Estado
                         });
 
+                        // Encabezados
                         void HeaderCell(string text) =>
-                            table.Cell().Element(CellStyle).Text(text).Bold().FontSize(12);
+                            table.Cell().Element(HeaderStyle).Text(text).Bold().FontSize(12);
 
                         HeaderCell("Tipo");
                         HeaderCell("Contenedor");
@@ -208,21 +229,33 @@ namespace BitacoraAlfipac.Controllers
                         HeaderCell("Viaje");
                         HeaderCell("Cliente");
                         HeaderCell("Detalle");
-                        //HeaderCell("Estado");
 
+                        // Filas
                         foreach (var r in registros)
                         {
-                            table.Cell().Element(CellStyle).Text(r.Tipo);
-                            table.Cell().Element(CellStyle).Text(r.Contenedor);
-                            table.Cell().Element(CellStyle).Text(r.Numero);
-                            table.Cell().Element(CellStyle).Text(r.Viaje);
-                            table.Cell().Element(CellStyle).Text(r.Cliente);
-                            table.Cell().Element(CellStyle).Text(r.Detalle);
-                            //table.Cell().Element(CellStyle).Text("Pendiente");
+                            table.Cell().Element(CellStyle).Text(r.Tipo ?? "");
+                            table.Cell().Element(CellStyle).Text(r.Contenedor ?? "");
+                            table.Cell().Element(CellStyle).Text(r.Numero ?? "");
+                            table.Cell().Element(CellStyle).Text(r.Viaje ?? "");
+                            table.Cell().Element(CellStyle).Text(r.Cliente ?? "");
+                            table.Cell().Element(CellStyle).Text(r.Detalle ?? "");
                         }
 
-                        static IContainer CellStyle(IContainer container)
-                            => container.Border(1).Padding(3);
+                        // ===== ESTILOS =====
+                        static IContainer HeaderStyle(IContainer c) =>
+                            c.Background(Colors.Grey.Lighten3)
+                             .BorderBottom(1)
+                             .BorderColor(Colors.Grey.Medium)
+                             .Padding(5)
+                             .AlignCenter()
+                             .AlignMiddle();
+
+                        static IContainer CellStyle(IContainer c) =>
+                            c.BorderBottom(1)
+                             .BorderColor(Colors.Grey.Lighten2)
+                             .Padding(4)
+                             .AlignLeft()
+                             .AlignMiddle();
                     });
                 });
             }).GeneratePdf();
@@ -248,33 +281,38 @@ namespace BitacoraAlfipac.Controllers
                     page.Size(PageSizes.A4.Landscape());
                     page.Margin(20);
 
-                    // HEADER
+                    // ===== HEADER =====
                     page.Header().Column(col =>
                     {
-                        col.Item().Text("ALFIPAC – HISTORIAL DE ACTAS Y PAB").Bold().FontSize(18);
+                        col.Item().Text("ALFIPAC – HISTORIAL DE ACTAS Y PAB")
+                            .Bold().FontSize(18);
+
                         col.Item().LineHorizontal(1);
+
                         col.Item().Text($"Impreso por: {nombre}");
                         col.Item().Text($"Fecha de impresión: {DateTime.Now:dd/MM/yyyy HH:mm}");
+
                         col.Item().LineHorizontal(1);
                     });
 
-                    // TABLA
+                    // ===== TABLA =====
                     page.Content().Table(table =>
                     {
                         table.ColumnsDefinition(columns =>
                         {
-                            columns.ConstantColumn(40);   // Tipo (3-4 letras, no necesita mucho espacio)
-                            columns.ConstantColumn(100);  // Contenedor (4 letras + 7 números)
-                            columns.ConstantColumn(60);   // Número (puede ser 1-2 dígitos, poco ancho)
-                            columns.ConstantColumn(80);   // Viaje (hasta 9 números)
-                            columns.RelativeColumn(2);    // Cliente (texto libre, espacio flexible)
-                            columns.RelativeColumn(3);    // Detalle (texto libre, más espacio que cliente)
-                            columns.ConstantColumn(120);  // Fecha Ingreso (dd/MM/yyyy HH:mm)
-                            columns.ConstantColumn(80);   // Resultado (CORRECTO/INCORRECTO, no muy ancho)
+                            columns.ConstantColumn(50);   // Tipo
+                            columns.ConstantColumn(100);  // Contenedor
+                            columns.ConstantColumn(60);   // Número
+                            columns.ConstantColumn(80);   // Viaje
+                            columns.RelativeColumn(2);    // Cliente
+                            columns.RelativeColumn(3);    // Detalle
+                            columns.ConstantColumn(120);  // Fecha Ingreso
+                            columns.ConstantColumn(80);   // Resultado
                         });
 
+                        // Encabezados
                         void HeaderCell(string text) =>
-                            table.Cell().Element(CellStyle).Text(text).Bold().FontSize(12);
+                            table.Cell().Element(HeaderStyle).Text(text).Bold().FontSize(12);
 
                         HeaderCell("Tipo");
                         HeaderCell("Contenedor");
@@ -285,21 +323,36 @@ namespace BitacoraAlfipac.Controllers
                         HeaderCell("Fecha Ingreso");
                         HeaderCell("Resultado");
 
+                        // Filas
                         foreach (var r in registros)
                         {
-                            table.Cell().Element(CellStyle).Text(r.Tipo);
-                            table.Cell().Element(CellStyle).Text(r.Contenedor);
-                            table.Cell().Element(CellStyle).Text(r.Numero);
-                            table.Cell().Element(CellStyle).Text(r.Viaje);
-                            table.Cell().Element(CellStyle).Text(r.Cliente);
-                            table.Cell().Element(CellStyle).Text(r.Detalle);
-                            table.Cell().Element(CellStyle).Text(r.FechaHoraIngresoContenedor?.ToString("dd/MM/yyyy HH:mm") ?? "");
+                            table.Cell().Element(CellStyle).Text(r.Tipo ?? "");
+                            table.Cell().Element(CellStyle).Text(r.Contenedor ?? "");
+                            table.Cell().Element(CellStyle).Text(r.Numero ?? "");
+                            table.Cell().Element(CellStyle).Text(r.Viaje ?? "");
+                            table.Cell().Element(CellStyle).Text(r.Cliente ?? "");
+                            table.Cell().Element(CellStyle).Text(r.Detalle ?? "");
                             table.Cell().Element(CellStyle)
-                                .Text(r.AplicadoCorrectamente ? "Correcta" : "Incorrecta");
+                                 .Text(r.FechaHoraIngresoContenedor?.ToString("dd/MM/yyyy HH:mm") ?? "");
+                            table.Cell().Element(CellStyle)
+                                 .Text(r.AplicadoCorrectamente ? "Correcta" : "Incorrecta");
                         }
 
-                        static IContainer CellStyle(IContainer container)
-                            => container.Border(1).Padding(3);
+                        // ===== ESTILOS =====
+                        static IContainer HeaderStyle(IContainer c) =>
+                            c.Background(Colors.Grey.Lighten3)
+                             .BorderBottom(1)
+                             .BorderColor(Colors.Grey.Medium)
+                             .Padding(5)
+                             .AlignCenter()
+                             .AlignMiddle();
+
+                        static IContainer CellStyle(IContainer c) =>
+                            c.BorderBottom(1)
+                             .BorderColor(Colors.Grey.Lighten2)
+                             .Padding(4)
+                             .AlignLeft()
+                             .AlignMiddle();
                     });
                 });
             }).GeneratePdf();
@@ -350,6 +403,55 @@ namespace BitacoraAlfipac.Controllers
                 tipo = registro.Tipo,
                 numero = registro.Numero
             });
+        }
+
+        // =========================
+        // 🔍 OBTENER DATOS POR CONTENEDOR
+        // =========================
+        [HttpGet]
+        public async Task<IActionResult> ObtenerDatosContenedor(string contenedor)
+        {
+            if (string.IsNullOrEmpty(contenedor))
+                return Json(new { success = false });
+
+            var datos = await _context.DatosIngresosViajes
+                .Where(x => x.Contenedor == contenedor)
+                .Select(x => new
+                {
+                    viaje = x.Viaje,
+                    cliente = x.Declarante
+                })
+                .FirstOrDefaultAsync();
+
+            if (datos == null)
+                return Json(new { success = false });
+
+            return Json(new
+            {
+                success = true,
+                viaje = datos.viaje,
+                cliente = datos.cliente
+            });
+        }
+
+        public async Task<IActionResult> HistorialFiltro(DateTime? fechaFiltro = null)
+        {
+            var query = _context.ActasPermanencias
+                                .Where(x => x.FechaHoraIngresoContenedor != null)
+                                .AsQueryable();
+
+            if (fechaFiltro.HasValue)
+            {
+                var fecha = fechaFiltro.Value.Date;
+                query = query.Where(x => x.FechaHoraIngresoContenedor.Value.Date == fecha);
+            }
+
+            var registros = await query.OrderBy(x => x.Contenedor).ToListAsync();
+
+            ViewBag.FechaFiltro = fechaFiltro?.ToString("yyyy-MM-dd");
+
+            // Forzar que use la vista Historial.cshtml
+            return View("Historial", registros);
         }
 
     }

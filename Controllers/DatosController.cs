@@ -148,7 +148,6 @@ public class DatosController : Controller
         return RedirectToAction(nameof(Ingresos));
     }
 
-    //Importar desde excel
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult ImportarExcel(IFormFile archivoExcel)
@@ -175,32 +174,29 @@ public class DatosController : Controller
 
             var ultimaFila = hoja.LastRowUsed().RowNumber();
 
-            // 🔥 Obtener combinaciones existentes (Viaje + Contenedor)
-            var existentes = _context.DatosIngresosViajes
-                .Select(x => new { x.Viaje, x.Contenedor })
-                .ToList()
-                .Select(x => $"{x.Viaje.Trim()}|{x.Contenedor.Trim()}")
+            var contenedoresExistentes = _context.DatosIngresosViajes
+                .Select(x => x.Contenedor.Trim())
                 .ToHashSet();
 
             var nuevosRegistros = new List<DatosIngresoViaje>();
+            var duplicados = new List<string>();
 
             for (int fila = 2; fila <= ultimaFila; fila++)
             {
                 var row = hoja.Row(fila);
 
                 var viaje = row.Cell(1).GetValue<string>()?.Trim();
-                var contenedor = row.Cell(2).GetValue<string>()?.Trim() ?? "";
+                var contenedor = row.Cell(2).GetValue<string>()?.Trim();
 
-                if (string.IsNullOrWhiteSpace(viaje))
+                if (string.IsNullOrWhiteSpace(viaje) || string.IsNullOrWhiteSpace(contenedor))
                     continue;
 
-                var clave = $"{viaje}|{contenedor}";
-
-                // ❌ Si ya existe esa combinación exacta, lo saltamos
-                if (existentes.Contains(clave))
+                if (contenedoresExistentes.Contains(contenedor))
+                {
+                    duplicados.Add(contenedor);
                     continue;
+                }
 
-                // 📅 Fecha
                 DateTime fechaCreacion;
                 var celdaFecha = row.Cell(4);
 
@@ -222,7 +218,7 @@ public class DatosController : Controller
                 };
 
                 nuevosRegistros.Add(registro);
-                existentes.Add(clave); // 🔥 Lo agregamos al hash para evitar duplicados dentro del mismo Excel
+                contenedoresExistentes.Add(contenedor);
             }
 
             if (nuevosRegistros.Any())
@@ -231,7 +227,19 @@ public class DatosController : Controller
                 _context.SaveChanges();
             }
 
-            TempData["Success"] = $"Registros importados correctamente: {nuevosRegistros.Count}";
+            // 🔔 Mensajes
+            if (duplicados.Any())
+            {
+                TempData["Warning"] =
+                    $"Se importaron {nuevosRegistros.Count} registros. " +
+                    $"No se insertaron {duplicados.Count} contenedores duplicados: " +
+                    $"{string.Join(", ", duplicados.Distinct())}";
+            }
+            else
+            {
+                TempData["Success"] =
+                    $"Registros importados correctamente: {nuevosRegistros.Count}";
+            }
         }
         catch (Exception ex)
         {

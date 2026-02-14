@@ -60,8 +60,9 @@ public class BitacoraIngresosPdf : IDocument
             {
                 columns.ConstantColumn(45);   // Hora
                 columns.ConstantColumn(80);   // Contenedor
-                columns.RelativeColumn(2);    // Marchamos
-                columns.RelativeColumn(0.7f);    // Transportista
+                columns.RelativeColumn(1.0f);    // Marchamos     ← quieres achicar esta
+                columns.RelativeColumn(0.7f); // Transportista
+                columns.RelativeColumn(1.2f); // Cliente       ← quieres agrandar esta un poco
                 columns.ConstantColumn(45);   // Tamaño
                 columns.RelativeColumn();     // Chofer
                 columns.ConstantColumn(80);   // Placa
@@ -76,6 +77,7 @@ public class BitacoraIngresosPdf : IDocument
                 HeaderCell(header, "Contenedor");
                 HeaderCell(header, "Marchamos");
                 HeaderCell(header, "Transportista");
+                HeaderCell(header, "Cliente");
                 HeaderCell(header, "Tamaño");
                 HeaderCell(header, "Chofer");
                 HeaderCell(header, "Placa");
@@ -90,6 +92,7 @@ public class BitacoraIngresosPdf : IDocument
                 BodyCell(table, i.Contenedor);
                 BodyCell(table, i.Marchamos);
                 BodyCell(table, i.Transportista);
+                BodyCell(table, i.Cliente);
                 BodyCell(table, i.Tamaño);
                 BodyCell(table, i.Chofer);
                 BodyCell(table, i.PlacaCabezal);

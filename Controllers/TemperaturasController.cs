@@ -116,12 +116,47 @@ public class TemperaturasController : Controller
     decimal temperatura,
     string? observacion)
     {
+        var contenedor = await _context.ContenedoresRefrigerados
+            .FindAsync(contenedorId);
+
+        if (contenedor == null)
+            return NotFound();
+
+        double setPoint = (double)contenedor.SetPoint;
+        double temp = (double)temperatura;
+
+        double diferencia = Math.Abs(temp - setPoint);
+
+        string estado;
+        string mensaje;
+
+        if (diferencia <= 4)
+        {
+            estado = "Normal";
+            mensaje = "Temperatura dentro de tolerancia.";
+        }
+        else if (diferencia <= 10)
+        {
+            estado = "Anormal";
+            mensaje = "ANORMAL: Temperatura fuera de rango permitido.";
+        }
+        else
+        {
+            estado = "Emergencia";
+            mensaje = "EMERGENCIA: Temperatura crítica.";
+        }
+
         var registro = new RegistroTemperatura
         {
             ContenedorRefrigeradoId = contenedorId,
             FechaHora = fechaHora,
             Temperatura = temperatura,
-            Observacion = observacion
+
+            // Si el usuario no escribe observación → se autogenera
+            Observacion = string.IsNullOrWhiteSpace(observacion)
+                ? $"{mensaje} (SetPoint: {setPoint}°C | Dif: {diferencia:F1}°C)"
+                : observacion,
+
         };
 
         _context.RegistrosTemperatura.Add(registro);
@@ -129,6 +164,7 @@ public class TemperaturasController : Controller
 
         return RedirectToAction(nameof(Detalle), new { id = contenedorId });
     }
+
 
     public async Task<IActionResult> ExportarExcel(int id)
     {

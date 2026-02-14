@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace BitacoraAlfipac.Models.Entidades
 {
+    [Index(nameof(Contenedor), IsUnique = true)]
     public class DatosIngresoViaje
     {
         public int Id { get; set; }

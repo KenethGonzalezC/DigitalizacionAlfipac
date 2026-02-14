@@ -9,6 +9,17 @@
 
     <h2 class="mb-3">Historial de Contenedores Ingresados</h2>
 
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <form method="get" asp-action="HistorialFiltro">
+                <label>Filtrar por fecha de ingreso</label>
+                <input type="date" name="fechaFiltro" class="form-control" value="@ViewBag.FechaFiltro" />
+                <button type="submit" class="btn btn-primary mt-2 w-100">Filtrar</button>
+            </form>
+        </div>
+    </div>
+
+
     <!-- BUSCAR + VOLVER -->
     <div class="row mb-4">
         <div class="col-md-4">

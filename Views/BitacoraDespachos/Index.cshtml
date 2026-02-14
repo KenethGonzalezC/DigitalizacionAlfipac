@@ -207,10 +207,15 @@
                         const marchamosInput = document.getElementById("marchamosInput");
                         const transportistaInput = document.querySelector("[name='Transportista']");
                         const chasisInput = document.querySelector("[name='Chasis']");
+                        const informacionInput = document.querySelector("[name='Informacion']"); // 🔥 NUEVO
 
                         if (marchamosInput) marchamosInput.value = data.marchamos || "";
                         if (transportistaInput) transportistaInput.value = data.transportista || "";
                         if (chasisInput) chasisInput.value = data.chasis || "";
+
+                        // 🔥 AUTOCOMPLETAR CLIENTE EN INFORMACIÓN
+                        if (informacionInput && !informacionInput.value)
+                            informacionInput.value = data.cliente || "";
                     })
                     .catch(() => {
                         document.getElementById("infoPatio").innerText =
@@ -230,4 +235,3 @@
                 });
         });
     </script>
-

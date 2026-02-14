@@ -53,7 +53,8 @@ namespace BitacoraAlfipac.Controllers
             string marchamos,
             string estadoCarga,
             string chasis,
-            string transportista)
+            string transportista,
+            string cliente)
         {
             var contenedor = _context.Patio2.FirstOrDefault(c => c.Id == id);
 
@@ -64,6 +65,7 @@ namespace BitacoraAlfipac.Controllers
             contenedor.EstadoCarga = estadoCarga;
             contenedor.Chasis = chasis;
             contenedor.Transportista = transportista;
+            contenedor.Cliente = cliente;
 
             _context.SaveChanges();
 
@@ -88,6 +90,7 @@ namespace BitacoraAlfipac.Controllers
                 Tamano = contenedor.Tamano,
                 Chasis = contenedor.Chasis,
                 Transportista = contenedor.Transportista,
+                Cliente = contenedor.Cliente,
                 EstadoCarga = contenedor.EstadoCarga
             };
 
@@ -117,6 +120,7 @@ namespace BitacoraAlfipac.Controllers
                         Tamano = c.Tamano,
                         Chasis = c.Chasis,
                         Transportista = c.Transportista,
+                        Cliente = c.Cliente,
                         EstadoCarga = c.EstadoCarga
                     });
             }
@@ -149,6 +153,7 @@ namespace BitacoraAlfipac.Controllers
                         Tamano = contenedor.Tamano,
                         Chasis = contenedor.Chasis,
                         Transportista = contenedor.Transportista,
+                        Cliente = contenedor.Cliente,
                         EstadoCarga = contenedor.EstadoCarga
                     });
                     break;
@@ -161,6 +166,7 @@ namespace BitacoraAlfipac.Controllers
                         Tamano = contenedor.Tamano,
                         Chasis = contenedor.Chasis,
                         Transportista = contenedor.Transportista,
+                        Cliente = contenedor.Cliente,
                         EstadoCarga = contenedor.EstadoCarga
                     });
                     break;
@@ -173,6 +179,7 @@ namespace BitacoraAlfipac.Controllers
                         Tamano = contenedor.Tamano,
                         Chasis = contenedor.Chasis,
                         Transportista = contenedor.Transportista,
+                        Cliente = contenedor.Cliente,
                         EstadoCarga = contenedor.EstadoCarga
                     });
                     break;
@@ -185,6 +192,7 @@ namespace BitacoraAlfipac.Controllers
                         Tamano = contenedor.Tamano,
                         Chasis = contenedor.Chasis,
                         Transportista = contenedor.Transportista,
+                        Cliente = contenedor.Cliente,
                         EstadoCarga = contenedor.EstadoCarga
                     });
                     break;
@@ -197,7 +205,7 @@ namespace BitacoraAlfipac.Controllers
         }
 
         // ===============================
-        // EXPORTAR DESDE PDF
+        // EXPORTAR PDF PATIO 2
         // ===============================
         [HttpPost]
         public IActionResult ExportarPDF(string nombre, DateTime fecha, string turno)
@@ -214,14 +222,16 @@ namespace BitacoraAlfipac.Controllers
             {
                 container.Page(page =>
                 {
-                    page.Size(PageSizes.A4);
+                    page.Size(PageSizes.A4.Landscape()); // ✅ Horizontal
                     page.Margin(20);
 
-                    // 🧾 HEADER
                     page.Header().Column(col =>
                     {
-                        col.Item().Text("ALFIPAC – INVENTARIO DE CONTENEDORES").Bold().FontSize(18);
-                        col.Item().Text("Patio 2").FontSize(14);
+                        col.Item().Text("ALFIPAC – INVENTARIO DE CONTENEDORES")
+                            .Bold().FontSize(18);
+
+                        col.Item().Text("Patio 2")
+                            .FontSize(14);
 
                         col.Item().LineHorizontal(1);
 
@@ -232,21 +242,22 @@ namespace BitacoraAlfipac.Controllers
 
                         col.Item().LineHorizontal(1);
 
+                        // RESUMEN
                         col.Item().Row(row =>
                         {
-                            row.RelativeItem().Border(1).Padding(5).Column(x =>
+                            row.RelativeItem().Element(BoxStyle).Column(x =>
                             {
                                 x.Item().Text("TOTAL").Bold();
                                 x.Item().Text(total.ToString()).FontSize(16);
                             });
 
-                            row.RelativeItem().Border(1).Padding(5).Column(x =>
+                            row.RelativeItem().Element(BoxStyle).Column(x =>
                             {
                                 x.Item().Text("CARGADOS").Bold();
                                 x.Item().Text(cargados.ToString()).FontSize(16);
                             });
 
-                            row.RelativeItem().Border(1).Padding(5).Column(x =>
+                            row.RelativeItem().Element(BoxStyle).Column(x =>
                             {
                                 x.Item().Text("VACÍOS").Bold();
                                 x.Item().Text(vacios.ToString()).FontSize(16);
@@ -254,7 +265,7 @@ namespace BitacoraAlfipac.Controllers
                         });
                     });
 
-                    // 📋 TABLA
+                    // TABLA
                     page.Content().Table(table =>
                     {
                         table.ColumnsDefinition(columns =>
@@ -264,36 +275,58 @@ namespace BitacoraAlfipac.Controllers
                             columns.RelativeColumn(1);
                             columns.RelativeColumn(2);
                             columns.RelativeColumn(2);
+                            columns.RelativeColumn(2);
                             columns.RelativeColumn(1);
                         });
 
-                        void HeaderCell(string text) =>
-                            table.Cell().Element(CellStyle).Text(text).Bold();
+                        void Header(string text) =>
+                            table.Cell().Element(HeaderCell).Text(text).Bold();
 
-                        HeaderCell("Contenedor");
-                        HeaderCell("Marchamos");
-                        HeaderCell("Tamaño");
-                        HeaderCell("Chasis");
-                        HeaderCell("Transportista");
-                        HeaderCell("Estado");
+                        Header("Contenedor");
+                        Header("Marchamos");
+                        Header("Tamaño");
+                        Header("Chasis");
+                        Header("Transportista");
+                        Header("Cliente");
+                        Header("Estado");
 
                         foreach (var c in datos)
                         {
-                            table.Cell().Element(CellStyle).Text(c.Contenedor);
-                            table.Cell().Element(CellStyle).Text(c.Marchamos);
-                            table.Cell().Element(CellStyle).Text(c.Tamano);
-                            table.Cell().Element(CellStyle).Text(c.Chasis);
-                            table.Cell().Element(CellStyle).Text(c.Transportista);
-                            table.Cell().Element(CellStyle).Text(c.EstadoCarga);
+                            table.Cell().Element(Cell).Text(c.Contenedor ?? "");
+                            table.Cell().Element(Cell).Text(c.Marchamos ?? "");
+                            table.Cell().Element(Cell).Text(c.Tamano ?? "");
+                            table.Cell().Element(Cell).Text(c.Chasis ?? "");
+                            table.Cell().Element(Cell).Text(c.Transportista ?? "");
+                            table.Cell().Element(Cell).Text(c.Cliente ?? "");
+                            table.Cell().Element(Cell).Text(c.EstadoCarga ?? "");
                         }
-
-                        static IContainer CellStyle(IContainer container)
-                            => container.Border(1).Padding(3);
                     });
                 });
             }).GeneratePdf();
 
-            return File(pdf, "application/pdf", $"Inventario_Patio2 {DateTime.Now:dd/MM/yyyy} Turno: {turno}.pdf");
+            return File(pdf, "application/pdf",
+                $"Inventario_Patio2_{DateTime.Now:dd-MM-yyyy}_Turno_{turno}.pdf");
+
+
+            // ===== ESTILOS =====
+
+            static IContainer HeaderCell(IContainer c) =>
+                c.Background(Colors.Grey.Lighten3)
+                 .BorderBottom(1)
+                 .BorderColor(Colors.Grey.Medium)
+                 .Padding(5)
+                 .AlignCenter();
+
+            static IContainer Cell(IContainer c) =>
+                c.BorderBottom(1)
+                 .BorderColor(Colors.Grey.Lighten2)
+                 .Padding(4);
+
+            static IContainer BoxStyle(IContainer c) =>
+                c.Border(1)
+                 .BorderColor(Colors.Grey.Medium)
+                 .Padding(6)
+                 .Background(Colors.Grey.Lighten4);
         }
 
         // ===============================
@@ -348,9 +381,10 @@ namespace BitacoraAlfipac.Controllers
             ws.Cell(fila, 3).Value = "Tamaño";
             ws.Cell(fila, 4).Value = "Chasis";
             ws.Cell(fila, 5).Value = "Transportista";
-            ws.Cell(fila, 6).Value = "Estado";
+            ws.Cell(fila, 6).Value = "Cliente";
+            ws.Cell(fila, 7).Value = "Estado";
 
-            ws.Range(fila, 1, fila, 6).Style
+            ws.Range(fila, 1, fila, 7).Style
                 .Font.SetBold()
                 .Fill.SetBackgroundColor(XLColor.LightGray)
                 .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
@@ -364,7 +398,8 @@ namespace BitacoraAlfipac.Controllers
                 ws.Cell(fila, 3).Value = c.Tamano;
                 ws.Cell(fila, 4).Value = c.Chasis;
                 ws.Cell(fila, 5).Value = c.Transportista;
-                ws.Cell(fila, 6).Value = c.EstadoCarga;
+                ws.Cell(fila, 6).Value = c.Cliente;
+                ws.Cell(fila, 7).Value = c.EstadoCarga;
                 fila++;
             }
 
@@ -407,11 +442,11 @@ namespace BitacoraAlfipac.Controllers
             sb.AppendLine($"CARGADOS,{cargados}");
             sb.AppendLine($"VACÍOS,{vacios}");
             sb.AppendLine("");
-            sb.AppendLine("Contenedor,Marchamos,Tamaño,Chasis,Transportista,Estado");
+            sb.AppendLine("Contenedor,Marchamos,Tamaño,Chasis,Transportista, Cliente, Estado");
 
             foreach (var c in datos)
             {
-                sb.AppendLine($"{c.Contenedor},{c.Marchamos},{c.Tamano},{c.Chasis},{c.Transportista},{c.EstadoCarga}");
+                sb.AppendLine($"{c.Contenedor},{c.Marchamos},{c.Tamano},{c.Chasis},{c.Transportista},{c.Cliente},{c.EstadoCarga}");
             }
 
             return File(Encoding.UTF8.GetBytes(sb.ToString()),

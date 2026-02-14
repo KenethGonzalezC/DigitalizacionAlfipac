@@ -6,8 +6,7 @@ namespace BitacoraAlfipac.Data.Seed
     {
         public static void SeedAdminUser(ApplicationDbContext context)
         {
-            // Si ya existe algún usuario, NO hacer nada
-            if (context.Usuarios.Any())
+            if (context.Usuarios.Any(u => u.NombreUsuario == "admin"))
                 return;
 
             var admin = new Usuario

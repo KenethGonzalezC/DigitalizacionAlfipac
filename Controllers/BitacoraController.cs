@@ -75,81 +75,103 @@ public class BitacoraController : Controller
         return View(bitacora);
     }
 
-[HttpGet]
-public IActionResult ExportarPdf(DateTime fecha)
-{
-    var movimientos = ObtenerMovimientosPorFecha(fecha);
-
-    QuestPDF.Settings.License = LicenseType.Community;
-
-    var pdf = Document.Create(container =>
+    [HttpGet]
+    public IActionResult ExportarPdf(DateTime fecha)
     {
-        container.Page(page =>
+        var movimientos = ObtenerMovimientosPorFecha(fecha);
+
+        QuestPDF.Settings.License = LicenseType.Community;
+
+        var pdf = Document.Create(container =>
         {
-            page.Size(PageSizes.A4.Landscape()); // 🔥 HORIZONTAL
-            page.Margin(20);
-
-            page.Header().Column(col =>
+            container.Page(page =>
             {
-                col.Item().Text("ALFIPAC – BITÁCORA OPERATIVA DIARIA").Bold().FontSize(18);
-                col.Item().Text($"Fecha operativa: {fecha:dd/MM/yyyy}");
-                col.Item().Text($"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}");
-                col.Item().LineHorizontal(1);
-            });
+                page.Size(PageSizes.A4.Landscape());
+                page.Margin(20);
 
-            page.Content().Table(table =>
-            {
-                table.ColumnsDefinition(columns =>
+                page.Header().Column(col =>
                 {
-                    columns.RelativeColumn(2.2f);   // Contenedor
-                    columns.RelativeColumn(2.0f);   // Marchamos
-                    columns.RelativeColumn(1.2f);   // Entrada
-                    columns.RelativeColumn(1.2f);   // Salida
-                    columns.RelativeColumn(2.4f);   // Transportista
-                    columns.RelativeColumn(2.8f);   // Información ← la más ancha normalmente
-                    columns.RelativeColumn(2.1f);   // Chofer
-                    columns.RelativeColumn(1.4f);   // Placa     ← suele ser la más angosta
-                    columns.RelativeColumn(1.8f);   // Chasis
-                    columns.RelativeColumn(2.0f);   // Viaje/DUA
+                    col.Item().AlignCenter().Text("ALFIPAC – BITÁCORA OPERATIVA DIARIA")
+                        .Bold().FontSize(18);
+
+                    col.Item().AlignCenter().Text($"Fecha operativa: {fecha:dd/MM/yyyy}")
+                        .FontSize(11);
+
+                    col.Item().AlignCenter().Text($"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}")
+                        .FontSize(10).FontColor(Colors.Grey.Darken1);
+
+                    col.Item().PaddingTop(5).LineHorizontal(1);
                 });
 
-                void Header(string t) =>
-                    table.Cell().Element(CellStyle).Text(t).Bold();
-
-                Header("Contenedor");
-                Header("Marchamos");
-                Header("Entrada");
-                Header("Salida");
-                Header("Transportista");
-                Header("Información");
-                Header("Chofer");
-                Header("Placa");
-                Header("Chasis");
-                Header("Viaje/DUA");
-
-                foreach (var m in movimientos)
+                page.Content().PaddingTop(10).Table(table =>
                 {
-                    table.Cell().Element(CellStyle).Text(m.Contenedor);
-                    table.Cell().Element(CellStyle).Text(m.Marchamos);
-                    table.Cell().Element(CellStyle).Text(m.HoraEntrada?.ToString("HH:mm") ?? "");
-                    table.Cell().Element(CellStyle).Text(m.HoraSalida?.ToString("HH:mm") ?? "");
-                    table.Cell().Element(CellStyle).Text(m.Transportista);
-                    table.Cell().Element(CellStyle).Text(m.Informacion);
-                    table.Cell().Element(CellStyle).Text(m.Chofer);
-                    table.Cell().Element(CellStyle).Text(m.Placa);
-                    table.Cell().Element(CellStyle).Text(m.Chasis);
-                    table.Cell().Element(CellStyle).Text(m.ViajeODua);
-                }
+                    table.ColumnsDefinition(columns =>
+                    {
+                        columns.RelativeColumn(2.2f);
+                        columns.RelativeColumn(2.0f);
+                        columns.RelativeColumn(1.2f);
+                        columns.RelativeColumn(1.2f);
+                        columns.RelativeColumn(2.4f);
+                        columns.RelativeColumn(2.8f);
+                        columns.RelativeColumn(2.1f);
+                        columns.RelativeColumn(1.4f);
+                        columns.RelativeColumn(1.8f);
+                        columns.RelativeColumn(2.0f);
+                    });
 
-                static IContainer CellStyle(IContainer c) =>
-                    c.Border(1).Padding(3);
+                    void Header(string t) =>
+                        table.Cell().Element(HeaderStyle).Text(t).Bold().FontSize(10).AlignCenter();
+
+                    Header("Contenedor");
+                    Header("Marchamos");
+                    Header("Entrada");
+                    Header("Salida");
+                    Header("Transportista");
+                    Header("Información");
+                    Header("Chofer");
+                    Header("Placa");
+                    Header("Chasis");
+                    Header("Viaje/DUA");
+
+                    int index = 0;
+
+                    foreach (var m in movimientos)
+                    {
+                        var bg = index % 2 == 0 ? Colors.White : Colors.Grey.Lighten4;
+
+                        table.Cell().Element(c => CellStyle(c, bg)).Text(m.Contenedor);
+                        table.Cell().Element(c => CellStyle(c, bg)).Text(m.Marchamos);
+                        table.Cell().Element(c => CellStyle(c, bg)).AlignCenter().Text(m.HoraEntrada?.ToString("HH:mm") ?? "");
+                        table.Cell().Element(c => CellStyle(c, bg)).AlignCenter().Text(m.HoraSalida?.ToString("HH:mm") ?? "");
+                        table.Cell().Element(c => CellStyle(c, bg)).Text(m.Transportista);
+                        table.Cell().Element(c => CellStyle(c, bg)).Text(m.Informacion);
+                        table.Cell().Element(c => CellStyle(c, bg)).Text(m.Chofer);
+                        table.Cell().Element(c => CellStyle(c, bg)).AlignCenter().Text(m.Placa);
+                        table.Cell().Element(c => CellStyle(c, bg)).Text(m.Chasis);
+                        table.Cell().Element(c => CellStyle(c, bg)).Text(m.ViajeODua);
+
+                        index++;
+                    }
+
+                    static IContainer HeaderStyle(IContainer c) =>
+                        c.Background(Colors.Grey.Lighten2)
+                         .Border(1)
+                         .PaddingVertical(4)
+                         .PaddingHorizontal(3);
+
+                    static IContainer CellStyle(IContainer c, string bg) =>
+                        c.Background(bg)
+                         .Border(0.5f)
+                         .BorderColor(Colors.Grey.Lighten1)
+                         .Padding(3)
+                         .DefaultTextStyle(x => x.FontSize(9));
+                });
             });
-        });
-    }).GeneratePdf();
+        }).GeneratePdf();
 
-    return File(pdf, "application/pdf",
-        $"Bitacora_{fecha:dd-MM-yyyy}.pdf");
-}
+        return File(pdf, "application/pdf",
+            $"Bitacora_{fecha:dd-MM-yyyy}.pdf");
+    }
 
     //Exportar a Excel
     [HttpGet]

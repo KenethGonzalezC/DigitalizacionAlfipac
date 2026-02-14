@@ -8,6 +8,7 @@
         string? Tamano { get; set; }
         string? Chasis { get; set; }
         string? Transportista { get; set; }
+        public string? Cliente { get; set; }
         string? EstadoCarga { get; set; }
     }
 }
