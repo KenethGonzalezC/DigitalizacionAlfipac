@@ -4,6 +4,7 @@ using BitacoraAlfipac.Models.Entidades;
 using BitacoraAlfipac.Models.ViewModels;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Presentation;
+using iText.Kernel.Pdf.Canvas.Wmf;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
@@ -635,6 +636,203 @@ public async Task<IActionResult> Mover(
             $"Inventario_General_{DateTime.Now:ddMMyyyy_HHmm}.csv");
     }
 
+    public async Task<IActionResult> InventarioGeneral(
+    string? contenedor,
+    string? cliente,
+    string? estado,
+    string? tamano,
+    string? patio)
+    {
+        var sinAsignar = await _context.ContenedoresSinAsignarPatio
+            .Select(x => new InventarioItemVM
+            {
+                Id = x.Id,
+                Contenedor = x.Contenedor,
+                Marchamos = x.Marchamos,
+                Tamano = x.Tamano,
+                Chasis = x.Chasis,
+                Transportista = x.Transportista,
+                Cliente = x.Cliente,
+                EstadoCarga = x.EstadoCarga,
+                Patio = "S/Pat"
+            }).ToListAsync();
+
+        var patio1 = await _context.Patio1
+            .Select(x => new InventarioItemVM
+            {
+                Id = x.Id,
+                Contenedor = x.Contenedor,
+                Marchamos = x.Marchamos,
+                Tamano = x.Tamano,
+                Chasis = x.Chasis,
+                Transportista = x.Transportista,
+                Cliente = x.Cliente,
+                EstadoCarga = x.EstadoCarga,
+                Patio = "P1"
+            }).ToListAsync();
+
+        var patio2 = await _context.Patio2
+            .Select(x => new InventarioItemVM
+            {
+                Id = x.Id,
+                Contenedor = x.Contenedor,
+                Marchamos = x.Marchamos,
+                Tamano = x.Tamano,
+                Chasis = x.Chasis,
+                Transportista = x.Transportista,
+                Cliente = x.Cliente,
+                EstadoCarga = x.EstadoCarga,
+                Patio = "P2"
+            }).ToListAsync();
+
+        var anden = await _context.Anden2000
+            .Select(x => new InventarioItemVM
+            {
+                Id = x.Id,
+                Contenedor = x.Contenedor,
+                Marchamos = x.Marchamos,
+                Tamano = x.Tamano,
+                Chasis = x.Chasis,
+                Transportista = x.Transportista,
+                Cliente = x.Cliente,
+                EstadoCarga = x.EstadoCarga,
+                Patio = "2000"
+            }).ToListAsync();
+
+        var quimicos = await _context.PatioQuimicos
+            .Select(x => new InventarioItemVM
+            {
+                Id = x.Id,
+                Contenedor = x.Contenedor,
+                Marchamos = x.Marchamos,
+                Tamano = x.Tamano,
+                Chasis = x.Chasis,
+                Transportista = x.Transportista,
+                Cliente = x.Cliente,
+                EstadoCarga = x.EstadoCarga,
+                Patio = "AgroQui"
+            }).ToListAsync();
+
+        var todos = sinAsignar
+            .Concat(patio1)
+            .Concat(patio2)
+            .Concat(anden)
+            .Concat(quimicos)
+            .AsQueryable();
+
+        // 🔎 FILTROS SEGUROS
+        if (!string.IsNullOrWhiteSpace(contenedor))
+            todos = todos.Where(x => x.Contenedor != null &&
+                                     x.Contenedor.Contains(contenedor));
+
+        if (!string.IsNullOrWhiteSpace(cliente))
+            todos = todos.Where(x => x.Cliente != null &&
+                                     x.Cliente.Contains(cliente));
+
+        if (!string.IsNullOrWhiteSpace(estado))
+            todos = todos.Where(x => x.EstadoCarga == estado);
+
+        if (!string.IsNullOrWhiteSpace(tamano))
+            todos = todos.Where(x => x.Tamano == tamano);
+
+        if (!string.IsNullOrWhiteSpace(patio))
+            todos = todos.Where(x => x.Patio == patio);
+
+        var lista = todos.ToList();
+
+        var vm = new InventarioGeneralVM
+        {
+            Items = lista,
+
+            Total = lista.Count,
+            Cargados = lista.Count(x => x.EstadoCarga == "CARGADO"),
+            Vacios = lista.Count(x => x.EstadoCarga == "VACIO"),
+
+            SinAsignar = lista.Count(x => x.Patio == "S/Pat"),
+            Patio1 = lista.Count(x => x.Patio == "P1"),
+            Patio2 = lista.Count(x => x.Patio == "P2"),
+            Anden2000 = lista.Count(x => x.Patio == "2000"),
+            Quimicos = lista.Count(x => x.Patio == "AgroQui")
+        };
+
+        return View(vm);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AgregarManual(AgregarManualVM model)
+    {
+        if (!ModelState.IsValid)
+            return RedirectToAction("InventarioGeneral");
+
+        var ahora = DateTime.Now;
+
+        // =====================
+        // INSERTAR EN INVENTARIO
+        // =====================
+        var inventario = new ContenedorSinAsignarPatio
+        {
+            Contenedor = model.Contenedor.ToUpper().Trim(),
+            Marchamos = model.Marchamos,
+            Tamano = model.Tamano,
+            Chasis = model.Chasis,
+            Transportista = model.Transportista,
+            Cliente = model.Cliente,
+            EstadoCarga = model.EstadoCarga
+        };
+
+        var existe = await _context.ContenedoresSinAsignarPatio
+    .AnyAsync(x => x.Contenedor == model.Contenedor);
+
+        if (existe)
+        {
+            TempData["error"] = "El contenedor ya existe en inventario";
+            return RedirectToAction("InventarioGeneral");
+        }
+
+
+        _context.ContenedoresSinAsignarPatio.Add(inventario);
+
+        // =====================
+        // INSERTAR EN BITACORA (OPCIONAL)
+        // =====================
+        if (model.InsertarBitacora)
+        {
+            var bitacora = new BitacoraIngreso
+            {
+                Contenedor = inventario.Contenedor,
+                FechaHoraIngreso = ahora,
+                Cliente = model.Cliente,
+                Transportista = model.Transportista
+            };
+
+            _context.BitacoraIngresos.Add(bitacora);
+        }
+
+        await _context.SaveChangesAsync();
+
+        TempData["ok"] = "Contenedor agregado manualmente";
+
+        return RedirectToAction("InventarioGeneral");
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> EliminarContenedor(string contenedor)
+    {
+        if (string.IsNullOrWhiteSpace(contenedor))
+            return RedirectToAction("InventarioGeneral");
+
+        contenedor = contenedor.ToUpper().Trim();
+
+        var item = await _context.ContenedoresSinAsignarPatio
+            .FirstOrDefaultAsync(x => x.Contenedor == contenedor);
+
+        if (item != null)
+        {
+            _context.ContenedoresSinAsignarPatio.Remove(item);
+            await _context.SaveChangesAsync();
+        }
+
+        return RedirectToAction("InventarioGeneral");
+    }
+
 }
-
-

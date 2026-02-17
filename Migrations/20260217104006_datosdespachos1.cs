@@ -5,25 +5,24 @@
 namespace BitacoraAlfipac.Migrations
 {
     /// <inheritdoc />
-    public partial class EliminarCampoAplicada : Migration
+    public partial class datosdespachos1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Aplicada",
-                table: "ActasPermanencias");
+                name: "PatioOrigen",
+                table: "DatosDespachosViajes");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "Aplicada",
-                table: "ActasPermanencias",
-                type: "bit",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.AddColumn<string>(
+                name: "PatioOrigen",
+                table: "DatosDespachosViajes",
+                type: "nvarchar(max)",
+                nullable: true);
         }
     }
 }

@@ -183,45 +183,92 @@
     </script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+                        document.addEventListener("DOMContentLoaded", function () {
 
-            function buscarContenedor() {
+            async function buscarContenedor() {
 
                 const contenedor = document.getElementById("contenedorInput").value.trim();
                 if (!contenedor) return;
 
-                fetch(`/BitacoraDespachos/BuscarParaDespacho?contenedor=${contenedor}`)
-                    .then(r => r.json())
-                    .then(data => {
+                const infoPatio = document.getElementById("infoPatio");
 
-                        const infoPatio = document.getElementById("infoPatio");
+                try {
 
-                        if (!data.encontrado) {
-                            infoPatio.innerText = data.mensaje ?? "⚠ Contenedor no está en inventario";
-                            return;
-                        }
+                    let datosDespacho = null;
+                    let datosInventario = null;
 
-                        infoPatio.innerText = `Ubicación actual: ${data.patio} | Estado: ${data.estado}`;
+                    // =========================
+                    // BUSCAR EN DESPACHOS
+                    // =========================
+                    const resDespacho = await fetch(`/Datos/BuscarDespacho?contenedor=${contenedor}`);
+                    const despacho = await resDespacho.json();
 
-                        // Referencias seguras
-                        const marchamosInput = document.getElementById("marchamosInput");
-                        const transportistaInput = document.querySelector("[name='Transportista']");
-                        const chasisInput = document.querySelector("[name='Chasis']");
-                        const informacionInput = document.querySelector("[name='Informacion']"); // 🔥 NUEVO
+                    if (despacho && despacho.encontrado) {
+                        datosDespacho = despacho;
+                    }
 
-                        if (marchamosInput) marchamosInput.value = data.marchamos || "";
-                        if (transportistaInput) transportistaInput.value = data.transportista || "";
-                        if (chasisInput) chasisInput.value = data.chasis || "";
+                    // =========================
+                    // BUSCAR EN INVENTARIO (PATIO)
+                    // =========================
+                    const resInv = await fetch(`/BitacoraDespachos/BuscarParaDespacho?contenedor=${contenedor}`);
+                    const inv = await resInv.json();
 
-                        // 🔥 AUTOCOMPLETAR CLIENTE EN INFORMACIÓN
-                        if (informacionInput && !informacionInput.value)
-                            informacionInput.value = data.cliente || "";
-                    })
-                    .catch(() => {
-                        document.getElementById("infoPatio").innerText =
-                            "Error consultando el contenedor";
-                    });
+                    if (inv && inv.encontrado) {
+                        datosInventario = inv;
+
+                        // 🔵 SOLO mostrar ubicación
+                        infoPatio.innerText =
+                            `📦 Ubicación: ${inv.patio ?? "-"} | Estado: ${inv.estado ?? "-"}`;
+                    }
+                    else {
+                        infoPatio.innerText = "❌ No está en inventario";
+                    }
+
+                    // =========================
+                    // PRIORIDAD DATOS
+                    // =========================
+
+                    if (datosDespacho) {
+                        llenarCampos(datosDespacho); // 🔥 PRIORIDAD DESPACHO
+                        return;
+                    }
+
+                    if (datosInventario) {
+                        llenarCampos(datosInventario); // fallback inventario
+                        return;
+                    }
+
+                    infoPatio.innerText = "❌ Contenedor no encontrado";
+
+                } catch (error) {
+                    console.error(error);
+                    infoPatio.innerText = "Error consultando el contenedor";
+                }
             }
+
+
+            function llenarCampos(data) {
+
+                const map = {
+                    Marchamos: data.marchamos,
+                    Transportista: data.transportista,
+                    Chasis: data.chasis,
+                    Cliente: data.cliente,
+                    Informacion: data.cliente,
+                    Chofer: data.chofer,
+                    PlacaCabezal: data.placaCabezal,
+                    ViajeDua: data.viajeDua
+                };
+
+                Object.keys(map).forEach(name => {
+
+                    const input = document.querySelector(`[name='${name}']`);
+
+                    if (input && map[name] !== undefined && map[name] !== null)
+                        input.value = map[name];
+                });
+            }
+
 
             document.getElementById("btnBuscarContenedor")
                 ?.addEventListener("click", buscarContenedor);
@@ -233,5 +280,6 @@
                         buscarContenedor();
                     }
                 });
+
         });
     </script>

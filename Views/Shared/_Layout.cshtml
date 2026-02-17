@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - BitacoraAlfipac</title>
+    <title>@ViewData["Title"] - Alfipac - SCL</title>
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -16,10 +16,16 @@
             <div class="container-fluid">
 
                 <!-- LOGO / MARCA -->
-                <a class="navbar-brand fw-semibold"
+                <a class="navbar-brand fw-semibold d-flex align-items-center gap-2"
                    asp-controller="Home"
                    asp-action="Index">
-                    BitacoraAlfipac
+
+                    <img src="~/images/logo.jpg"
+                         alt="Logo"
+                         style="height:40px; width:auto;" />
+
+                    <span>SCL - Alfipac</span>
+
                 </a>
 
                 <!-- TOGGLER -->
@@ -180,7 +186,7 @@
 
     <footer class="border-top footer text-muted mt-4">
         <div class="container">
-            &copy; 2026 - BitacoraAlfipac · Almacén Fiscal del Pacífico
+            &copy; 2026 - Sistema de Control Logistico · Almacén Fiscal del Pacífico · By SK
         </div>
     </footer>
 

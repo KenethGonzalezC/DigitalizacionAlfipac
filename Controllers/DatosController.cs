@@ -2,6 +2,7 @@
 using BitacoraAlfipac.Models.Entidades;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using System.Globalization;
 
@@ -275,4 +276,307 @@ public class DatosController : Controller
         return RedirectToAction(nameof(Ingresos));
     }
 
+    //Precargar despacho
+    private async Task<(object? contenedor, string? patio)> BuscarContenedorGlobal(string numero)
+    {
+        numero = numero.ToUpper();
+
+        var sinAsignar = await _context.ContenedoresSinAsignarPatio
+            .FirstOrDefaultAsync(c => c.Contenedor == numero);
+        if (sinAsignar != null) return (sinAsignar, "Sin Asignar");
+
+        var q = await _context.PatioQuimicos.FirstOrDefaultAsync(c => c.Contenedor == numero);
+        if (q != null) return (q, "Patio Químicos");
+
+        var p1 = await _context.Patio1.FirstOrDefaultAsync(c => c.Contenedor == numero);
+        if (p1 != null) return (p1, "Patio 1");
+
+        var p2 = await _context.Patio2.FirstOrDefaultAsync(c => c.Contenedor == numero);
+        if (p2 != null) return (p2, "Patio 2");
+
+        var a = await _context.Anden2000.FirstOrDefaultAsync(c => c.Contenedor == numero);
+        if (a != null) return (a, "Andén 2000");
+
+        return (null, null);
+    }
+
+    //Despachos
+    //Traer informacion del contenedor
+    [HttpGet]
+    public async Task<IActionResult> BuscarParaDespacho(string contenedor)
+    {
+        if (string.IsNullOrWhiteSpace(contenedor))
+            return Json(new { encontrado = false });
+
+        contenedor = contenedor.ToUpper().Trim();
+
+        // 🔍 Verificar si ya fue despachado
+        var historial = await _context.HistorialContenedores
+            .Where(h => h.Contenedor == contenedor && h.FechaHoraSalida != null)
+            .OrderByDescending(h => h.FechaHoraSalida)
+            .FirstOrDefaultAsync();
+
+        if (historial != null)
+        {
+            return Json(new
+            {
+                encontrado = false,
+                mensaje = $"Este contenedor ya fue despachado el {historial.FechaHoraSalida:dd/MM/yyyy HH:mm}"
+            });
+        }
+
+        // 🔍 Buscar en patios
+        var (data, patio) = await BuscarContenedorGlobal(contenedor);
+
+        if (data == null)
+            return Json(new { encontrado = false });
+
+        var c = (IContenedorInventario)data;
+
+        return Json(new
+        {
+            encontrado = true,
+            contenedor = c.Contenedor,
+            marchamos = c.Marchamos ?? "",
+            chasis = c.Chasis ?? "",
+            transportista = c.Transportista ?? "",
+            cliente = c.Cliente ?? "",
+            estado = c.EstadoCarga ?? "",
+            patio
+        });
+    }
+
+    //precarga
+    // POST: Datos/RegistrarPrecargaDespacho
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RegistrarPrecargaDespacho(string contenedor)
+    {
+        if (string.IsNullOrWhiteSpace(contenedor))
+            return RedirectToAction("Despachos");
+
+        contenedor = contenedor.ToUpper().Trim();
+
+        // 🔍 Buscar en patios
+        var (data, patio) = await BuscarContenedorGlobal(contenedor);
+
+        if (data == null)
+        {
+            TempData["Error"] = "Contenedor no encontrado en patios";
+            return RedirectToAction("Despachos");
+        }
+
+        var c = (IContenedorInventario)data;
+
+        if (string.IsNullOrWhiteSpace(c.Contenedor))
+        {
+            TempData["Warning"] = "El contenedor es requerido";
+            return RedirectToAction("Despachos");
+        }
+
+        bool existe = await _context.DatosDespachosViajes
+            .AnyAsync(x => x.Contenedor == c.Contenedor);
+
+        if (existe)
+        {
+            TempData["Warning"] = "El contenedor ya tiene una precarga registrada";
+            return RedirectToAction("Despachos");
+        }
+
+        _context.DatosDespachosViajes.Add(new DatosDespachoViaje
+        {
+            Contenedor = c.Contenedor,
+            Marchamos = c.Marchamos,
+            Transportista = c.Transportista,
+            Cliente = c.Cliente,
+            Chasis = c.Chasis,
+
+            Chofer = null,
+            PlacaCabezal = null,
+            ViajeDua = null,
+
+            FechaCreacion = DateTime.Now
+        });
+
+        await _context.SaveChangesAsync();
+
+
+        TempData["Ok"] = "Datos de despacho precargados correctamente";
+
+        return RedirectToAction("Despachos");
+    }
+
+    // Página hija → Despachos
+    public IActionResult Despachos(
+        string contenedor,
+        string marchamos,
+        string transportista,
+        string cliente,
+        string chofer,
+        string placa,
+        string chasis,
+        string viajeDua,
+        string fechaRegistro,
+        int pagina = 1)
+    {
+        int registrosPorPagina = 50;
+
+        var query = _context.DatosDespachosViajes.AsQueryable();
+
+        DateTime? fechaRegistroDate = null;
+
+        if (!string.IsNullOrEmpty(fechaRegistro) &&
+            DateTime.TryParseExact(fechaRegistro, "yyyy-MM-dd",
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.None, out var fechaParsed))
+        {
+            fechaRegistroDate = fechaParsed;
+        }
+
+        bool sinFiltros =
+            string.IsNullOrEmpty(contenedor) &&
+            string.IsNullOrEmpty(marchamos) &&
+            string.IsNullOrEmpty(transportista) &&
+            string.IsNullOrEmpty(cliente) &&
+            string.IsNullOrEmpty(chofer) &&
+            string.IsNullOrEmpty(placa) &&
+            string.IsNullOrEmpty(chasis) &&
+            string.IsNullOrEmpty(viajeDua) &&
+            !fechaRegistroDate.HasValue;
+
+        if (sinFiltros)
+            fechaRegistroDate = DateTime.Today;
+
+        // 🔎 FILTROS
+        if (!string.IsNullOrEmpty(contenedor))
+            query = query.Where(x => x.Contenedor.Contains(contenedor));
+
+        if (!string.IsNullOrEmpty(marchamos))
+            query = query.Where(x => x.Marchamos.Contains(marchamos));
+
+        if (!string.IsNullOrEmpty(transportista))
+            query = query.Where(x => x.Transportista.Contains(transportista));
+
+        if (!string.IsNullOrEmpty(cliente))
+            query = query.Where(x => x.Cliente.Contains(cliente));
+
+        if (!string.IsNullOrEmpty(chofer))
+            query = query.Where(x => x.Chofer.Contains(chofer));
+
+        if (!string.IsNullOrEmpty(placa))
+            query = query.Where(x => x.PlacaCabezal.Contains(placa));
+
+        if (!string.IsNullOrEmpty(chasis))
+            query = query.Where(x => x.Chasis.Contains(chasis));
+
+        if (!string.IsNullOrEmpty(viajeDua))
+            query = query.Where(x => x.ViajeDua.Contains(viajeDua));
+
+        if (fechaRegistroDate.HasValue)
+            query = query.Where(x => x.FechaCreacion.Date == fechaRegistroDate.Value.Date);
+
+        var totalRegistros = query.Count();
+
+        var datos = query
+            .OrderByDescending(x => x.FechaCreacion)
+            .Skip((pagina - 1) * registrosPorPagina)
+            .Take(registrosPorPagina)
+            .ToList();
+
+        ViewBag.TotalPaginas = (int)Math.Ceiling((double)totalRegistros / registrosPorPagina);
+        ViewBag.PaginaActual = pagina;
+        ViewBag.FechaRegistro = fechaRegistroDate?.ToString("yyyy-MM-dd");
+
+        return View(datos);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CrearDespacho(DatosDespachoViaje model)
+    {
+        model.Contenedor = model.Contenedor.ToUpper().Trim();
+        model.FechaCreacion = DateTime.Now;
+
+        _context.Add(model);
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction("Despachos");
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditarDespacho(DatosDespachoViaje model)
+    {
+        var data = await _context.DatosDespachosViajes.FindAsync(model.Id);
+
+        if (data == null)
+            return RedirectToAction("Despachos");
+
+        data.Marchamos = model.Marchamos;
+        data.Transportista = model.Transportista;
+        data.Cliente = model.Cliente;
+        data.Chasis = model.Chasis;
+        data.Chofer = model.Chofer;
+        data.PlacaCabezal = model.PlacaCabezal;
+        data.ViajeDua = model.ViajeDua;
+
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction("Despachos");
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EliminarDespacho(int id)
+    {
+        var data = await _context.DatosDespachosViajes.FindAsync(id);
+
+        if (data != null)
+        {
+            _context.Remove(data);
+            await _context.SaveChangesAsync();
+        }
+
+        return RedirectToAction("Despachos");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> BuscarDespacho(string contenedor)
+    {
+        if (string.IsNullOrWhiteSpace(contenedor))
+            return Json(new { encontrado = false });
+
+        contenedor = contenedor.ToUpper().Trim();
+
+        var ingreso = await _context.DatosDespachosViajes
+            .Where(x => x.Contenedor == contenedor)
+            .Select(x => new
+            {
+                contenedor = x.Contenedor,
+                marchamos = x.Marchamos,
+                transportista = x.Transportista,
+                cliente = x.Cliente,
+                chofer = x.Chofer,
+                placaCabezal = x.PlacaCabezal,
+                chasis = x.Chasis,
+                viajeDua = x.ViajeDua
+            })
+            .FirstOrDefaultAsync();
+
+        if (ingreso == null)
+            return Json(new { encontrado = false });
+
+        return Json(new
+        {
+            encontrado = true,
+            contenedor = ingreso.contenedor,
+            marchamos = ingreso.marchamos,
+            transportista = ingreso.transportista,
+            cliente = ingreso.cliente,
+            chofer = ingreso.chofer,
+            placaCabezal = ingreso.placaCabezal,
+            chasis = ingreso.chasis,
+            viajeDua = ingreso.viajeDua
+        });
+    }
 }

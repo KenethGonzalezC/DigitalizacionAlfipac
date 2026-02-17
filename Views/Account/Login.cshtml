@@ -1,7 +1,7 @@
 ﻿@model BitacoraAlfipac.Models.ViewModels.LoginViewModel
 
 @{
-    ViewData["Title"] = "Inicio de sesión";
+    ViewData["Title"] = "Inicio de sesión SCL";
     Layout = null;
 }
 
@@ -11,17 +11,21 @@
     <meta charset="utf-8" />
     <title>@ViewData["Title"] - ALFIPAC</title>
 
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/login.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" /> 
+    <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
 </head>
 <body class="login-bg">
 
     <div class="login-container">
         <div class="login-card">
 
+            <div class="text-center mb-3">
+                <img src="~/images/logo.jpg" style="height:70px;" />
+            </div>  
+
             <h3 class="text-center mb-1">ALFIPAC</h3>
             <p class="text-center text-muted mb-3">
-                Sistema de Bitácora Aduanera
+                Sistema de Control Logistico - Alfipac
             </p>
 
             <!-- ERRORES GENERALES -->
@@ -46,7 +50,7 @@
             }
 
             <form asp-action="Login" method="post" novalidate>
-
+                                
                 <div class="mb-3">
                     <label asp-for="NombreUsuario" class="form-label"></label>
                     <input asp-for="NombreUsuario"
@@ -71,7 +75,7 @@
             <hr />
 
             <p class="text-center text-muted small mb-0">
-                © @DateTime.Now.Year ALFIPAC · Almacén Fiscal del Pacífico
+                © @DateTime.Now.Year SCL · Almacén Fiscal del Pacífico
             </p>
 
         </div>

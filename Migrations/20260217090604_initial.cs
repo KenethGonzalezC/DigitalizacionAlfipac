@@ -6,11 +6,31 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BitacoraAlfipac.Migrations
 {
     /// <inheritdoc />
-    public partial class Inicial : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "ActasPermanencias",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Tipo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Contenedor = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Numero = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Detalle = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Viaje = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Cliente = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FechaHoraIngresoContenedor = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    AplicadoCorrectamente = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ActasPermanencias", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Anden2000",
                 columns: table => new
@@ -21,6 +41,7 @@ namespace BitacoraAlfipac.Migrations
                     Marchamos = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Tamano = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Transportista = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Cliente = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Chasis = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EstadoCarga = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Ubicacion = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -63,6 +84,7 @@ namespace BitacoraAlfipac.Migrations
                     Marchamos = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FechaHoraIngreso = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Transportista = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Cliente = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Tamaño = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Chofer = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PlacaCabezal = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -86,6 +108,7 @@ namespace BitacoraAlfipac.Migrations
                     Estado = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Tamaño = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Transportista = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Cliente = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Chasis = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FechaRespaldo = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -122,6 +145,7 @@ namespace BitacoraAlfipac.Migrations
                     Marchamos = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Tamano = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Transportista = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Cliente = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Chasis = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EstadoCarga = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Ubicacion = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -129,6 +153,26 @@ namespace BitacoraAlfipac.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ContenedoresSinAsignarPatio", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DatosIngresosViajes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Viaje = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Contenedor = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RecintoOrigen = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FechaCreacionViaje = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Declarante = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Transportista = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Mercancia = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FechaRegistroSistema = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DatosIngresosViajes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -147,6 +191,20 @@ namespace BitacoraAlfipac.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PabMercanciasSusceptibles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Codigo = table.Column<int>(type: "int", nullable: false),
+                    Descripcion = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PabMercanciasSusceptibles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Patio1",
                 columns: table => new
                 {
@@ -156,6 +214,7 @@ namespace BitacoraAlfipac.Migrations
                     Marchamos = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Tamano = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Transportista = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Cliente = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Chasis = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EstadoCarga = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Ubicacion = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -175,6 +234,7 @@ namespace BitacoraAlfipac.Migrations
                     Marchamos = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Tamano = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Transportista = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Cliente = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Chasis = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EstadoCarga = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Ubicacion = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -194,6 +254,7 @@ namespace BitacoraAlfipac.Migrations
                     Marchamos = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Tamano = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Transportista = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Cliente = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Chasis = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EstadoCarga = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Ubicacion = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -201,6 +262,21 @@ namespace BitacoraAlfipac.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PatioQuimicos", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TransportistasAutorizados",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nombre = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
+                    CedulaJuridica = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Codigo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TransportistasAutorizados", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -243,6 +319,12 @@ namespace BitacoraAlfipac.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_DatosIngresosViajes_Contenedor",
+                table: "DatosIngresosViajes",
+                column: "Contenedor",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_RegistrosTemperatura_ContenedorRefrigeradoId",
                 table: "RegistrosTemperatura",
                 column: "ContenedorRefrigeradoId");
@@ -251,6 +333,9 @@ namespace BitacoraAlfipac.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ActasPermanencias");
+
             migrationBuilder.DropTable(
                 name: "Anden2000");
 
@@ -267,7 +352,13 @@ namespace BitacoraAlfipac.Migrations
                 name: "ContenedoresSinAsignarPatio");
 
             migrationBuilder.DropTable(
+                name: "DatosIngresosViajes");
+
+            migrationBuilder.DropTable(
                 name: "HistorialContenedores");
+
+            migrationBuilder.DropTable(
+                name: "PabMercanciasSusceptibles");
 
             migrationBuilder.DropTable(
                 name: "Patio1");
@@ -280,6 +371,9 @@ namespace BitacoraAlfipac.Migrations
 
             migrationBuilder.DropTable(
                 name: "RegistrosTemperatura");
+
+            migrationBuilder.DropTable(
+                name: "TransportistasAutorizados");
 
             migrationBuilder.DropTable(
                 name: "Usuarios");

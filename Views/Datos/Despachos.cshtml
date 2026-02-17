@@ -1,0 +1,417 @@
+﻿@model List<BitacoraAlfipac.Models.Entidades.DatosDespachoViaje>
+
+@{
+    ViewData["Title"] = "Datos de Despachos";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-3">Datos Anticipados de Despachos</h2>
+
+    <!-- ================= FORMULARIO ================= -->
+    <form asp-action="CrearDespacho" method="post" class="card p-4 mb-4 shadow-sm">
+        @Html.AntiForgeryToken()
+
+        <div class="row g-3">
+
+            <div class="col-md-3">
+
+                <label class="form-label fw-semibold">
+                    Contenedor
+                </label>
+
+                <div class="input-group">
+
+                    <input name="Contenedor"
+                           id="contenedorInput"
+                           class="form-control"
+                           required />
+
+                    <button type="button"
+                            id="btnBuscarContenedor"
+                            class="btn btn-outline-primary">
+                        Buscar
+                    </button>
+
+                </div>
+
+                <small id="infoPatio" class="text-muted fw-bold mt-1 d-block"></small>
+
+            </div>
+
+            <div class="col-md-3">
+                <label>Marchamos</label>
+                <input name="Marchamos" id="marchamosInput" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label>Transportista</label>
+                <input name="Transportista" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label>Cliente</label>
+                <input name="Cliente" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label>Chasis</label>
+                <input name="Chasis" id="chasisInput" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label>Chofer</label>
+                <input name="Chofer" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label>Placa Cabezal</label>
+                <input name="PlacaCabezal" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label>Viaje / DUA</label>
+                <input name="ViajeDua" class="form-control" />
+            </div>
+
+        </div>
+
+        <button class="btn btn-primary mt-3">
+            Guardar
+        </button>
+    </form>
+
+
+    <!-- ================= FILTROS ================= -->
+    <form method="get" class="card p-3 mb-3 shadow-sm">
+        <div class="row g-2 align-items-center">
+
+            <div class="col-12 col-sm-6 col-md">
+                <input name="contenedor" value="@ViewBag.Contenedor" class="form-control" placeholder="Contenedor" />
+            </div>
+
+            <div class="col-12 col-sm-6 col-md">
+                <input name="transportista" value="@ViewBag.Transportista" class="form-control" placeholder="Transportista" />
+            </div>
+
+            <div class="col-12 col-sm-6 col-md">
+                <input name="cliente" value="@ViewBag.Cliente" class="form-control" placeholder="Cliente" />
+            </div>
+
+            <div class="col-12 col-sm-6 col-md">
+                <input name="viajeDua" value="@ViewBag.ViajeDua" class="form-control" placeholder="Viaje / DUA" />
+            </div>
+
+            <div class="col">
+                <input type="date" name="fechaRegistro" value="@ViewBag.FechaRegistro" class="form-control" />
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex gap-2">
+                <button type="submit" class="btn btn-outline-primary flex-grow-1">
+                    Filtrar
+                </button>
+
+                <button type="button" onclick="limpiarFiltros()" class="btn btn-outline-secondary flex-grow-1">
+                    Limpiar
+                </button>
+            </div>
+
+        </div>
+    </form>
+
+
+    <!-- ================= TABLA ================= -->
+    <div class="table-responsive">
+
+        <table class="table table-striped">
+
+            <thead class="table-light">
+                <tr>
+                    <th>Contenedor</th>
+                    <th>Marchamos</th>
+                    <th>Transportista</th>
+                    <th>Cliente</th>
+                    <th>Chasis</th>
+                    <th>Chofer</th>
+                    <th>Placa</th>
+                    <th>Viaje/DUA</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="9" class="text-center">No hay registros</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Contenedor</td>
+                            <td>@item.Marchamos</td>
+                            <td>@item.Transportista</td>
+                            <td>@item.Cliente</td>
+                            <td>@item.Chasis</td>
+                            <td>@item.Chofer</td>
+                            <td>@item.PlacaCabezal</td>
+                            <td>@item.ViajeDua</td>
+
+                            <td>
+
+                                <button class="btn btn-sm btn-primary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editarModal"
+                                        onclick="cargarEditar(@item.Id)">
+                                    Editar
+                                </button>
+
+                                <button class="btn btn-sm btn-danger"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal"
+                                        data-id="@item.Id"
+                                        data-contenedor="@item.Contenedor">
+                                    Eliminar
+                                </button>
+
+                            </td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<!-- ================= MODAL EDITAR ================= -->
+<div class="modal fade" id="editarModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <form method="post" asp-action="EditarDespacho">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar despacho</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" name="Id" id="editId" />
+
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+                            <label>Contenedor</label>
+                            <input name="Contenedor" id="editContenedor" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Marchamos</label>
+                            <input name="Marchamos" id="editMarchamos" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Transportista</label>
+                            <input name="Transportista" id="editTransportista" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Cliente</label>
+                            <input name="Cliente" id="editCliente" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Chofer</label>
+                            <input name="Chofer" id="editChofer" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Placa Cabezal</label>
+                            <input name="PlacaCabezal" id="editPlaca" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Chasis</label>
+                            <input name="Chasis" id="editChasis" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Viaje / DUA</label>
+                            <input name="ViajeDua" id="editViajeDua" class="form-control" />
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <button class="btn btn-primary">
+                        Guardar cambios
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- ================= MODAL ELIMINAR ================= -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <form method="post" asp-action="EliminarDespacho">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Confirmar eliminación</h5>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" name="id" id="deleteId" />
+
+                    <p>
+                        ¿Eliminar el despacho del contenedor
+                        <strong id="deleteContenedor"></strong>?
+                    </p>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <button class="btn btn-danger">
+                        Eliminar
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- ================= SCRIPTS ================= -->
+
+<script>
+
+    const datos = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+
+    function cargarEditar(id) {
+
+        const item = datos.find(x => x.Id === id);
+        if (!item) return;
+
+        document.getElementById("editId").value = item.Id;
+        document.getElementById("editContenedor").value = item.Contenedor;
+        document.getElementById("editMarchamos").value = item.Marchamos;
+        document.getElementById("editTransportista").value = item.Transportista;
+        document.getElementById("editCliente").value = item.Cliente;
+        document.getElementById("editChofer").value = item.Chofer;
+        document.getElementById("editPlaca").value = item.PlacaCabezal;
+        document.getElementById("editChasis").value = item.Chasis;
+        document.getElementById("editViajeDua").value = item.ViajeDua;
+
+        document.getElementById("tituloContenedor").textContent = item.Contenedor;
+    }
+
+</script>
+
+<script>
+    const deleteModal = document.getElementById('deleteModal');
+
+    deleteModal.addEventListener('show.bs.modal', event => {
+
+        const button = event.relatedTarget;
+
+        document.getElementById('deleteId').value = button.dataset.id;
+        document.getElementById('deleteContenedor').textContent =
+            button.dataset.contenedor;
+
+    });
+</script>
+
+<script>
+    function limpiarFiltros() {
+        const url = new URL(window.location);
+        url.search = '';
+        window.location.href = url.toString();
+    }
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        function buscarContenedor() {
+
+            const contenedor = document.getElementById("contenedorInput").value.trim();
+            if (!contenedor) return;
+
+            fetch(`/BitacoraDespachos/BuscarParaDespacho?contenedor=${contenedor}`)
+                .then(r => r.json())
+                .then(data => {
+
+                    const infoPatio = document.getElementById("infoPatio");
+
+                    if (!data.encontrado) {
+                        infoPatio.innerText =
+                            data.mensaje ?? "⚠ Contenedor no está en inventario";
+                        return;
+                    }
+
+                    infoPatio.innerText =
+                        `Ubicación actual: ${data.patio} | Estado: ${data.estado}`;
+
+                    document.getElementById("marchamosInput").value =
+                        data.marchamos || "";
+
+                    document.querySelector("[name='Transportista']").value =
+                        data.transportista || "";
+
+                    document.getElementById("chasisInput").value =
+                        data.chasis || "";
+
+                    const clienteInput =
+                        document.querySelector("[name='Cliente']");
+
+                    if (clienteInput && !clienteInput.value)
+                        clienteInput.value = data.cliente || "";
+                })
+                .catch(() => {
+                    document.getElementById("infoPatio").innerText =
+                        "Error consultando el contenedor";
+                });
+        }
+
+        document.getElementById("btnBuscarContenedor")
+            ?.addEventListener("click", buscarContenedor);
+
+        document.getElementById("contenedorInput")
+            ?.addEventListener("keypress", e => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    buscarContenedor();
+                }
+            });
+    });
+</script>

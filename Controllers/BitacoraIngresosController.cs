@@ -118,6 +118,14 @@ public class BitacoraIngresosController : Controller
             }
         }
 
+        var datosIngreso = await _context.DatosIngresosViajes
+        .FirstOrDefaultAsync(x => x.Contenedor == model.Contenedor);
+
+        if (datosIngreso != null)
+        {
+            _context.DatosIngresosViajes.Remove(datosIngreso);
+        }
+
         await _context.SaveChangesAsync();
 
         // 🔑 CLAVE: refrescar la MISMA página con la fecha seleccionada

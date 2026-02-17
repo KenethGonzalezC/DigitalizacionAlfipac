@@ -324,6 +324,47 @@ namespace BitacoraAlfipac.Migrations
                     b.ToTable("ContenedoresSinAsignarPatio");
                 });
 
+            modelBuilder.Entity("BitacoraAlfipac.Models.Entidades.DatosDespachoViaje", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Chasis")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Chofer")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Cliente")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Contenedor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Marchamos")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PlacaCabezal")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Transportista")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ViajeDua")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DatosDespachosViajes");
+                });
+
             modelBuilder.Entity("BitacoraAlfipac.Models.Entidades.DatosIngresoViaje", b =>
                 {
                     b.Property<int>("Id")

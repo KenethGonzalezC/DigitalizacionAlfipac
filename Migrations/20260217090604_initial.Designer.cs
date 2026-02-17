@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BitacoraAlfipac.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260214171352_AddClienteToBitacoraIngreso")]
-    partial class AddClienteToBitacoraIngreso
+    [Migration("20260217090604_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -75,6 +75,9 @@ namespace BitacoraAlfipac.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Chasis")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Cliente")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Contenedor")
@@ -219,6 +222,9 @@ namespace BitacoraAlfipac.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Cliente")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Contenedor")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -292,6 +298,9 @@ namespace BitacoraAlfipac.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Chasis")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Cliente")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Contenedor")
@@ -419,6 +428,9 @@ namespace BitacoraAlfipac.Migrations
                     b.Property<string>("Chasis")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Cliente")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Contenedor")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -454,6 +466,9 @@ namespace BitacoraAlfipac.Migrations
                     b.Property<string>("Chasis")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Cliente")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Contenedor")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -487,6 +502,9 @@ namespace BitacoraAlfipac.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Chasis")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Cliente")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Contenedor")

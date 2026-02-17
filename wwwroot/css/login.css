@@ -1,35 +1,103 @@
-﻿/* Fondo general */
+﻿/* =========================
+   FONDO GENERAL
+========================= */
 .login-bg {
+    background: linear-gradient( rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55) ), url('/images/logo.jpg') no-repeat center center fixed;
+    background-size: cover;
     height: 100vh;
-    background: linear-gradient(135deg, #0d6efd, #0a58ca);
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont;
 }
 
-/* Contenedor */
+
+/* =========================
+   CONTENEDOR
+========================= */
 .login-container {
     width: 100%;
-    max-width: 400px;
-    padding: 15px;
+    max-width: 420px;
+    padding: 20px;
 }
 
-/* Tarjeta */
+
+/* =========================
+   TARJETA GLASS
+========================= */
 .login-card {
-    background: #ffffff;
-    border-radius: 10px;
-    padding: 30px 25px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 16px;
+    padding: 35px 30px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+    color: white;
 }
 
-    /* Inputs */
-    .login-card .form-control {
-        border-radius: 6px;
+
+    /* =========================
+   TITULOS
+========================= */
+    .login-card h3 {
+        font-weight: 700;
+        color: #ffffff;
     }
 
-    /* Botón */
+    .login-card p {
+        color: rgba(255,255,255,0.8);
+    }
+
+
+    /* =========================
+   INPUTS
+========================= */
+    .login-card .form-control {
+        border-radius: 8px;
+        border: none;
+        padding: 10px 12px;
+        background: rgba(255,255,255,0.85);
+        backdrop-filter: blur(4px);
+    }
+
+        .login-card .form-control:focus {
+            box-shadow: 0 0 0 2px rgba(13,110,253,0.25);
+        }
+
+
+    /* =========================
+   BOTÓN
+========================= */
     .login-card .btn-primary {
-        border-radius: 6px;
+        border-radius: 8px;
         font-weight: 600;
+        padding: 10px;
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+        border: none;
+        transition: 0.25s;
+    }
+
+        .login-card .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
+        }
+
+
+    /* =========================
+   ALERTAS
+========================= */
+    .login-card .alert {
+        border-radius: 8px;
+    }
+
+
+    /* =========================
+   FOOTER
+========================= */
+    .login-card hr {
+        border-color: rgba(255,255,255,0.3);
+    }
+
+    .login-card .small {
+        color: rgba(255,255,255,0.7);
     }

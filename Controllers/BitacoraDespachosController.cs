@@ -142,6 +142,23 @@ namespace BitacoraAlfipac.Controllers
                 _context.HistorialContenedores.Add(historialFurgon);
             }
 
+            var datos = await _context.DatosDespachosViajes
+    .FirstOrDefaultAsync(x => x.Contenedor == vm.Contenedor);
+
+            if (datos != null)
+            {
+                _context.DatosDespachosViajes.Remove(datos);
+            }
+
+            // eliminar precarga si existe
+            var precarga = await _context.DatosDespachosViajes
+                .FirstOrDefaultAsync(x => x.Contenedor == vm.Contenedor);
+
+            if (precarga != null)
+            {
+                _context.DatosDespachosViajes.Remove(precarga);
+            }
+
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Index", new { fecha = vm.FechaHoraDespacho.Date });
