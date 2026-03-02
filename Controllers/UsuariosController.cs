@@ -2,8 +2,8 @@
 using BitacoraAlfipac.Data;
 using BitacoraAlfipac.Models;
 using BitacoraAlfipac.Models.Entidades;
+using BitacoraAlfipac.Models.ViewModels;
 using BitacoraAlfipac.Security;
-using BitacoraAlfipac.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace BitacoraAlfipac.ViewModels
+namespace BitacoraAlfipac.Models.ViewModels
 {
     public class UsuarioCreateViewModel
     {
