@@ -1,9 +1,10 @@
 using BitacoraAlfipac.Data;
 using BitacoraAlfipac.Data.Seed;
-using BitacoraAlfipac.Services.Interfaces;
 using BitacoraAlfipac.Services.Implementations;
+using BitacoraAlfipac.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +49,13 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // ==========================
 builder.Services.AddControllersWithViews();
 
+//GLOBALIZACION
+var culture = new CultureInfo("en-US");
+
+CultureInfo.DefaultThreadCurrentCulture = culture;
+CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+//BUILDER
 var app = builder.Build();
 
 // ==========================

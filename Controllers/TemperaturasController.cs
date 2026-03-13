@@ -165,6 +165,21 @@ public class TemperaturasController : Controller
         return RedirectToAction(nameof(Detalle), new { id = contenedorId });
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EliminarRegistro(int id, int contenedorId)
+    {
+        var registro = await _context.RegistrosTemperatura
+            .FirstOrDefaultAsync(r => r.Id == id);
+
+        if (registro != null)
+        {
+            _context.RegistrosTemperatura.Remove(registro);
+            await _context.SaveChangesAsync();
+        }
+
+        return RedirectToAction(nameof(Detalle), new { id = contenedorId });
+    }
 
     public async Task<IActionResult> ExportarExcel(int id)
     {

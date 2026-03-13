@@ -40,8 +40,15 @@
                    step="0.1"
                    name="SetPoint"
                    class="form-control"
-                   value="@Model.SetPoint" />
+                   value="@Model.SetPoint?.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)" />
         </div>
+
+        @if (Model.SetPoint != null)
+        {
+            <small class="text-muted">
+                SetPoint actual: <strong>@Model.SetPoint.Value.ToString("0.0") °C</strong>
+            </small>
+        }
 
         <div class="col-md-4">
             <label class="form-label">Fecha / Hora Despacho</label>
@@ -97,7 +104,7 @@
                 <input name="fechaHora" type="datetime-local" class="form-control" required />
             </div>
             <div class="col-md-2">
-                <input name="temperatura" class="form-control" placeholder="°C" required />
+                <input name="temperatura" class="form-control" placeholder="°C" type="number" step="0.1" required />
             </div>
             <div class="col-md-5">
                 <input name="observacion" class="form-control" placeholder="Observación" />
@@ -123,13 +130,16 @@
         {
             <tr>
                 <td>@r.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
-                <td>@r.Temperatura °C</td>
+                <td>@r.Temperatura.ToString("0.0") °C</td>
                 <td>@r.Observacion</td>
                 <td class="text-center">
                     <form asp-action="EliminarRegistro" method="post">
                         <input type="hidden" name="id" value="@r.Id" />
                         <input type="hidden" name="contenedorId" value="@Model.Id" />
-                        <button class="btn btn-danger btn-sm">✖</button>
+                        <button class="btn btn-danger btn-sm"
+                                onclick="return confirm('¿Eliminar este registro de temperatura?')">
+                            ✖
+                        </button>
                     </form>
                 </td>
             </tr>
