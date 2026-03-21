@@ -190,23 +190,44 @@ namespace BitacoraAlfipac.Controllers
                 container.Page(page =>
                 {
                     page.Size(PageSizes.A4.Landscape());
-                    page.Margin(20);
+                    page.Margin(25);
 
-                    // ===== HEADER =====
+                    // =========================
+                    // HEADER
+                    // =========================
                     page.Header().Column(col =>
                     {
-                        col.Item().Text("ALFIPAC – ACTAS Y PAB PENDIENTES")
-                            .Bold().FontSize(18);
+                        col.Spacing(5);
 
-                        col.Item().LineHorizontal(1);
+                        col.Item().Text("ALFIPAC")
+                            .FontSize(20)
+                            .Bold()
+                            .FontColor(Colors.Blue.Darken2);
 
-                        col.Item().Text($"Impreso por: {nombre}");
-                        col.Item().Text($"Fecha de impresión: {DateTime.Now:dd/MM/yyyy HH:mm}");
+                        col.Item().Text("ACTAS Y PAB PENDIENTES")
+                            .FontSize(14)
+                            .SemiBold();
 
-                        col.Item().LineHorizontal(1);
+                        col.Item().LineHorizontal(1)
+                            .LineColor(Colors.Grey.Lighten2);
+
+                        col.Item().Row(row =>
+                        {
+                            row.RelativeItem().Text($"👤 Usuario: {nombre}").FontSize(10);
+                            row.RelativeItem().AlignRight().Text($"📅 {DateTime.Now:dd/MM/yyyy HH:mm}").FontSize(10);
+                        });
+
+                        col.Item().Text($"Total de registros: {registros.Count}")
+                            .FontSize(10)
+                            .FontColor(Colors.Grey.Darken1);
+
+                        col.Item().LineHorizontal(1)
+                            .LineColor(Colors.Grey.Lighten2);
                     });
 
-                    // ===== TABLA =====
+                    // =========================
+                    // TABLA
+                    // =========================
                     page.Content().Table(table =>
                     {
                         table.ColumnsDefinition(columns =>
@@ -216,12 +237,20 @@ namespace BitacoraAlfipac.Controllers
                             columns.RelativeColumn(1); // Número
                             columns.RelativeColumn(2); // Viaje
                             columns.RelativeColumn(2); // Cliente
-                            columns.RelativeColumn(3); // Detalle
+                            columns.RelativeColumn(4); // Detalle (más espacio)
                         });
 
-                        // Encabezados
+                        // ===== HEADER =====
                         void HeaderCell(string text) =>
-                            table.Cell().Element(HeaderStyle).Text(text).Bold().FontSize(12);
+                            table.Cell().Background(Colors.Blue.Lighten3)
+                                .Border(1)
+                                .BorderColor(Colors.White)
+                                .Padding(6)
+                                .AlignCenter()
+                                .AlignMiddle()
+                                .Text(text)
+                                .Bold()
+                                .FontSize(11);
 
                         HeaderCell("Tipo");
                         HeaderCell("Contenedor");
@@ -230,33 +259,50 @@ namespace BitacoraAlfipac.Controllers
                         HeaderCell("Cliente");
                         HeaderCell("Detalle");
 
-                        // Filas
+                        // ===== FILAS =====
+                        int i = 0;
+
                         foreach (var r in registros)
                         {
-                            table.Cell().Element(CellStyle).Text(r.Tipo ?? "");
-                            table.Cell().Element(CellStyle).Text(r.Contenedor ?? "");
-                            table.Cell().Element(CellStyle).Text(r.Numero ?? "");
-                            table.Cell().Element(CellStyle).Text(r.Viaje ?? "");
-                            table.Cell().Element(CellStyle).Text(r.Cliente ?? "");
-                            table.Cell().Element(CellStyle).Text(r.Detalle ?? "");
+                            var bg = i % 2 == 0
+                                ? Colors.Grey.Lighten4
+                                : Colors.White;
+
+                            void Cell(string text) =>
+                                table.Cell()
+                                    .Background(bg)
+                                    .BorderBottom(1)
+                                    .BorderColor(Colors.Grey.Lighten2)
+                                    .Padding(5)
+                                    .Text(text)
+                                    .FontSize(10);
+
+                            Cell(r.Tipo ?? "");
+                            Cell(r.Contenedor ?? "");
+                            Cell(r.Numero ?? "");
+                            Cell(r.Viaje ?? "-");
+                            Cell(r.Cliente ?? "-");
+                            Cell(r.Detalle ?? "");
+
+                            i++;
                         }
-
-                        // ===== ESTILOS =====
-                        static IContainer HeaderStyle(IContainer c) =>
-                            c.Background(Colors.Grey.Lighten3)
-                             .BorderBottom(1)
-                             .BorderColor(Colors.Grey.Medium)
-                             .Padding(5)
-                             .AlignCenter()
-                             .AlignMiddle();
-
-                        static IContainer CellStyle(IContainer c) =>
-                            c.BorderBottom(1)
-                             .BorderColor(Colors.Grey.Lighten2)
-                             .Padding(4)
-                             .AlignLeft()
-                             .AlignMiddle();
                     });
+
+                    // =========================
+                    // FOOTER
+                    // =========================
+                    page.Footer()
+                        .AlignCenter()
+                        .Text(txt =>
+                        {
+                            txt.Span("Reporte generado automáticamente por SCL · ")
+                                .FontSize(9)
+                                .FontColor(Colors.Grey.Darken1);
+
+                            txt.Span(DateTime.Now.ToString("dd/MM/yyyy HH:mm"))
+                                .SemiBold()
+                                .FontSize(9);
+                        });
                 });
             }).GeneratePdf();
 
@@ -279,40 +325,70 @@ namespace BitacoraAlfipac.Controllers
                 container.Page(page =>
                 {
                     page.Size(PageSizes.A4.Landscape());
-                    page.Margin(20);
+                    page.Margin(25);
 
-                    // ===== HEADER =====
+                    // =========================
+                    // HEADER
+                    // =========================
                     page.Header().Column(col =>
                     {
-                        col.Item().Text("ALFIPAC – HISTORIAL DE ACTAS Y PAB")
-                            .Bold().FontSize(18);
+                        col.Spacing(5);
 
-                        col.Item().LineHorizontal(1);
+                        col.Item().Text("ALFIPAC")
+                            .FontSize(20)
+                            .Bold()
+                            .FontColor(Colors.Blue.Darken2);
 
-                        col.Item().Text($"Impreso por: {nombre}");
-                        col.Item().Text($"Fecha de impresión: {DateTime.Now:dd/MM/yyyy HH:mm}");
+                        col.Item().Text("HISTORIAL DE ACTAS Y PAB")
+                            .FontSize(14)
+                            .SemiBold();
 
-                        col.Item().LineHorizontal(1);
+                        col.Item().LineHorizontal(1)
+                            .LineColor(Colors.Grey.Lighten2);
+
+                        col.Item().Row(row =>
+                        {
+                            row.RelativeItem().Text($"👤 Usuario: {nombre}").FontSize(10);
+                            row.RelativeItem().AlignRight().Text($"📅 {DateTime.Now:dd/MM/yyyy HH:mm}").FontSize(10);
+                        });
+
+                        col.Item().Text($"Total de registros: {registros.Count}")
+                            .FontSize(10)
+                            .FontColor(Colors.Grey.Darken1);
+
+                        col.Item().LineHorizontal(1)
+                            .LineColor(Colors.Grey.Lighten2);
                     });
 
-                    // ===== TABLA =====
+                    // =========================
+                    // TABLA
+                    // =========================
                     page.Content().Table(table =>
                     {
                         table.ColumnsDefinition(columns =>
                         {
-                            columns.ConstantColumn(50);   // Tipo
-                            columns.ConstantColumn(100);  // Contenedor
-                            columns.ConstantColumn(60);   // Número
-                            columns.ConstantColumn(80);   // Viaje
+                            columns.ConstantColumn(60);   // Tipo
+                            columns.ConstantColumn(110);  // Contenedor
+                            columns.ConstantColumn(70);   // Número
+                            columns.ConstantColumn(90);   // Viaje
                             columns.RelativeColumn(2);    // Cliente
                             columns.RelativeColumn(3);    // Detalle
-                            columns.ConstantColumn(120);  // Fecha Ingreso
-                            columns.ConstantColumn(80);   // Resultado
+                            columns.ConstantColumn(130);  // Fecha
+                            columns.ConstantColumn(100);  // Resultado
                         });
 
-                        // Encabezados
+                        // ===== HEADER =====
                         void HeaderCell(string text) =>
-                            table.Cell().Element(HeaderStyle).Text(text).Bold().FontSize(12);
+                            table.Cell()
+                                .Background(Colors.Blue.Lighten3)
+                                .Border(1)
+                                .BorderColor(Colors.White)
+                                .Padding(6)
+                                .AlignCenter()
+                                .AlignMiddle()
+                                .Text(text)
+                                .Bold()
+                                .FontSize(11);
 
                         HeaderCell("Tipo");
                         HeaderCell("Contenedor");
@@ -323,37 +399,70 @@ namespace BitacoraAlfipac.Controllers
                         HeaderCell("Fecha Ingreso");
                         HeaderCell("Resultado");
 
-                        // Filas
+                        // ===== FILAS =====
+                        int i = 0;
+
                         foreach (var r in registros)
                         {
-                            table.Cell().Element(CellStyle).Text(r.Tipo ?? "");
-                            table.Cell().Element(CellStyle).Text(r.Contenedor ?? "");
-                            table.Cell().Element(CellStyle).Text(r.Numero ?? "");
-                            table.Cell().Element(CellStyle).Text(r.Viaje ?? "");
-                            table.Cell().Element(CellStyle).Text(r.Cliente ?? "");
-                            table.Cell().Element(CellStyle).Text(r.Detalle ?? "");
-                            table.Cell().Element(CellStyle)
-                                 .Text(r.FechaHoraIngresoContenedor?.ToString("dd/MM/yyyy HH:mm") ?? "");
-                            table.Cell().Element(CellStyle)
-                                 .Text(r.AplicadoCorrectamente ? "Correcta" : "Incorrecta");
+                            var bg = i % 2 == 0
+                                ? Colors.Grey.Lighten4
+                                : Colors.White;
+
+                            void Cell(string text) =>
+                                table.Cell()
+                                    .Background(bg)
+                                    .BorderBottom(1)
+                                    .BorderColor(Colors.Grey.Lighten2)
+                                    .Padding(5)
+                                    .Text(text)
+                                    .FontSize(10);
+
+                            Cell(r.Tipo ?? "");
+                            Cell(r.Contenedor ?? "");
+                            Cell(r.Numero ?? "");
+                            Cell(r.Viaje ?? "-");
+                            Cell(r.Cliente ?? "-");
+                            Cell(r.Detalle ?? "");
+                            Cell(r.FechaHoraIngresoContenedor?.ToString("dd/MM/yyyy HH:mm") ?? "-");
+
+                            // =========================
+                            // RESULTADO CON COLOR
+                            // =========================
+                            var resultadoTexto = r.AplicadoCorrectamente ? "✔ Correcta" : "✖ Incorrecta";
+                            var resultadoColor = r.AplicadoCorrectamente
+                                ? Colors.Green.Medium
+                                : Colors.Red.Medium;
+
+                            table.Cell()
+                                .Background(bg)
+                                .BorderBottom(1)
+                                .BorderColor(Colors.Grey.Lighten2)
+                                .Padding(5)
+                                .AlignCenter()
+                                .Text(resultadoTexto)
+                                .FontColor(resultadoColor)
+                                .Bold()
+                                .FontSize(10);
+
+                            i++;
                         }
-
-                        // ===== ESTILOS =====
-                        static IContainer HeaderStyle(IContainer c) =>
-                            c.Background(Colors.Grey.Lighten3)
-                             .BorderBottom(1)
-                             .BorderColor(Colors.Grey.Medium)
-                             .Padding(5)
-                             .AlignCenter()
-                             .AlignMiddle();
-
-                        static IContainer CellStyle(IContainer c) =>
-                            c.BorderBottom(1)
-                             .BorderColor(Colors.Grey.Lighten2)
-                             .Padding(4)
-                             .AlignLeft()
-                             .AlignMiddle();
                     });
+
+                    // =========================
+                    // FOOTER
+                    // =========================
+                    page.Footer()
+                        .AlignCenter()
+                        .Text(txt =>
+                        {
+                            txt.Span("Reporte histórico generado por SCL · ")
+                                .FontSize(9)
+                                .FontColor(Colors.Grey.Darken1);
+
+                            txt.Span(DateTime.Now.ToString("dd/MM/yyyy HH:mm"))
+                                .SemiBold()
+                                .FontSize(9);
+                        });
                 });
             }).GeneratePdf();
 
