@@ -639,6 +639,7 @@ public async Task<IActionResult> Mover(
     public async Task<IActionResult> InventarioGeneral(
     string? contenedor,
     string? cliente,
+    string? transportista,
     string? estado,
     string? tamano,
     string? patio)
@@ -725,6 +726,10 @@ public async Task<IActionResult> Mover(
             todos = todos.Where(x => x.Contenedor != null &&
                                      x.Contenedor.Contains(contenedor));
 
+        if (!string.IsNullOrWhiteSpace(transportista))
+            todos = todos.Where(x => x.Transportista != null &&
+                                     x.Transportista.Contains(transportista));
+
         if (!string.IsNullOrWhiteSpace(cliente))
             todos = todos.Where(x => x.Cliente != null &&
                                      x.Cliente.Contains(cliente));
@@ -745,8 +750,8 @@ public async Task<IActionResult> Mover(
             Items = lista,
 
             Total = lista.Count,
-            Cargados = lista.Count(x => x.EstadoCarga == "CARGADO"),
-            Vacios = lista.Count(x => x.EstadoCarga == "VACIO"),
+            Cargados = lista.Count(x => x.EstadoCarga == "Cargado"),
+            Vacios = lista.Count(x => x.EstadoCarga == "Vacio"),
 
             SinAsignar = lista.Count(x => x.Patio == "S/Pat"),
             Patio1 = lista.Count(x => x.Patio == "P1"),

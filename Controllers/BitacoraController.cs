@@ -89,18 +89,32 @@ public class BitacoraController : Controller
                 page.Size(PageSizes.A4.Landscape());
                 page.Margin(20);
 
-                page.Header().Column(col =>
+                page.Header().Row(row =>
                 {
-                    col.Item().AlignCenter().Text("ALFIPAC – BITÁCORA OPERATIVA DIARIA")
-                        .Bold().FontSize(18);
+                    // LOGO IZQUIERDA
+                    row.ConstantItem(60).Height(60).Image("wwwroot/logo.jpg");
 
-                    col.Item().AlignCenter().Text($"Fecha operativa: {fecha:dd/MM/yyyy}")
-                        .FontSize(11);
+                    // TEXTO CENTRO
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().AlignCenter().Text("ALFIPAC – BITÁCORA OPERATIVA DIARIA")
+                            .Bold().FontSize(18);
 
-                    col.Item().AlignCenter().Text($"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}")
-                        .FontSize(10).FontColor(Colors.Grey.Darken1);
+                        col.Item().AlignCenter().Text("CONTROL INTERNO ENTRADA / SALIDA")
+                            .Bold().FontSize(18);
 
-                    col.Item().PaddingTop(5).LineHorizontal(1);
+                        col.Item().AlignCenter().Text($"Fecha operativa: {fecha:dd/MM/yyyy}")
+                            .FontSize(11);
+
+                        col.Item().AlignCenter().Text($"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}")
+                            .FontSize(10)
+                            .FontColor(Colors.Grey.Darken1);
+
+                        col.Item().PaddingTop(5).LineHorizontal(1);
+                    });
+
+                    // ESPACIO DERECHO (para balance visual)
+                    row.ConstantItem(60);
                 });
 
                 page.Content().PaddingTop(10).Table(table =>
