@@ -174,7 +174,7 @@
                                         data-marchamos="@item.Marchamos"
                                         data-fecha="@item.FechaHoraIngreso.ToString("yyyy-MM-dd HH:mm")"
                                         data-transportista="@item.Transportista"
-                                        data-cliente="" @item.Cliente"
+                                        data-cliente="@item.Cliente"
                                         data-tamano="@item.Tamaño"
                                         data-chasis="@item.Chasis"
                                         data-viaje="@item.ViajeDua">
@@ -304,7 +304,7 @@
                     <div class="row g-3">
                         <div class="col-md-4">
                             <label>Contenedor</label>
-                            <input name="Contenedor" id="editContenedor" class="form-control" />
+                            <input name="Contenedor" id="editContenedor" class="form-control" readonly />
                         </div>
 
                         <div class="col-md-4">
@@ -330,6 +330,16 @@
                         <div class="col-md-4">
                             <label>Tamaño</label>
                             <input name="Tamano" id="editTamano" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Chofer</label>
+                            <input name="Chofer" id="editChofer" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>Placa</label>
+                            <input name="PlacaCabezal" id="editPlacaCabezal" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
@@ -371,6 +381,8 @@
         document.getElementById("editTransportista").value = item.Transportista;
         document.getElementById("editCliente").value = item.Cliente;
         document.getElementById("editTamano").value = item.Tamaño;
+        document.getElementById("editChofer").value = item.Chofer;
+        document.getElementById("editPlacaCabezal").value = item.PlacaCabezal;
         document.getElementById("editChasis").value = item.Chasis;
         document.getElementById("editViaje").value = item.ViajeDua;
     }

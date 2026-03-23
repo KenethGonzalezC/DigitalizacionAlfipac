@@ -4,6 +4,8 @@ namespace BitacoraAlfipac.Models.ViewModels
 {
     public class BitacoraDespachosViewModel
     {
+        //necesario para editar
+        public int Id { get; set; } 
         // Formulario
         public string Contenedor { get; set; } = "";
         public string? ContenedorReferencia { get; set; }

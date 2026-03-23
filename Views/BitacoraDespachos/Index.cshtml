@@ -120,7 +120,7 @@
             @if (!Model.Despachos.Any())
             {
                 <tr>
-                    <td colspan="9" class="text-center text-muted py-4">
+                    <td colspan="10" class="text-center text-muted py-4">
                         No existen despachos para esta fecha
                     </td>
                 </tr>
@@ -137,6 +137,21 @@
                         <td>@d.Informacion</td>
                         <td>@d.Chasis</td>
                         <td>@d.ViajeDua</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning btnEditar"
+                                    data-id="@d.Id"
+                                    data-contenedor="@d.Contenedor"
+                                    data-marchamos="@d.Marchamos"
+                                    data-fecha="@d.FechaHoraDespacho.ToString("yyyy-MM-ddTHH:mm")"
+                                    data-transportista="@d.Transportista"
+                                    data-info="@d.Informacion"
+                                    data-chofer="@d.Chofer"
+                                    data-placa="@d.PlacaCabezal"
+                                    data-chasis="@d.Chasis"
+                                    data-viaje="@d.ViajeDua">
+                                Editar
+                            </button>
+                        </td>
                         <td>
                             <button class="btn btn-sm btn-danger"
                                     data-id="@d.Id"
@@ -282,4 +297,102 @@
                 });
 
         });
+    </script>
+
+    <div class="modal fade" id="modalEditar" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+
+                <form asp-action="Editar" method="post">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Editar despacho</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <input type="hidden" id="editId" name="Id" />
+
+                        <div class="row g-3">
+
+                            <div class="col-md-4">
+                                <label>Contenedor</label>
+                                <input id="editContenedor" class="form-control" readonly />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Marchamos</label>
+                                <input id="editMarchamos" name="Marchamos" class="form-control" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Fecha despacho</label>
+                                <input id="editFecha" name="FechaHoraDespacho"
+                                       type="datetime-local"
+                                       class="form-control" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Transportista</label>
+                                <input id="editTransportista" name="Transportista" class="form-control" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Información</label>
+                                <input id="editInfo" name="Informacion" class="form-control" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Chofer</label>
+                                <input id="editChofer" name="Chofer" class="form-control" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Placa</label>
+                                <input id="editPlaca" name="PlacaCabezal" class="form-control" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Chasis</label>
+                                <input id="editChasis" name="Chasis" class="form-control" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label>Viaje / DUA</label>
+                                <input id="editViaje" name="ViajeDua" class="form-control" />
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-primary">Guardar cambios</button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+            document.querySelectorAll(".btnEditar").forEach(btn => {
+                btn.addEventListener("click", function () {
+
+                    document.getElementById("editId").value = this.dataset.id;
+                    document.getElementById("editContenedor").value = this.dataset.contenedor;
+                    document.getElementById("editMarchamos").value = this.dataset.marchamos;
+                    document.getElementById("editFecha").value = this.dataset.fecha;
+                    document.getElementById("editTransportista").value = this.dataset.transportista;
+                    document.getElementById("editInfo").value = this.dataset.info;
+                    document.getElementById("editChofer").value = this.dataset.chofer;
+                    document.getElementById("editPlaca").value = this.dataset.placa;
+                    document.getElementById("editChasis").value = this.dataset.chasis;
+                    document.getElementById("editViaje").value = this.dataset.viaje;
+
+                    var modal = new bootstrap.Modal(document.getElementById("modalEditar"));
+                    modal.show();
+                });
+            });
     </script>

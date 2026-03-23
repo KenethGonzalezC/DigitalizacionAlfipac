@@ -1,0 +1,179 @@
+﻿@model List<BitacoraAlfipac.Models.Entidades.BitacoraIngreso>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>🚗 Vehículos en almacén</h3>
+
+    <div>
+        <span class="badge bg-primary">Total: @ViewBag.TotalVehiculos</span>
+    </div>
+</div>
+
+<form method="get" class="card p-3 mb-3 shadow-sm">
+    <div class="row g-2">
+
+        <div class="col-md-2">
+            <input name="marchamo" class="form-control"
+                   placeholder="VEHICULO"
+                   value="@Context.Request.Query["marchamo"]" />
+        </div>
+
+        <div class="col-md-2">
+            <input name="contenedor" class="form-control"
+                   placeholder="VIN"
+                   value="@Context.Request.Query["contenedor"]" />
+        </div>
+
+        <div class="col-md-2">
+            <input name="cliente" class="form-control"
+                   placeholder="Cliente"
+                   value="@Context.Request.Query["cliente"]" />
+        </div>
+
+        <div class="col-md-2 d-grid">
+            <button class="btn btn-primary">Filtrar</button>
+        </div>
+
+        <div class="col-md-2 d-grid">
+            <button type="button" onclick="limpiarFiltros()" class="btn btn-outline-secondary flex-grow-1">
+                Limpiar
+            </button>
+        </div>
+
+    </div>
+</form>
+
+<input type="text" id="buscador" class="form-control mb-3"
+       placeholder="🔍 Buscar VIN" />
+
+<div>
+    <button class="btn btn-success mb-3"
+            data-bs-toggle="modal"
+            data-bs-target="#modalVehiculoManual">
+        + Agregar vehículo manual
+    </button>
+</div>
+    
+<div class="card p-3">
+
+    <table class="table table-bordered table-sm" id="tablaVehiculos">
+        <thead class="table-light">
+            <tr>
+                <th>Ingreso</th>
+                <th>Vehículo</th>
+                <th>VIN</th>
+                <th>Cliente</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var v in Model)
+            {
+                var horas = (DateTime.Now - v.FechaHoraIngreso).TotalHours;
+
+                <tr>
+                    <td>@v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@v.Marchamos</td>
+                    <td>@v.Contenedor</td>
+                    <td>@v.Cliente</td>
+
+                    <td class="text-center">
+                        <form asp-action="EliminarVehiculo" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@v.Id" />
+                            <button class="btn btn-danger btn-sm">
+                                Eliminar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+<script>
+    document.getElementById("buscador").addEventListener("keyup", function () {
+        let filtro = this.value.toLowerCase();
+        let filas = document.querySelectorAll("#tablaVehiculos tbody tr");
+
+        filas.forEach(f => {
+            let texto = f.innerText.toLowerCase();
+            f.style.display = texto.includes(filtro) ? "" : "none";
+        });
+    });
+</script>
+
+<script>
+    function limpiarFiltros() {
+        const url = new URL(window.location);
+        url.search = '';
+        window.location.href = url.toString();
+    }
+</script>
+
+<div class="modal fade" id="modalVehiculoManual" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <form asp-action="CrearVehiculoManual" method="post">
+                @Html.AntiForgeryToken()
+
+                <!-- HEADER -->
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Registrar vehículo manual</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- BODY -->
+                <div class="modal-body">
+
+                    <p class="text-muted">
+                        Este registro no se incluirá en la bitácora diaria.
+                    </p>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+                            <label class="form-label">VIN</label>
+                            <input name="contenedor" class="form-control" required />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Vehículo</label>
+                            <input name="marchamo" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Cliente</label>
+                            <input name="cliente" class="form-control" />
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- FOOTER -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <button type="submit" class="btn btn-success">
+                        Guardar vehículo
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelector('[name="contenedor"]').addEventListener('input', function () {
+        this.value = this.value.toUpperCase();
+    });
+</script>
+

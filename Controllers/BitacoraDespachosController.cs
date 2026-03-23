@@ -517,7 +517,79 @@ namespace BitacoraAlfipac.Controllers
             return RedirectToAction("Backups");
         }
 
+        //edicion de despachos
+        public async Task<IActionResult> Editar(int id)
+        {
+            var despacho = await _context.BitacoraDespachos
+                .FirstOrDefaultAsync(x => x.Id == id);
 
+            if (despacho == null)
+                return NotFound();
+
+            var vm = new BitacoraDespachosViewModel
+            {
+                // SOLO LECTURA
+                Contenedor = despacho.Contenedor,
+
+                // EDITABLES
+                Marchamos = despacho.Marchamos,
+                FechaHoraDespacho = despacho.FechaHoraDespacho,
+                Transportista = despacho.Transportista,
+                Informacion = despacho.Informacion,
+                Chofer = despacho.Chofer,
+                PlacaCabezal = despacho.PlacaCabezal,
+                Chasis = despacho.Chasis,
+                ViajeDua = despacho.ViajeDua,
+                EsSalidaEnFurgon = despacho.EsSalidaEnFurgon,
+                ContenedorReferencia = despacho.ContenedorReferencia,
+
+                // IMPORTANTE
+                Id = despacho.Id
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Editar(BitacoraDespachosViewModel vm)
+        {
+            var despacho = await _context.BitacoraDespachos
+                .FirstOrDefaultAsync(x => x.Id == vm.Id);
+
+            if (despacho == null)
+                return NotFound();
+
+            // ❌ NO TOCAR CONTENEDOR
+            // despacho.Contenedor = vm.Contenedor;
+
+            // ✅ EDITABLES
+            despacho.Marchamos = vm.Marchamos;
+            despacho.FechaHoraDespacho = vm.FechaHoraDespacho;
+            despacho.Transportista = vm.Transportista;
+            despacho.Informacion = vm.Informacion;
+            despacho.Chofer = vm.Chofer;
+            despacho.PlacaCabezal = vm.PlacaCabezal;
+            despacho.Chasis = vm.Chasis;
+            despacho.ViajeDua = vm.ViajeDua;
+            despacho.EsSalidaEnFurgon = vm.EsSalidaEnFurgon;
+            despacho.ContenedorReferencia = vm.ContenedorReferencia;
+
+            // 🔥 OPCIONAL PERO IMPORTANTE: actualizar historial
+            var historial = await _context.HistorialContenedores
+                .Where(h => h.Contenedor == despacho.Contenedor)
+                .OrderByDescending(h => h.FechaHoraIngreso)
+                .FirstOrDefaultAsync();
+
+            if (historial != null)
+            {
+                historial.FechaHoraSalida = vm.FechaHoraDespacho;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index", new { fecha = vm.FechaHoraDespacho.Date });
+        }
     }
 
 }

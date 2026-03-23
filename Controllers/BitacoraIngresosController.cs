@@ -90,17 +90,21 @@ public class BitacoraIngresosController : Controller
             FechaHoraIngreso = fechaHora
         });
 
-        _context.ContenedoresSinAsignarPatio.Add(new ContenedorSinAsignarPatio
+        //manejo de vehiculos
+        if (model.Tamano.Trim().ToUpper() != "VEHICULO")
         {
-            Contenedor = model.Contenedor,
-            Marchamos = model.Marchamos,
-            Tamano = model.Tamano,
-            Transportista = model.Transportista,
-            Cliente = model.Cliente,
-            Chasis = model.Chasis,
-            EstadoCarga = "Cargado",
-            Ubicacion = "Sin asignar"
-        });
+            _context.ContenedoresSinAsignarPatio.Add(new ContenedorSinAsignarPatio
+            {
+                Contenedor = model.Contenedor,
+                Marchamos = model.Marchamos,
+                Tamano = model.Tamano,
+                Transportista = model.Transportista,
+                Cliente = model.Cliente,
+                Chasis = model.Chasis,
+                EstadoCarga = "Cargado",
+                Ubicacion = "Sin asignar"
+            });
+        }
 
         // 🔹 SI ES REFRIGERADO, CREARLO EN EL MODULO REEFER
         if (model.EsRefrigerado)
@@ -142,11 +146,15 @@ public class BitacoraIngresosController : Controller
         if (ingreso == null)
             return NotFound();
 
-        ingreso.Contenedor = model.Contenedor;
+        // ❌ NO se edita el contenedor
+        // ingreso.Contenedor = model.Contenedor;
+
         ingreso.Marchamos = model.Marchamos;
         ingreso.Transportista = model.Transportista;
         ingreso.Cliente = model.Cliente;
         ingreso.Tamaño = model.Tamano;
+        ingreso.Chofer = model.Chofer;
+        ingreso.PlacaCabezal = model.PlacaCabezal;
         ingreso.Chasis = model.Chasis;
         ingreso.ViajeDua = model.ViajeDua;
 
@@ -159,11 +167,30 @@ public class BitacoraIngresosController : Controller
             0
         );
 
+        // =========================
+        // 🔄 SINCRONIZAR INVENTARIO
+        // =========================
+        var resultado = await BuscarContenedorGlobal(ingreso.Contenedor);
+
+        if (resultado.contenedor != null)
+        {
+            var inv = (IContenedorInventario)resultado.contenedor;
+
+            inv.Marchamos = ingreso.Marchamos;
+            inv.Transportista = ingreso.Transportista;
+            inv.Cliente = ingreso.Cliente;
+            inv.Chasis = ingreso.Chasis;
+            inv.Tamano = ingreso.Tamaño;
+
+            // 💡 Solo si aplica
+            if (!string.IsNullOrEmpty(inv.EstadoCarga))
+                inv.EstadoCarga = "Cargado";
+        }
+
         await _context.SaveChangesAsync();
 
         return RedirectToAction(nameof(Index), new { fecha = ingreso.FechaHoraIngreso.Date });
     }
-
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -359,6 +386,167 @@ public class BitacoraIngresosController : Controller
 
         return Json(resultado);
     }
+    private async Task<(object? contenedor, string? patio)> BuscarContenedorGlobal(string contenedor)
+    {
+        if (string.IsNullOrWhiteSpace(contenedor))
+            return (null, null);
 
+        contenedor = contenedor.ToUpper().Trim();
+
+        // =========================
+        // 🔵 VEHICULOS (PRIORIDAD)
+        // =========================
+        var vehiculo = await _context.ContenedoresSinAsignarPatio
+            .FirstOrDefaultAsync(c => c.Contenedor == contenedor && c.Tamano == "VEHICULO");
+
+        if (vehiculo != null)
+            return (vehiculo, "Vehiculos");
+
+        // =========================
+        // 🔵 SIN ASIGNAR
+        // =========================
+        var sinAsignar = await _context.ContenedoresSinAsignarPatio
+            .FirstOrDefaultAsync(c => c.Contenedor == contenedor);
+
+        if (sinAsignar != null)
+            return (sinAsignar, "SinAsignar");
+
+        // =========================
+        // 🔵 PATIOS
+        // =========================
+        var p1 = await _context.Patio1
+            .FirstOrDefaultAsync(c => c.Contenedor == contenedor);
+
+        if (p1 != null)
+            return (p1, "Patio1");
+
+        var p2 = await _context.Patio2
+            .FirstOrDefaultAsync(c => c.Contenedor == contenedor);
+
+        if (p2 != null)
+            return (p2, "Patio2");
+
+        var anden = await _context.Anden2000
+            .FirstOrDefaultAsync(c => c.Contenedor == contenedor);
+
+        if (anden != null)
+            return (anden, "Anden2000");
+
+        var quimicos = await _context.PatioQuimicos
+            .FirstOrDefaultAsync(c => c.Contenedor == contenedor);
+
+        if (quimicos != null)
+            return (quimicos, "PatioQuimicos");
+
+        return (null, null);
+    }
+
+    //vehiculos
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EliminarVehiculo(int id)
+    {
+        var ingreso = await _context.BitacoraIngresos
+            .FirstOrDefaultAsync(x => x.Id == id);
+
+        if (ingreso == null)
+            return NotFound();
+
+        // eliminar historial relacionado
+        var historial = await _context.HistorialContenedores
+            .Where(h => h.Contenedor == ingreso.Contenedor &&
+                        h.FechaHoraIngreso == ingreso.FechaHoraIngreso)
+            .ToListAsync();
+
+        _context.HistorialContenedores.RemoveRange(historial);
+
+        _context.BitacoraIngresos.Remove(ingreso);
+
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction("Vehiculos");
+    }
+
+    //filtros
+    public async Task<IActionResult> Vehiculos(
+    string? contenedor,
+    string? marchamo,
+    string? cliente,
+    DateTime? fechaInicio,
+    DateTime? fechaFin)
+    {
+        var query = _context.BitacoraIngresos
+            .Where(x => x.Tamaño == "VEHICULO" ||
+            x.FechaHoraIngreso.Year == 1212) //incluir manuales)
+            .AsQueryable();
+
+        // 🔍 FILTROS DINÁMICOS
+        if (!string.IsNullOrWhiteSpace(contenedor))
+            query = query.Where(x => x.Contenedor.Contains(contenedor));
+
+        if (!string.IsNullOrWhiteSpace(marchamo))
+            query = query.Where(x => x.Marchamos.Contains(marchamo));
+
+        if (!string.IsNullOrWhiteSpace(cliente))
+            query = query.Where(x => x.Cliente.Contains(cliente));
+
+        if (fechaInicio.HasValue)
+            query = query.Where(x => x.FechaHoraIngreso >= fechaInicio);
+
+        if (fechaFin.HasValue)
+            query = query.Where(x => x.FechaHoraIngreso <= fechaFin);
+
+        var lista = await query
+            .OrderByDescending(x => x.FechaHoraIngreso)
+            .ToListAsync();
+
+        // 📊 KPIs
+        ViewBag.TotalVehiculos = lista.Count;
+
+        ViewBag.VehiculosHoy = lista.Count(x =>
+            x.FechaHoraIngreso.Date == DateTime.Today);
+
+        ViewBag.VehiculosAntiguos = lista.Count(x =>
+            (DateTime.Now - x.FechaHoraIngreso).TotalHours > 24);
+
+        return View(lista);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CrearVehiculoManual(string contenedor, string marchamo, string cliente)
+    {
+        var existe = await _context.BitacoraIngresos
+    .AnyAsync(x => x.Contenedor == contenedor);
+
+        if (existe)
+        {
+            return RedirectToAction("Vehiculos");
+        }
+
+        if (string.IsNullOrWhiteSpace(contenedor))
+            return RedirectToAction("Vehiculos");
+
+        var ingreso = new BitacoraIngreso
+        {
+            Contenedor = contenedor.ToUpper().Trim(),
+            Marchamos = marchamo ?? "",
+            Cliente = cliente ?? "",
+            FechaHoraIngreso = new DateTime(1212, 12, 12), // CLAVE
+            Transportista = "-",
+            Tamaño = "VEHICULO",
+            Chofer = "-",
+            PlacaCabezal = "-",
+            Chasis = "-",
+            ViajeDua = "-"
+        };
+
+        _context.BitacoraIngresos.Add(ingreso);
+
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction("Vehiculos");
+    }
 
 }
