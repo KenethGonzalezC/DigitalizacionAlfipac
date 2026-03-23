@@ -74,29 +74,33 @@ namespace BitacoraAlfipac.Controllers
                 contenedorObj = resultado.contenedor;
                 patioOrigen = resultado.patio;
 
-                if (contenedorObj != null)
+                // 🚨 VALIDACIÓN CRÍTICA
+                if (contenedorObj == null)
                 {
-                    inventario = (IContenedorInventario)contenedorObj;
-
-                    // ✏️ actualizar marchamo
-                    inventario.Marchamos = vm.Marchamos;
-
-                    // 🛟 BACKUP
-                    var backup = new ContenedorBackupDespacho
-                    {
-                        Contenedor = inventario.Contenedor,
-                        PatioOrigen = patioOrigen ?? "",
-                        Marchamos = inventario.Marchamos ?? "",
-                        Estado = inventario.EstadoCarga ?? "",
-                        Tamaño = inventario.Tamano ?? "",
-                        Transportista = inventario.Transportista ?? "",
-                        Cliente = inventario.Cliente ?? "",
-                        Chasis = inventario.Chasis ?? "",
-                        FechaRespaldo = DateTime.Now
-                    };
-
-                    _context.ContenedoresBackupDespacho.Add(backup);
+                    TempData["Error"] = "El contenedor no existe en inventario. Si es salida en furgón, debe marcar la opción.";
+                    return RedirectToAction("Index", new { fecha = vm.FechaHoraDespacho.Date });
                 }
+
+                inventario = (IContenedorInventario)contenedorObj;
+
+                // ✏️ actualizar marchamo
+                inventario.Marchamos = vm.Marchamos;
+
+                // 🛟 BACKUP
+                var backup = new ContenedorBackupDespacho
+                {
+                    Contenedor = inventario.Contenedor,
+                    PatioOrigen = patioOrigen ?? "",
+                    Marchamos = inventario.Marchamos ?? "",
+                    Estado = inventario.EstadoCarga ?? "",
+                    Tamaño = inventario.Tamano ?? "",
+                    Transportista = inventario.Transportista ?? "",
+                    Cliente = inventario.Cliente ?? "",
+                    Chasis = inventario.Chasis ?? "",
+                    FechaRespaldo = DateTime.Now
+                };
+
+                _context.ContenedoresBackupDespacho.Add(backup);
             }
 
             // 📝 CREAR DESPACHO (SIEMPRE)
