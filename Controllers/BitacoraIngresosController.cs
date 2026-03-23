@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using System.IO;
 using System.Text;
 
@@ -481,6 +483,10 @@ public class BitacoraIngresosController : Controller
             x.FechaHoraIngreso.Year == 1212) //incluir manuales)
             .AsQueryable();
 
+        // 🔴 FILTRO CLAVE: SOLO VEHÍCULOS ACTIVOS (NO DESPACHADOS)
+        query = query.Where(x => !_context.HistorialContenedores
+            .Any(h => h.Contenedor == x.Contenedor && h.FechaHoraSalida != null));
+
         // 🔍 FILTROS DINÁMICOS
         if (!string.IsNullOrWhiteSpace(contenedor))
             query = query.Where(x => x.Contenedor.Contains(contenedor));
@@ -549,4 +555,172 @@ public class BitacoraIngresosController : Controller
         return RedirectToAction("Vehiculos");
     }
 
+    //exportaciones
+    [HttpPost]
+    public IActionResult ExportarVehiculosPDF(string nombre)
+    {
+        var datos = _context.BitacoraIngresos
+            .Where(x => x.Tamaño == "VEHICULO" || x.FechaHoraIngreso.Year == 1212)
+            .OrderByDescending(x => x.FechaHoraIngreso)
+            .ToList();
+
+        int total = datos.Count;
+
+        QuestPDF.Settings.License = LicenseType.Community;
+
+        var pdf = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4.Landscape());
+                page.Margin(20);
+
+                // ===== HEADER =====
+                page.Header().Column(col =>
+                {
+                    col.Item().Text("ALFIPAC – VEHÍCULOS EN ALMACÉN")
+                        .Bold().FontSize(18);
+
+                    col.Item().LineHorizontal(1);
+
+                    col.Item().Text($"Impreso por: {nombre}");
+                    col.Item().Text($"Fecha de impresión: {DateTime.Now:dd/MM/yyyy HH:mm}");
+
+                    col.Item().LineHorizontal(1);
+
+                    col.Item().Row(row =>
+                    {
+                        row.RelativeItem().Element(BoxStyle).Column(x =>
+                        {
+                            x.Item().Text("TOTAL VEHÍCULOS").Bold();
+                            x.Item().Text(total.ToString()).FontSize(16);
+                        });
+                    });
+                });
+
+                // ===== TABLA =====
+                page.Content().Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        columns.RelativeColumn(2); // Fecha
+                        columns.RelativeColumn(2); // Vehículo
+                        columns.RelativeColumn(2); // VIN
+                        columns.RelativeColumn(2); // Cliente
+                    });
+
+                    void Header(string text) =>
+                        table.Cell().Element(HeaderCell).Text(text).Bold();
+
+                    Header("Ingreso");
+                    Header("Vehículo");
+                    Header("VIN");
+                    Header("Cliente");
+
+                    foreach (var v in datos)
+                    {
+                        table.Cell().Element(Cell)
+                            .Text(v.FechaHoraIngreso.Year == 1212
+                                ? "-"
+                                : v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm"));
+
+                        table.Cell().Element(Cell).Text(v.Marchamos);
+                        table.Cell().Element(Cell).Text(v.Contenedor);
+                        table.Cell().Element(Cell).Text(v.Cliente);
+                    }
+                });
+            });
+        }).GeneratePdf();
+
+        return File(pdf, "application/pdf",
+            $"Vehiculos_{DateTime.Now:dd-MM-yyyy_HH-mm}.pdf");
+
+
+        // ===== ESTILOS =====
+
+        static IContainer HeaderCell(IContainer c) =>
+            c.Background(Colors.Grey.Lighten3)
+             .BorderBottom(1)
+             .BorderColor(Colors.Grey.Medium)
+             .Padding(5)
+             .AlignCenter();
+
+        static IContainer Cell(IContainer c) =>
+            c.BorderBottom(1)
+             .BorderColor(Colors.Grey.Lighten2)
+             .Padding(4);
+
+        static IContainer BoxStyle(IContainer c) =>
+            c.Border(1)
+             .BorderColor(Colors.Grey.Medium)
+             .Padding(6)
+             .Background(Colors.Grey.Lighten4);
+    }
+
+    [HttpPost]
+    public IActionResult ExportarVehiculosExcel(string nombre)
+    {
+        var datos = _context.BitacoraIngresos
+            .Where(x => x.Tamaño == "VEHICULO" || x.FechaHoraIngreso.Year == 1212)
+            .OrderByDescending(x => x.FechaHoraIngreso)
+            .ToList();
+
+        using var workbook = new XLWorkbook();
+        var ws = workbook.Worksheets.Add("Vehículos");
+
+        // ===== TITULOS =====
+        ws.Cell("A1").Value = "ALFIPAC";
+        ws.Range("A1:D1").Merge().Style.Font.SetBold().Font.SetFontSize(18)
+            .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+        ws.Cell("A2").Value = "VEHÍCULOS EN ALMACÉN";
+        ws.Range("A2:D2").Merge().Style.Font.SetBold()
+            .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+        ws.Cell("A4").Value = "Encargado:";
+        ws.Cell("B4").Value = nombre;
+
+        ws.Cell("C4").Value = "Fecha:";
+        ws.Cell("D4").Value = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+
+        int fila = 6;
+
+        // ===== HEADERS =====
+        ws.Cell(fila, 1).Value = "Ingreso";
+        ws.Cell(fila, 2).Value = "Vehículo";
+        ws.Cell(fila, 3).Value = "VIN";
+        ws.Cell(fila, 4).Value = "Cliente";
+
+        ws.Range(fila, 1, fila, 4).Style.Font.SetBold()
+            .Fill.SetBackgroundColor(XLColor.LightGray)
+            .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+        fila++;
+
+        // ===== DATA =====
+        foreach (var v in datos)
+        {
+            ws.Cell(fila, 1).Value = v.FechaHoraIngreso.Year == 1212
+                ? "-"
+                : v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm");
+
+            ws.Cell(fila, 2).Value = v.Marchamos;
+            ws.Cell(fila, 3).Value = v.Contenedor;
+            ws.Cell(fila, 4).Value = v.Cliente;
+
+            fila++;
+        }
+
+        ws.Columns().AdjustToContents();
+
+        ws.Range(6, 1, fila - 1, 4).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        ws.Range(6, 1, fila - 1, 4).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+
+        return File(stream.ToArray(),
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            $"Vehiculos_{DateTime.Now:dd-MM-yyyy_HH-mm}.xlsx");
+    }
 }

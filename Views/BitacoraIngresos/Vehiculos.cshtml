@@ -46,12 +46,33 @@
        placeholder="🔍 Buscar VIN" />
 
 <div>
+    <input type="text" id="buscador2" class="form-control mb-3"
+           placeholder="🔍 Buscar Modelo" />
+</div>
+
+<div>
     <button class="btn btn-success mb-3"
             data-bs-toggle="modal"
             data-bs-target="#modalVehiculoManual">
         + Agregar vehículo manual
     </button>
 </div>
+
+<form asp-action="ExportarVehiculosPDF" method="post" class="d-inline">
+    <input type="hidden" name="nombre" value="@(User.Identity?.Name ?? "Sistema")" />
+    <button class="btn btn-danger">
+        Exportar PDF
+    </button>
+</form>
+
+<form asp-action="ExportarVehiculosExcel" method="post" class="d-inline">
+    <input type="hidden" name="nombre" value="@(User.Identity?.Name ?? "Sistema")" />
+    <button class="btn btn-success">
+        Exportar Excel
+    </button>
+</form>
+
+<H5></H5>
     
 <div class="card p-3">
 
@@ -78,13 +99,24 @@
                     <td>@v.Cliente</td>
 
                     <td class="text-center">
-                        <form asp-action="EliminarVehiculo" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@v.Id" />
-                            <button class="btn btn-danger btn-sm">
-                                Eliminar
-                            </button>
-                        </form>
+                        <div class="d-flex justify-content-center gap-2">
+                            <form asp-action="EliminarVehiculo" method="post" class="m-0">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@v.Id" />
+                                <button class="btn btn-danger btn-sm">
+                                    Eliminar
+                                </button>
+                            </form>
+
+                            <a class="btn btn-success btn-sm"
+                                   asp-controller="BitacoraDespachos"
+                                   asp-action="Index"
+                                   asp-route-contenedor="@v.Contenedor"
+                                   asp-route-marchamos="@v.Marchamos"
+                                   asp-route-cliente="@v.Cliente">
+                                Despachar
+                            </a>
+                        </div>
                     </td>
                 </tr>
             }
@@ -95,6 +127,18 @@
 
 <script>
     document.getElementById("buscador").addEventListener("keyup", function () {
+        let filtro = this.value.toLowerCase();
+        let filas = document.querySelectorAll("#tablaVehiculos tbody tr");
+
+        filas.forEach(f => {
+            let texto = f.innerText.toLowerCase();
+            f.style.display = texto.includes(filtro) ? "" : "none";
+        });
+    });
+</script>
+
+<script>
+    document.getElementById("buscador2").addEventListener("keyup", function () {
         let filtro = this.value.toLowerCase();
         let filas = document.querySelectorAll("#tablaVehiculos tbody tr");
 
