@@ -212,7 +212,14 @@ namespace BitacoraAlfipac.Controllers
                         col.Item().LineHorizontal(1);
 
                         // RESUMEN
-                        col.Item().Row(row =>
+                            
+                    });
+
+                    // TABLA
+                    page.Content().Column(content =>
+                    {
+                        // 🔹 SOLO SALE UNA VEZ (primera página)
+                        content.Item().Row(row =>
                         {
                             row.RelativeItem().Element(BoxStyle).Column(x =>
                             {
@@ -232,43 +239,58 @@ namespace BitacoraAlfipac.Controllers
                                 x.Item().Text(vacios.ToString()).FontSize(16);
                             });
                         });
+
+                        content.Item().PaddingVertical(10);
+
+                        // 🔽 TABLA
+                        content.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(1);
+                            });
+
+                            // ✅ HEADER REPETIDO
+                            table.Header(header =>
+                            {
+                                void HeaderCellText(string text) =>
+                                    header.Cell().Element(HeaderCell).Text(text).Bold();
+
+                                HeaderCellText("Contenedor");
+                                HeaderCellText("Marchamos");
+                                HeaderCellText("Tamaño");
+                                HeaderCellText("Chasis");
+                                HeaderCellText("Transportista");
+                                HeaderCellText("Cliente");
+                                HeaderCellText("Estado");
+                            });
+
+                            foreach (var c in datos)
+                            {
+                                table.Cell().Element(Cell).Text(c.Contenedor ?? "");
+                                table.Cell().Element(Cell).Text(c.Marchamos ?? "");
+                                table.Cell().Element(Cell).Text(c.Tamano ?? "");
+                                table.Cell().Element(Cell).Text(c.Chasis ?? "");
+                                table.Cell().Element(Cell).Text(c.Transportista ?? "");
+                                table.Cell().Element(Cell).Text(c.Cliente ?? "");
+                                table.Cell().Element(Cell).Text(c.EstadoCarga ?? "");
+                            }
+                        });
                     });
 
-                    // TABLA
-                    page.Content().Table(table =>
+                    // ================= FOOTER ================= 
+                    page.Footer().AlignCenter().Text(x =>
                     {
-                        table.ColumnsDefinition(columns =>
-                        {
-                            columns.RelativeColumn(2);
-                            columns.RelativeColumn(2);
-                            columns.RelativeColumn(1);
-                            columns.RelativeColumn(2);
-                            columns.RelativeColumn(2);
-                            columns.RelativeColumn(2);
-                            columns.RelativeColumn(1);
-                        });
-
-                        void Header(string text) =>
-                            table.Cell().Element(HeaderCell).Text(text).Bold();
-
-                        Header("Contenedor");
-                        Header("Marchamos");
-                        Header("Tamaño");
-                        Header("Chasis");
-                        Header("Transportista");
-                        Header("Cliente");
-                        Header("Estado");
-
-                        foreach (var c in datos)
-                        {
-                            table.Cell().Element(Cell).Text(c.Contenedor ?? "");
-                            table.Cell().Element(Cell).Text(c.Marchamos ?? "");
-                            table.Cell().Element(Cell).Text(c.Tamano ?? "");
-                            table.Cell().Element(Cell).Text(c.Chasis ?? "");
-                            table.Cell().Element(Cell).Text(c.Transportista ?? "");
-                            table.Cell().Element(Cell).Text(c.Cliente ?? "");
-                            table.Cell().Element(Cell).Text(c.EstadoCarga ?? "");
-                        }
+                        x.Span("Página ");
+                        x.CurrentPageNumber();
+                        x.Span(" de ");
+                        x.TotalPages();
                     });
                 });
             }).GeneratePdf();

@@ -438,109 +438,135 @@ public async Task<IActionResult> Mover(
                 page.Size(PageSizes.A4.Landscape());
                 page.Margin(20);
 
-                // ===== ESTILOS LOCALES =====
+                // ===== ESTILOS =====
                 static IContainer BoxStyle(IContainer c) =>
-                    c.Background(Colors.Grey.Lighten4)
-                     .Border(1)
-                     .BorderColor(Colors.Grey.Lighten2)
+                    c.Border(1)
+                     .BorderColor(Colors.Grey.Medium)
                      .Padding(6)
-                     .AlignCenter();
+                     .Background(Colors.Grey.Lighten4);
 
                 static IContainer Cell(IContainer c) =>
-                    c.BorderBottom(0.5f)
+                    c.BorderBottom(1)
                      .BorderColor(Colors.Grey.Lighten2)
-                     .PaddingVertical(4)
-                     .PaddingHorizontal(2);
+                     .Padding(4);
 
                 static IContainer HeaderCell(IContainer c) =>
-    c.Background(Colors.Grey.Lighten3)
-     .BorderBottom(1)
-     .BorderColor(Colors.Grey.Medium)
-     .Padding(5)
-     .AlignCenter();
+                    c.Background(Colors.Grey.Lighten3)
+                     .BorderBottom(1)
+                     .BorderColor(Colors.Grey.Medium)
+                     .Padding(5)
+                     .AlignCenter();
 
-
-                // ===== HEADER =====
+                // =========================
+                // 🔝 HEADER
+                // =========================
                 page.Header().Column(col =>
                 {
                     col.Item().Text("ALFIPAC – INVENTARIO GENERAL DE CONTENEDORES")
-                        .Bold().FontSize(18).FontColor(Colors.Blue.Darken2);
+                        .Bold().FontSize(18);
 
-                    col.Item().LineHorizontal(1).LineColor(Colors.Grey.Medium);
+                    col.Item().Text("Todos los patios")
+                        .FontSize(14);
 
-                    col.Item().Text($"Responsable: {nombre}");
+                    col.Item().LineHorizontal(1);
+
+                    col.Item().Text($"Impreso por: {nombre}");
                     col.Item().Text($"Fecha operativa: {fecha:dd/MM/yyyy}");
                     col.Item().Text($"Turno: {turno}");
-                    col.Item().Text($"Impreso: {DateTime.Now:dd/MM/yyyy HH:mm}");
+                    col.Item().Text($"Fecha de impresión: {DateTime.Now:dd/MM/yyyy HH:mm}");
 
-                    col.Item().LineHorizontal(1).LineColor(Colors.Grey.Medium);
+                    col.Item().LineHorizontal(1);
+                });
 
-                    col.Item().Row(row =>
+                // =========================
+                // 📄 CONTENIDO
+                // =========================
+                page.Content().Column(content =>
+                {
+                    // 🔹 RESUMEN SOLO PRIMERA PÁGINA
+                    content.Item().ShowOnce().Row(row =>
                     {
                         row.RelativeItem().Element(BoxStyle).Column(x =>
                         {
-                            x.Item().Text("TOTAL").Bold().FontSize(10);
-                            x.Item().Text(total.ToString()).FontSize(16).Bold();
+                            x.Item().Text("TOTAL").Bold();
+                            x.Item().Text(total.ToString()).FontSize(16);
                         });
 
                         row.RelativeItem().Element(BoxStyle).Column(x =>
                         {
-                            x.Item().Text("CARGADOS").Bold().FontSize(10);
-                            x.Item().Text(cargados.ToString()).FontSize(16).Bold();
+                            x.Item().Text("CARGADOS").Bold();
+                            x.Item().Text(cargados.ToString()).FontSize(16);
                         });
 
                         row.RelativeItem().Element(BoxStyle).Column(x =>
                         {
-                            x.Item().Text("VACÍOS").Bold().FontSize(10);
-                            x.Item().Text(vacios.ToString()).FontSize(16).Bold();
+                            x.Item().Text("VACÍOS").Bold();
+                            x.Item().Text(vacios.ToString()).FontSize(16);
                         });
+                    });
+
+                    content.Item().PaddingVertical(10);
+
+                    // 🔽 TABLA
+                    content.Item().Table(table =>
+                    {
+                        table.ColumnsDefinition(c =>
+                        {
+                            c.RelativeColumn(2);
+                            c.RelativeColumn(2);
+                            c.RelativeColumn(1);
+                            c.RelativeColumn(2);
+                            c.RelativeColumn(2);
+                            c.RelativeColumn(2);
+                            c.RelativeColumn(1);
+                            c.RelativeColumn(2);
+                        });
+
+                        // ✅ HEADER REPETIDO
+                        table.Header(header =>
+                        {
+                            void H(string t) =>
+                                header.Cell().Element(HeaderCell).Text(t).Bold();
+
+                            H("Contenedor");
+                            H("Marchamos");
+                            H("Tamaño");
+                            H("Chasis");
+                            H("Transportista");
+                            H("Cliente");
+                            H("Estado");
+                            H("Ubicación");
+                        });
+
+                        foreach (var c in datos)
+                        {
+                            table.Cell().Element(Cell).Text(c.Contenedor ?? "");
+                            table.Cell().Element(Cell).Text(c.Marchamos ?? "");
+                            table.Cell().Element(Cell).Text(c.Tamano ?? "");
+                            table.Cell().Element(Cell).Text(c.Chasis ?? "");
+                            table.Cell().Element(Cell).Text(c.Transportista ?? "");
+                            table.Cell().Element(Cell).Text(c.Cliente ?? "");
+                            table.Cell().Element(Cell).Text(c.Estado ?? "");
+                            table.Cell().Element(Cell).Text(c.Ubicacion ?? "");
+                        }
                     });
                 });
 
-                // ===== TABLA =====
-                page.Content().Table(table =>
+                // =========================
+                // 🔢 FOOTER
+                // =========================
+                page.Footer().AlignCenter().Text(x =>
                 {
-                    table.ColumnsDefinition(c =>
-                    {
-                        c.RelativeColumn(2);
-                        c.RelativeColumn(2);
-                        c.RelativeColumn(1);
-                        c.RelativeColumn(2);
-                        c.RelativeColumn(2);
-                        c.RelativeColumn(2);
-                        c.RelativeColumn(1);
-                        c.RelativeColumn(2);
-                    });
-
-                    void Header(string t) =>
-                        table.Cell().Element(HeaderCell).Text(t);
-
-                    Header("Contenedor");
-                    Header("Marchamos");
-                    Header("Tamaño");
-                    Header("Chasis");
-                    Header("Transportista");
-                    Header("Cliente");
-                    Header("Estado");
-                    Header("Ubicación");
-
-                    foreach (var c in datos)
-                    {
-                        table.Cell().Element(Cell).Text(c.Contenedor);
-                        table.Cell().Element(Cell).Text(c.Marchamos);
-                        table.Cell().Element(Cell).Text(c.Tamano);
-                        table.Cell().Element(Cell).Text(c.Chasis);
-                        table.Cell().Element(Cell).Text(c.Transportista);
-                        table.Cell().Element(Cell).Text(c.Cliente);
-                        table.Cell().Element(Cell).Text(c.Estado);
-                        table.Cell().Element(Cell).Text(c.Ubicacion);
-                    }
+                    x.Span("Página ");
+                    x.CurrentPageNumber();
+                    x.Span(" de ");
+                    x.TotalPages();
                 });
             });
         }).GeneratePdf();
 
         return File(pdf, "application/pdf",
-            $"Inventario_General_{DateTime.Now:ddMMyyyy_HHmm}.pdf");
+            $"Inventario_General_{DateTime.Now:dd-MM-yyyy}_Turno_{turno}.pdf");
     }
 
     //EXPORTAR A EXCEL
