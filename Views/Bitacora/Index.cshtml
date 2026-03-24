@@ -23,11 +23,12 @@
         </button>
 
         <div>
-        <a asp-action="ExportarPdf"
-           asp-route-fecha="@fecha.ToString("yyyy-MM-dd")"
-           class="btn btn-danger">
-            Exportar PDF
-        </a>
+            <button type="button"
+                    class="btn btn-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalExportarPdf">
+                Exportar PDF
+            </button>
         </div>
 
         <div>
@@ -99,3 +100,77 @@
     </div>
 
 </div>
+
+<div class="modal fade" id="modalExportarPdf" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form asp-action="ExportarPdf" method="get">
+
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Exportar Bitácora</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" name="fecha" value="@fecha.ToString("yyyy-MM-dd")" />
+
+                    <div class="form-check mb-3">
+                        <input type="checkbox" id="todoDia" class="form-check-input" />
+                        <label class="form-check-label">Todo el día</label>
+                    </div>
+
+                    <div id="rangoHoras" class="row g-2" style="display:none;">
+                        <div class="col">
+                            <label>Hora inicio</label>
+                            <input type="time" name="horaInicio" class="form-control" />
+                        </div>
+                        <div class="col">
+                            <label>Hora fin</label>
+                            <input type="time" name="horaFin" class="form-control" />
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-danger">Exportar</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const chk = document.getElementById("todoDia");
+        const rango = document.getElementById("rangoHoras");
+        const horaInicio = document.querySelector("input[name='horaInicio']");
+        const horaFin = document.querySelector("input[name='horaFin']");
+
+        function toggleRango() {
+            if (chk.checked) {
+                rango.style.display = "none";
+
+                // 🔴 CLAVE: desactivar inputs
+                horaInicio.disabled = true;
+                horaFin.disabled = true;
+
+            } else {
+                rango.style.display = "flex";
+
+                horaInicio.disabled = false;
+                horaFin.disabled = false;
+            }
+        }
+
+        chk.addEventListener("change", toggleRango);
+
+        // Estado inicial
+        toggleRango();
+    });
+</script>

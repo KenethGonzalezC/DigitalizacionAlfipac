@@ -1,6 +1,7 @@
 ﻿using BitacoraAlfipac.Data;
 using BitacoraAlfipac.Models.ViewModels;
 using ClosedXML.Excel;
+using ClosedXML.Excel.Drawings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
@@ -12,13 +13,16 @@ public class BitacoraController : Controller
 {
     private readonly ApplicationDbContext _context;
 
-    public BitacoraController(ApplicationDbContext context)
+    //ENTORNO
+    private readonly IWebHostEnvironment _env;
+    public BitacoraController(ApplicationDbContext context, IWebHostEnvironment env)
     {
         _context = context;
+        _env = env;
     }
 
     // ===============================
-    // 📅 BITÁCORA POR DÍA
+    // BITÁCORA POR DÍA
     // ===============================
     public async Task<IActionResult> Index(DateTime? fecha)
     {
@@ -76,9 +80,25 @@ public class BitacoraController : Controller
     }
 
     [HttpGet]
-    public IActionResult ExportarPdf(DateTime fecha)
+    public IActionResult ExportarPdf(DateTime fecha, TimeSpan? horaInicio, TimeSpan? horaFin)
     {
         var movimientos = ObtenerMovimientosPorFecha(fecha);
+
+        // FILTRO NUEVO
+        if (horaInicio.HasValue && horaFin.HasValue)
+        {
+            movimientos = movimientos
+                .Where(m =>
+                    (m.HoraEntrada.HasValue &&
+                     m.HoraEntrada.Value.TimeOfDay >= horaInicio &&
+                     m.HoraEntrada.Value.TimeOfDay <= horaFin)
+                 ||
+                    (m.HoraSalida.HasValue &&
+                     m.HoraSalida.Value.TimeOfDay >= horaInicio &&
+                     m.HoraSalida.Value.TimeOfDay <= horaFin)
+                )
+                .ToList();
+        }
 
         QuestPDF.Settings.License = LicenseType.Community;
 
@@ -133,6 +153,17 @@ public class BitacoraController : Controller
                         columns.RelativeColumn(2.0f);
                     });
 
+                    page.Footer().Element(footer =>
+                    {
+                        footer.AlignCenter().Text(txt =>
+                        {
+                            txt.Span("Página ");
+                            txt.CurrentPageNumber();
+                            txt.Span(" de ");
+                            txt.TotalPages();
+                        });
+                    });
+
                     void Header(string t) =>
                         table.Cell().Element(HeaderStyle).Text(t).Bold().FontSize(10).AlignCenter();
 
@@ -183,8 +214,20 @@ public class BitacoraController : Controller
             });
         }).GeneratePdf();
 
-        return File(pdf, "application/pdf",
-            $"Bitacora_{fecha:dd-MM-yyyy}.pdf");
+        string nombreArchivo;
+
+        // SIN FILTRO (todo el día)
+        if (!horaInicio.HasValue || !horaFin.HasValue)
+        {
+            nombreArchivo = $"Bitacora_{fecha:dd-MM-yyyy}.pdf";
+        }
+        else
+        {
+            // CON RANGO
+            nombreArchivo = $"Bitacora_{fecha:dd-MM-yyyy}_{horaInicio:hh\\-mm}hrs_{horaFin:hh\\-mm}hrs.pdf";
+        }
+
+        return File(pdf, "application/pdf", nombreArchivo);
     }
 
     //Exportar a Excel
@@ -197,8 +240,75 @@ public class BitacoraController : Controller
         var ws = workbook.Worksheets.Add("Bitácora");
 
         // =============================================
-        // Encabezados
+        // ENCABEZADO TIPO PDF
         // =============================================
+
+        int fila = 1;
+
+        // =============================================
+        // 🖼️ LOGO (IZQUIERDA)
+        // =============================================
+        var logoPath = Path.Combine(_env.WebRootPath, "images", "logo.jpg");
+
+        if (System.IO.File.Exists(logoPath))
+        {
+            var image = ws.AddPicture(logoPath)
+                .MoveTo(ws.Cell("A1"))
+                .WithPlacement(XLPicturePlacement.FreeFloating);
+
+            image.Width = 80;   // 🔥 controla tamaño
+            image.Height = 60;
+        }
+
+        // =============================================
+        // 🧾 TEXTO (CENTRADO COMO PDF)
+        // =============================================
+
+        // usamos columnas C a J para centrar visualmente
+        ws.Range(fila, 3, fila, 10).Merge().Value =
+            "ALFIPAC – BITÁCORA OPERATIVA DIARIA";
+
+        ws.Range(fila, 3, fila, 10).Style
+            .Font.SetBold().Font.SetFontSize(16)
+            .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+        fila++;
+
+        ws.Range(fila, 3, fila, 10).Merge().Value =
+            "CONTROL INTERNO ENTRADA / SALIDA";
+
+        ws.Range(fila, 3, fila, 10).Style
+            .Font.SetBold().Font.SetFontSize(14)
+            .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+        fila++;
+
+        ws.Range(fila, 3, fila, 10).Merge().Value =
+            $"Fecha operativa: {fecha:dd/MM/yyyy}";
+
+        ws.Range(fila, 3, fila, 10).Style
+            .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+        fila++;
+
+        ws.Range(fila, 3, fila, 10).Merge().Value =
+            $"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}";
+
+        ws.Range(fila, 3, fila, 10).Style
+            .Font.SetFontColor(XLColor.Gray)
+            .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+        fila++;
+
+        // Línea separadora
+        ws.Range(fila, 1, fila, 10).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+
+        fila += 2;
+
+        // =============================================
+        // 📊 ENCABEZADOS TABLA
+        // =============================================
+
         var headers = new[]
         {
         "Contenedor", "Marchamos", "Entrada", "Salida",
@@ -206,27 +316,33 @@ public class BitacoraController : Controller
         "Chasis", "Viaje/DUA"
     };
 
-        var headerRow = ws.Row(1);
         for (int col = 1; col <= headers.Length; col++)
         {
-            var cell = ws.Cell(1, col);
+            var cell = ws.Cell(fila, col);
             cell.Value = headers[col - 1];
+
             cell.Style.Font.Bold = true;
-            cell.Style.Font.FontColor = XLColor.Black;
             cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
             cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-            cell.Style.Fill.BackgroundColor = XLColor.FromHtml("#E0E0E0"); // gris claro
+            cell.Style.Fill.BackgroundColor = XLColor.LightGray;
+            cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
         }
 
-        // Congelar encabezados
-        ws.SheetView.FreezeRows(1);
+        // Congelar encabezado
+        ws.SheetView.FreezeRows(fila);
+
+        fila++;
 
         // =============================================
-        // Datos
+        // 📄 DATOS CON ESTILO ZEBRA
         // =============================================
-        int fila = 2;
+
+        int index = 0;
+
         foreach (var m in movimientos)
         {
+            var bgColor = index % 2 == 0 ? XLColor.White : XLColor.FromHtml("#F5F5F5");
+
             ws.Cell(fila, 1).Value = m.Contenedor ?? "";
             ws.Cell(fila, 2).Value = m.Marchamos ?? "";
             ws.Cell(fila, 3).Value = m.HoraEntrada?.ToString("HH:mm") ?? "";
@@ -236,59 +352,56 @@ public class BitacoraController : Controller
             ws.Cell(fila, 7).Value = m.Chofer ?? "";
             ws.Cell(fila, 8).Value = m.Placa ?? "";
             ws.Cell(fila, 9).Value = m.Chasis ?? "";
-            ws.Cell(fila, 10).Value = m.ViajeODua ?? "";   // ← ajusta si el nombre real es ViajeDua o similar
+            ws.Cell(fila, 10).Value = m.ViajeODua ?? "";
+
+            for (int col = 1; col <= 10; col++)
+            {
+                var cell = ws.Cell(fila, col);
+
+                cell.Style.Fill.BackgroundColor = bgColor;
+                cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                cell.Style.Border.OutsideBorderColor = XLColor.LightGray;
+                cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                cell.Style.Font.FontSize = 10;
+            }
 
             fila++;
+            index++;
         }
 
         // =============================================
-        // Formato de columnas
+        // 🎯 FORMATO FINAL
         // =============================================
-        var dataRange = ws.RangeUsed();
 
-        // Alineaciones generales
-        dataRange.Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
+        // Alineaciones
+        ws.Columns("A,B,E,F,G,H,I,J").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
+        ws.Columns("C:D").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
-        // Columnas de texto (izquierda)
-        ws.Columns("A,B,E,F,G,H,I,J,K").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Left;
+        // Anchos tipo PDF
+        ws.Column(1).Width = 18;
+        ws.Column(2).Width = 14;
+        ws.Column(3).Width = 10;
+        ws.Column(4).Width = 10;
+        ws.Column(5).Width = 25;
+        ws.Column(6).Width = 40;
+        ws.Column(7).Width = 22;
+        ws.Column(8).Width = 14;
+        ws.Column(9).Width = 14;
+        ws.Column(10).Width = 18;
 
-        // Columnas de hora (derecha)
-        ws.Columns("C:D").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
-
-        // Anchos recomendados (puedes ajustar estos valores)
-        ws.Column(1).Width = 18;   // Contenedor
-        ws.Column(2).Width = 14;   // Marchamos
-        ws.Column(3).Width = 10;   // Entrada
-        ws.Column(4).Width = 10;   // Salida
-        ws.Column(5).Width = 25;   // Transportista
-        ws.Column(6).Width = 40;   // Información (la más ancha normalmente)
-        ws.Column(7).Width = 22;   // Chofer
-        ws.Column(8).Width = 14;   // Placa
-        ws.Column(9).Width = 14;   // Chasis
-        ws.Column(10).Width = 18;  // Viaje/DUA
-
-        // Bordes alrededor de toda la tabla
-        dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-        dataRange.Style.Border.OutsideBorderColor = XLColor.Gray;
-        dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
-        dataRange.Style.Border.InsideBorderColor = XLColor.LightGray;
-
-        // Ajuste final automático (por si algunos textos son muy largos)
         ws.Columns().AdjustToContents();
 
         // =============================================
-        // Exportar
+        // 📦 EXPORTAR
         // =============================================
+
         using var stream = new MemoryStream();
         workbook.SaveAs(stream);
-        stream.Position = 0;
-
-        string fileName = $"Bitacora_{fecha:dd-MM-yyyy}.xlsx";
 
         return File(
             stream.ToArray(),
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            fileName
+            $"Bitacora_{fecha:dd-MM-yyyy}.xlsx"
         );
     }
 

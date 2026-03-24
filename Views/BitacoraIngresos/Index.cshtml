@@ -156,15 +156,7 @@
                             <td>@item.Cliente</td>
                             <td>@item.Tamaño</td>
                             <td>@item.Chasis</td>
-                            <td>@item.ViajeDua</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-secondary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editarModal"
-                                        onclick="cargarEditar(@item.Id)">
-                                    Editar
-                                </button>
-                            </td>
+                            <td>@item.ViajeDua</td>                            
                             <td>
                                 <button class="btn btn-sm btn-danger"
                                         data-bs-toggle="modal"
@@ -180,6 +172,17 @@
                                         data-viaje="@item.ViajeDua">
                                     Eliminar
                                 </button>
+                            </td>
+                            <td>
+                                @if (User.IsInRole("Administrador"))
+                                {
+                                    <button class="btn btn-sm btn-outline-secondary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editarModal"
+                                            onclick="cargarEditar(@item.Id)">
+                                        Editar
+                                    </button>
+                                }
                             </td>
                         </tr>
                     }

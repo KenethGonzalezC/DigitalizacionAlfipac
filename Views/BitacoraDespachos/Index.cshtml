@@ -136,22 +136,7 @@
                         <td>@d.Transportista</td>
                         <td>@d.Informacion</td>
                         <td>@d.Chasis</td>
-                        <td>@d.ViajeDua</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning btnEditar"
-                                    data-id="@d.Id"
-                                    data-contenedor="@d.Contenedor"
-                                    data-marchamos="@d.Marchamos"
-                                    data-fecha="@d.FechaHoraDespacho.ToString("yyyy-MM-ddTHH:mm")"
-                                    data-transportista="@d.Transportista"
-                                    data-info="@d.Informacion"
-                                    data-chofer="@d.Chofer"
-                                    data-placa="@d.PlacaCabezal"
-                                    data-chasis="@d.Chasis"
-                                    data-viaje="@d.ViajeDua">
-                                Editar
-                            </button>
-                        </td>
+                        <td>@d.ViajeDua</td>                        
                         <td>
                             <button class="btn btn-sm btn-danger"
                                     data-id="@d.Id"
@@ -159,6 +144,24 @@
                                     data-bs-target="#deleteModal">
                                 Eliminar
                             </button>
+                        </td>
+                        <td>
+                            @if (User.IsInRole("Administrador"))
+                            {
+                                <button class="btn btn-sm btn-warning btnEditar"
+                                        data-id="@d.Id"
+                                        data-contenedor="@d.Contenedor"
+                                        data-marchamos="@d.Marchamos"
+                                        data-fecha="@d.FechaHoraDespacho.ToString("yyyy-MM-ddTHH:mm")"
+                                        data-transportista="@d.Transportista"
+                                        data-info="@d.Informacion"
+                                        data-chofer="@d.Chofer"
+                                        data-placa="@d.PlacaCabezal"
+                                        data-chasis="@d.Chasis"
+                                        data-viaje="@d.ViajeDua">
+                                    Editar
+                                </button>
+                            }
                         </td>
                     </tr>
                 }

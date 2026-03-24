@@ -14,7 +14,6 @@
         @if (
             User.IsInRole("Administrador") ||
             User.IsInRole("Digitador") ||
-            User.IsInRole("Usuario") ||
             User.IsInRole("Patio")
         )
         {
@@ -39,8 +38,7 @@
         <!-- INGRESOS -->
         @if (
             User.IsInRole("Administrador") ||
-            User.IsInRole("Digitador") ||
-            User.IsInRole("Usuario")
+            User.IsInRole("Digitador")
         )
         {
             <div class="col-md-6 col-lg-4">
@@ -64,8 +62,7 @@
         <!-- DESPACHOS -->
         @if (
             User.IsInRole("Administrador") ||
-            User.IsInRole("Digitador") ||
-            User.IsInRole("Usuario")
+            User.IsInRole("Digitador")
         )
         {
             <div class="col-md-6 col-lg-4">
@@ -90,7 +87,6 @@
         @if (
             User.IsInRole("Administrador") ||
             User.IsInRole("Digitador") ||
-            User.IsInRole("Usuario") ||
             User.IsInRole("Patio")
         )
         {
@@ -116,7 +112,6 @@
         @if (
                 User.IsInRole("Administrador") ||
                 User.IsInRole("Digitador") ||
-                User.IsInRole("Usuario") ||
                 User.IsInRole("Patio")
                 )
         {
@@ -141,8 +136,7 @@
         <!-- BitacoraGeneral -->
         @if (
                 User.IsInRole("Administrador") ||
-                User.IsInRole("Digitador") ||
-                User.IsInRole("Usuario")
+                User.IsInRole("Digitador")
                 )
         {
             <div class="col-md-6 col-lg-4">
@@ -166,8 +160,7 @@
         <!-- Datos -->
         @if (
                 User.IsInRole("Administrador") ||
-                User.IsInRole("Digitador") ||
-                User.IsInRole("Usuario")
+                User.IsInRole("Digitador")
                 )
         {
             <div class="col-md-6 col-lg-4">
@@ -191,8 +184,7 @@
         <!-- Actas y Permanencias -->
         @if (
                 User.IsInRole("Administrador") ||
-                User.IsInRole("Digitador") ||
-                User.IsInRole("Usuario")
+                User.IsInRole("Digitador")
                 )
         {
             <div class="col-md-6 col-lg-4">
