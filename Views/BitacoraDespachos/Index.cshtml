@@ -78,6 +78,11 @@
                 <label class="form-check-label">Mercadería salió en furgón</label>
             </div>
 
+            <div class="col-md-4 form-check mt-2">
+                <input asp-for="GuardarContenedorSalida" class="form-check-input" />
+                <label class="form-check-label">Guardar contenedor de salida</label>
+            </div>
+
             <div class="col-md-4">
                 <label>Contenedor referencia</label>
                 <input asp-for="ContenedorReferencia" class="form-control" />
@@ -288,6 +293,8 @@
             }
 
 
+
+
             document.getElementById("btnBuscarContenedor")
                 ?.addEventListener("click", buscarContenedor);
 
@@ -298,6 +305,17 @@
                         buscarContenedor();
                     }
                 });
+                // 🔥 NUEVO COMPORTAMIENTO
+    const chkGuardar = document.getElementById("GuardarContenedorSalida");
+    const chkFurgon = document.getElementById("EsSalidaEnFurgon");
+
+    if (chkGuardar && chkFurgon) {
+        chkGuardar.addEventListener("change", function () {
+            if (this.checked) {
+                chkFurgon.checked = true;
+            }
+        });
+    }
 
         });
     </script>
@@ -379,7 +397,7 @@
         </div>
     </div>
 
-    <script>
+    <script>    
             document.querySelectorAll(".btnEditar").forEach(btn => {
                 btn.addEventListener("click", function () {
 

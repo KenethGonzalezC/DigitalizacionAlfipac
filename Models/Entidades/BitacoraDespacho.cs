@@ -21,5 +21,7 @@ public class BitacoraDespacho
     public string PlacaCabezal { get; set; } = null!;
     public string Chasis { get; set; } = null!;
     public string ViajeDua { get; set; } = null!;
+    //Contenedor de salida
+    public bool GuardarContenedorSalida { get; set; }
 }
     

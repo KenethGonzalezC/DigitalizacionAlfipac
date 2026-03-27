@@ -25,5 +25,7 @@ namespace BitacoraAlfipac.Models.ViewModels
 
         // Tabla
         public List<BitacoraDespacho> Despachos { get; set; } = new();
+        //Guardar contenedor de salida
+        public bool GuardarContenedorSalida { get; set; }
     }
 }

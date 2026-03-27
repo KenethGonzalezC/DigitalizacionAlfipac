@@ -116,7 +116,8 @@ namespace BitacoraAlfipac.Controllers
                 Chasis = vm.Chasis,
                 ViajeDua = vm.ViajeDua,
                 EsSalidaEnFurgon = vm.EsSalidaEnFurgon,
-                ContenedorReferencia = vm.ContenedorReferencia
+                ContenedorReferencia = vm.ContenedorReferencia,
+                GuardarContenedorSalida = vm.GuardarContenedorSalida // 👈 NUEVO
             };
 
             _context.BitacoraDespachos.Add(despacho);

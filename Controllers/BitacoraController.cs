@@ -47,26 +47,47 @@ public class BitacoraController : Controller
             })
             .ToListAsync();
 
-        // 🔹 DESPACHOS DEL DÍA
-        var despachos = await _context.BitacoraDespachos
+        // 🔹 DESPACHOS DEL DÍA (FASE 1: traer datos simples)
+        var despachosRaw = await _context.BitacoraDespachos
             .Where(d => d.FechaHoraDespacho.Date == dia)
-            .Select(d => new BitacoraDiaVM
+            .Select(d => new
             {
-                Contenedor = d.ContenedorReferencia != null && d.ContenedorReferencia != ""
-                                ? "REF: " + d.ContenedorReferencia
-                                : d.Contenedor,
+                d.Contenedor,
+                d.ContenedorReferencia,
+                d.GuardarContenedorSalida,
+                d.Marchamos,
+                d.FechaHoraDespacho,
+                d.Transportista,
+                d.Informacion,
+                d.Chofer,
+                d.PlacaCabezal,
+                d.Chasis,
+                d.ViajeDua
+            })
+            .ToListAsync();
+
+        //fase 2
+        var despachos = despachosRaw.Select(d => new BitacoraDiaVM
+            {
+                Contenedor =
+            d.GuardarContenedorSalida && !string.IsNullOrEmpty(d.ContenedorReferencia)
+                ? $"{d.Contenedor} / REF: {d.ContenedorReferencia}"
+            : !string.IsNullOrEmpty(d.ContenedorReferencia)
+                ? "REF: " + d.ContenedorReferencia
+            : d.Contenedor,
+
                 Marchamos = d.Marchamos,
                 HoraEntrada = null,
                 HoraSalida = d.FechaHoraDespacho,
                 HoraOrden = d.FechaHoraDespacho,
                 Transportista = d.Transportista,
-                Informacion = d.Informacion, // 🔑 Aquí va cliente
+                Informacion = d.Informacion,
                 Chofer = d.Chofer,
                 Placa = d.PlacaCabezal,
                 Chasis = d.Chasis,
                 ViajeODua = d.ViajeDua
             })
-            .ToListAsync();
+            .ToList();
 
         // 🔥 UNIÓN Y ORDEN CRONOLÓGICO
         var bitacora = ingresos
@@ -153,30 +174,22 @@ public class BitacoraController : Controller
                         columns.RelativeColumn(2.0f);
                     });
 
-                    page.Footer().Element(footer =>
+                    table.Header(header =>
                     {
-                        footer.AlignCenter().Text(txt =>
-                        {
-                            txt.Span("Página ");
-                            txt.CurrentPageNumber();
-                            txt.Span(" de ");
-                            txt.TotalPages();
-                        });
+                        void H(string t) =>
+                            header.Cell().Element(HeaderStyle).Text(t).Bold().FontSize(10).AlignCenter();
+
+                        H("Contenedor");
+                        H("Marchamos");
+                        H("Entrada");
+                        H("Salida");
+                        H("Transportista");
+                        H("Información");
+                        H("Chofer");
+                        H("Placa");
+                        H("Chasis");
+                        H("Viaje/DUA");
                     });
-
-                    void Header(string t) =>
-                        table.Cell().Element(HeaderStyle).Text(t).Bold().FontSize(10).AlignCenter();
-
-                    Header("Contenedor");
-                    Header("Marchamos");
-                    Header("Entrada");
-                    Header("Salida");
-                    Header("Transportista");
-                    Header("Información");
-                    Header("Chofer");
-                    Header("Placa");
-                    Header("Chasis");
-                    Header("Viaje/DUA");
 
                     int index = 0;
 
@@ -209,7 +222,19 @@ public class BitacoraController : Controller
                          .Border(0.5f)
                          .BorderColor(Colors.Grey.Lighten1)
                          .Padding(3)
-                         .DefaultTextStyle(x => x.FontSize(9));
+                         .DefaultTextStyle(x => x.FontSize(9))
+                         .ShowEntire(); //No parte renglon entre paginas
+                });
+
+                page.Footer().Element(footer =>
+                {
+                    footer.AlignCenter().Text(txt =>
+                    {
+                        txt.Span("Página ");
+                        txt.CurrentPageNumber();
+                        txt.Span(" de ");
+                        txt.TotalPages();
+                    });
                 });
             });
         }).GeneratePdf();
