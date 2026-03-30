@@ -484,8 +484,8 @@ public class BitacoraIngresosController : Controller
             .AsQueryable();
 
         // 🔴 FILTRO CLAVE: SOLO VEHÍCULOS ACTIVOS (NO DESPACHADOS)
-        query = query.Where(x => !_context.HistorialContenedores
-            .Any(h => h.Contenedor == x.Contenedor && h.FechaHoraSalida != null));
+        //query = query.Where(x => !_context.HistorialContenedores
+            //.Any(h => h.Contenedor == x.Contenedor && h.FechaHoraSalida != null));
 
         // 🔍 FILTROS DINÁMICOS
         if (!string.IsNullOrWhiteSpace(contenedor))
