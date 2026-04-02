@@ -163,7 +163,10 @@
                                         data-chofer="@d.Chofer"
                                         data-placa="@d.PlacaCabezal"
                                         data-chasis="@d.Chasis"
-                                        data-viaje="@d.ViajeDua">
+                                        data-viaje="@d.ViajeDua"
+                                        data-furgon="@d.EsSalidaEnFurgon.ToString().ToLower()"
+                                        data-guardarsalida="@d.GuardarContenedorSalida.ToString().ToLower()"
+                                        data-contenedorref="@d.ContenedorReferencia">
                                     Editar
                                 </button>
                             }
@@ -384,6 +387,23 @@
                                 <input id="editViaje" name="ViajeDua" class="form-control" />
                             </div>
 
+                            <div class="col-md-4 form-check mt-4">
+                                <input type="checkbox" id="editFurgon" name="EsSalidaEnFurgon" class="form-check-input" disabled />
+                                <input type="hidden" id="hiddenFurgon" name="EsSalidaEnFurgon" />
+                                <label class="form-check-label">Mercadería salió en furgón</label>
+                            </div>
+
+                            <div class="col-md-4 form-check mt-2">
+                                <input type="checkbox" id="editGuardarSalida" name="GuardarContenedorSalida" value="true" class="form-check-input" />
+                                <input type="hidden" name="GuardarContenedorSalida" value="false" />
+                                <label class="form-check-label">Guardar contenedor de salida</label>
+                            </div>
+
+                            <div class="col-md-4" id="contenedorRefContainer">
+                                <label>Contenedor referencia</label>
+                                <input id="editContenedorRef" name="ContenedorReferencia" class="form-control" />
+                            </div>
+
                         </div>
                     </div>
 
@@ -397,7 +417,15 @@
         </div>
     </div>
 
-    <script>    
+    <script>
+            const chkGuardar = document.getElementById("editGuardarSalida");
+            const hiddenGuardar = document.getElementById("hiddenGuardarSalida");
+
+            // 🔁 sincroniza SIEMPRE el hidden cuando cambie
+            chkGuardar.addEventListener("change", function () {
+                hiddenGuardar.value = this.checked;
+            });
+
             document.querySelectorAll(".btnEditar").forEach(btn => {
                 btn.addEventListener("click", function () {
 
@@ -411,6 +439,38 @@
                     document.getElementById("editPlaca").value = this.dataset.placa;
                     document.getElementById("editChasis").value = this.dataset.chasis;
                     document.getElementById("editViaje").value = this.dataset.viaje;
+
+                    const esFurgon = this.dataset.furgon === "true";
+                    const guardarSalida = this.dataset.guardarsalida === "true";
+
+                    // 🔒 Furgón (solo lectura)
+                    document.getElementById("editFurgon").checked = esFurgon;
+
+                    // 🎯 Guardar salida (dinámico)
+                    chkGuardar.checked = guardarSalida;
+
+                    if (esFurgon) {
+                        chkGuardar.disabled = false;
+                    } else {
+                        chkGuardar.disabled = true;
+                        chkGuardar.checked = false;
+                    }
+
+                    // 🔁 actualizar hidden
+                    document.getElementById("hiddenFurgon").value = esFurgon;
+
+                    // 📦 Contenedor referencia
+                    const contRefDiv = document.getElementById("contenedorRefContainer");
+                    const contRefInput = document.getElementById("editContenedorRef");
+
+                    contRefInput.value = this.dataset.contenedorref || "";
+
+                    if (esFurgon) {
+                        contRefDiv.style.display = "block";
+                    } else {
+                        contRefDiv.style.display = "none";
+                        contRefInput.value = "";
+                    }
 
                     var modal = new bootstrap.Modal(document.getElementById("modalEditar"));
                     modal.show();

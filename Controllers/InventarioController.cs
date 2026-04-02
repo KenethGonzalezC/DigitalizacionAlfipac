@@ -5,6 +5,7 @@ using BitacoraAlfipac.Models.ViewModels;
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Presentation;
 using iText.Kernel.Pdf.Canvas.Wmf;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
@@ -864,6 +865,25 @@ public async Task<IActionResult> Mover(
         }
 
         return RedirectToAction("InventarioGeneral");
+    }
+
+    //usuario solo lectura
+    [Authorize(Roles = "Usuario")]
+    public async Task<IActionResult> InventarioLectura(
+    string? contenedor,
+    string? cliente,
+    string? transportista,
+    string? estado,
+    string? tamano,
+    string? patio)
+    {
+        // Reutilizamos el mismo método
+        var resultado = await InventarioGeneral(contenedor, cliente, transportista, estado, tamano, patio);
+
+        // Extraemos el modelo que ya construiste
+        var viewResult = resultado as ViewResult;
+
+        return View(viewResult!.Model);
     }
 
 }

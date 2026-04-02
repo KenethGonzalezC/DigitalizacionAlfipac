@@ -1,0 +1,66 @@
+﻿@{
+    ViewData["Title"] = "Inicio";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4 fw-semibold">
+        Panel principal de usuarios invitados
+    </h2>
+
+    <div class="row g-4">
+
+        <div class="col-md-6 col-lg-4">
+            <a asp-controller="Bitacora"
+                   asp-action="Index"
+                   class="text-decoration-none">
+
+                <div class="card h-100 shadow-sm dashboard-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Bitácora del día</h5>
+                        <p class="card-text text-muted">
+                            Registro de todos los movimientos del almacén fiscal.
+                        </p>
+                    </div>
+                </div>
+
+            </a>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <a asp-controller="HistorialContenedores"
+                   asp-action="Index"
+                   class="text-decoration-none">
+
+                <div class="card h-100 shadow-sm dashboard-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Historial de Contenedores</h5>
+                        <p class="card-text text-muted">
+                            Historial de Contenedores.
+                        </p>
+                    </div>
+                </div>
+
+            </a>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <a asp-controller="Inventario"
+                   asp-action="InventarioLectura"
+                   class="text-decoration-none">
+
+                <div class="card h-100 shadow-sm dashboard-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Inventario (Consulta)</h5>
+                        <p class="card-text text-muted">
+                            Visualización del inventario de contenedores en modo lectura.
+                        </p>
+                    </div>
+                </div>
+
+            </a>
+        </div>
+    </div>
+
+</div>
+

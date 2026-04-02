@@ -28,16 +28,18 @@
     </div>
 </form>
 
+<h3 class="mt-4">🟢 Contenedores Activos</h3>
+
 <table class="table table-striped">
     <thead>
         <tr>
             <th>Contenedor</th>
-            <th>Creación</th>
+            <th>Ingreso</th>
             <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var c in Model)
+        @foreach (var c in (List<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>)ViewBag.Activos)
         {
             <tr>
                 <td>
@@ -49,7 +51,42 @@
                     @(c.FechaHoraIngreso?.ToString("dd/MM/yyyy HH:mm") ?? "-")
                 </td>
                 <td>
-                    <form asp-action="Delete" method="post" onsubmit="return confirm('¿Eliminar contenedor?')">
+                    <form asp-action="Delete" method="post"
+                          onsubmit="return confirm('¿Eliminar contenedor?')">
+                        <input type="hidden" name="id" value="@c.Id" />
+                        <button class="btn btn-sm btn-danger">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3 class="mt-5">🔴 Contenedores Despachados</h3>
+
+<table class="table table-bordered table-sm">
+    <thead class="table-light">
+        <tr>
+            <th>Contenedor</th>
+            <th>Ingreso</th>
+            <th>Despacho</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in (List<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>)ViewBag.Despachados)
+        {
+            <tr>
+                <td>
+                    <a asp-action="Detalle" asp-route-id="@c.Id">
+                        @c.Contenedor
+                    </a>
+                </td>
+                <td>@(c.FechaHoraIngreso?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                <td>@(c.FechaHoraDespacho?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                <td>
+                    <form asp-action="Delete" method="post"
+                          onsubmit="return confirm('¿Eliminar contenedor?')">
                         <input type="hidden" name="id" value="@c.Id" />
                         <button class="btn btn-sm btn-danger">Eliminar</button>
                     </form>

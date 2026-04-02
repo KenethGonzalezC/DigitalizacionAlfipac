@@ -492,7 +492,7 @@ public class BitacoraIngresosController : Controller
             query = query.Where(x => x.Contenedor.Contains(contenedor));
 
         if (!string.IsNullOrWhiteSpace(marchamo))
-            query = query.Where(x => x.Marchamos.Contains(marchamo));
+            query = query.Where(x => x.Chasis.Contains(marchamo));
 
         if (!string.IsNullOrWhiteSpace(cliente))
             query = query.Where(x => x.Cliente.Contains(cliente));
@@ -521,7 +521,7 @@ public class BitacoraIngresosController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CrearVehiculoManual(string contenedor, string marchamo, string cliente)
+    public async Task<IActionResult> CrearVehiculoManual(string contenedor, string chasis, string cliente)
     {
         var existe = await _context.BitacoraIngresos
     .AnyAsync(x => x.Contenedor == contenedor);
@@ -537,14 +537,14 @@ public class BitacoraIngresosController : Controller
         var ingreso = new BitacoraIngreso
         {
             Contenedor = contenedor.ToUpper().Trim(),
-            Marchamos = marchamo ?? "",
+            Marchamos = "-",
             Cliente = cliente ?? "",
             FechaHoraIngreso = new DateTime(1212, 12, 12), // CLAVE
             Transportista = "-",
             Tamaño = "VEHICULO",
             Chofer = "-",
             PlacaCabezal = "-",
-            Chasis = "-",
+            Chasis = chasis ?? "",
             ViajeDua = "-"
         };
 
@@ -624,8 +624,8 @@ public class BitacoraIngresosController : Controller
                                 ? "-"
                                 : v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm"));
 
-                        table.Cell().Element(Cell).Text(v.Marchamos);
                         table.Cell().Element(Cell).Text(v.Contenedor);
+                        table.Cell().Element(Cell).Text(v.Chasis);
                         table.Cell().Element(Cell).Text(v.Cliente);
                     }
                 });
@@ -704,8 +704,8 @@ public class BitacoraIngresosController : Controller
                 ? "-"
                 : v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm");
 
-            ws.Cell(fila, 2).Value = v.Marchamos;
-            ws.Cell(fila, 3).Value = v.Contenedor;
+            ws.Cell(fila, 2).Value = v.Contenedor;
+            ws.Cell(fila, 3).Value = v.Chasis;
             ws.Cell(fila, 4).Value = v.Cliente;
 
             fila++;

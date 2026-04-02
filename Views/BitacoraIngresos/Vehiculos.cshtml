@@ -12,15 +12,15 @@
     <div class="row g-2">
 
         <div class="col-md-2">
-            <input name="marchamo" class="form-control"
+            <input name="contenedor" class="form-control"
                    placeholder="VEHICULO"
-                   value="@Context.Request.Query["marchamo"]" />
+                   value="@Context.Request.Query["contenedor"]" />
         </div>
 
         <div class="col-md-2">
-            <input name="contenedor" class="form-control"
+            <input name="chasis" class="form-control"
                    placeholder="VIN"
-                   value="@Context.Request.Query["contenedor"]" />
+                   value="@Context.Request.Query["chasis"]" />
         </div>
 
         <div class="col-md-2">
@@ -94,8 +94,8 @@
 
                 <tr>
                     <td>@v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td>@v.Marchamos</td>
                     <td>@v.Contenedor</td>
+                    <td>@v.Chasis</td>
                     <td>@v.Cliente</td>
 
                     <td class="text-center">
@@ -112,7 +112,7 @@
                                    asp-controller="BitacoraDespachos"
                                    asp-action="Index"
                                    asp-route-contenedor="@v.Contenedor"
-                                   asp-route-marchamos="@v.Marchamos"
+                                   asp-route-marchamos="@v.Chasis"
                                    asp-route-cliente="@v.Cliente">
                                 Despachar
                             </a>

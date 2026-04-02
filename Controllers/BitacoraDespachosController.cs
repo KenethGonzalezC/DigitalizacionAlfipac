@@ -601,6 +601,7 @@ namespace BitacoraAlfipac.Controllers
             despacho.ViajeDua = vm.ViajeDua;
             despacho.EsSalidaEnFurgon = vm.EsSalidaEnFurgon;
             despacho.ContenedorReferencia = vm.ContenedorReferencia;
+            despacho.GuardarContenedorSalida = vm.GuardarContenedorSalida;
 
             // 🔥 OPCIONAL PERO IMPORTANTE: actualizar historial
             var historial = await _context.HistorialContenedores

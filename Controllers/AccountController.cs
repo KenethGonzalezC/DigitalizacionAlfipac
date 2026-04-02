@@ -51,6 +51,11 @@ namespace BitacoraAlfipac.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 principal);
 
+            if (user.Rol == "Usuario")
+            {
+                return RedirectToAction("Index", "Usuario");
+            }
+
             return RedirectToAction("Index", "Home");
         }
 
