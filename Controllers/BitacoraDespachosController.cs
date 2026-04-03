@@ -23,11 +23,12 @@ namespace BitacoraAlfipac.Controllers
         }
 
         public async Task<IActionResult> Index(
-    DateTime? fecha,
-    string? contenedor,
-    string? marchamos,
-    string? cliente)
-        {
+        DateTime? fecha,
+        string? contenedor,
+        string? marchamos,
+        string? cliente,
+        string? chasis)
+            {
             var fechaSeleccionada = fecha ?? DateTime.Today;
 
             var inicio = fechaSeleccionada.Date;
@@ -47,7 +48,7 @@ namespace BitacoraAlfipac.Controllers
                 // 👇 AUTO-RELLENO
                 Contenedor = contenedor ?? "",
                 Marchamos = marchamos ?? "",
-                Transportista = cliente ?? "" // opcional aquí
+                Informacion = cliente ?? "" // opcional aquí
             };
 
             return View(vm);
@@ -63,47 +64,49 @@ namespace BitacoraAlfipac.Controllers
 
             var contenedorBuscado = vm.Contenedor.ToUpper().Trim();
 
-            object? contenedorObj = null;
-            IContenedorInventario? inventario = null;
-            string? patioOrigen = null;
+            object? entidad = null;
+            string tipo = "";
+            string? ubicacion = null;
 
-            // 🔎 Buscar en inventario SOLO si no es furgón
+            // 🔎 Buscar unidad SOLO si no es furgón
             if (!vm.EsSalidaEnFurgon)
             {
-                var resultado = await BuscarContenedorGlobal(contenedorBuscado);
-                contenedorObj = resultado.contenedor;
-                patioOrigen = resultado.patio;
+                var resultado = await BuscarUnidadGlobal(contenedorBuscado);
+                entidad = resultado.entidad;
+                tipo = resultado.tipo;
+                ubicacion = resultado.ubicacion;
 
-                // 🚨 VALIDACIÓN CRÍTICA
-                if (contenedorObj == null)
+                if (entidad == null)
                 {
-                    TempData["Error"] = "El contenedor no existe en inventario. Si es salida en furgón, debe marcar la opción.";
+                    TempData["Error"] = "La unidad no existe. Si es salida en furgón, debe marcar la opción.";
                     return RedirectToAction("Index", new { fecha = vm.FechaHoraDespacho.Date });
                 }
 
-                inventario = (IContenedorInventario)contenedorObj;
-
-                // ✏️ actualizar marchamo
-                inventario.Marchamos = vm.Marchamos;
-
-                // 🛟 BACKUP
-                var backup = new ContenedorBackupDespacho
+                // 🛟 BACKUP SOLO PARA CONTENEDORES
+                if (tipo == "CONTENEDOR")
                 {
-                    Contenedor = inventario.Contenedor,
-                    PatioOrigen = patioOrigen ?? "",
-                    Marchamos = inventario.Marchamos ?? "",
-                    Estado = inventario.EstadoCarga ?? "",
-                    Tamaño = inventario.Tamano ?? "",
-                    Transportista = inventario.Transportista ?? "",
-                    Cliente = inventario.Cliente ?? "",
-                    Chasis = inventario.Chasis ?? "",
-                    FechaRespaldo = DateTime.Now
-                };
+                    var inventario = (IContenedorInventario)entidad;
 
-                _context.ContenedoresBackupDespacho.Add(backup);
+                    inventario.Marchamos = vm.Marchamos;
+
+                    var backup = new ContenedorBackupDespacho
+                    {
+                        Contenedor = inventario.Contenedor,
+                        PatioOrigen = ubicacion ?? "",
+                        Marchamos = inventario.Marchamos ?? "",
+                        Estado = inventario.EstadoCarga ?? "",
+                        Tamaño = inventario.Tamano ?? "",
+                        Transportista = inventario.Transportista ?? "",
+                        Cliente = inventario.Cliente ?? "",
+                        Chasis = inventario.Chasis ?? "",
+                        FechaRespaldo = DateTime.Now
+                    };
+
+                    _context.ContenedoresBackupDespacho.Add(backup);
+                }
             }
 
-            // 📝 CREAR DESPACHO (SIEMPRE)
+            // 📝 CREAR DESPACHO
             var despacho = new BitacoraDespacho
             {
                 Contenedor = contenedorBuscado,
@@ -117,7 +120,7 @@ namespace BitacoraAlfipac.Controllers
                 ViajeDua = vm.ViajeDua,
                 EsSalidaEnFurgon = vm.EsSalidaEnFurgon,
                 ContenedorReferencia = vm.ContenedorReferencia,
-                GuardarContenedorSalida = vm.GuardarContenedorSalida // 👈 NUEVO
+                GuardarContenedorSalida = vm.GuardarContenedorSalida
             };
 
             _context.BitacoraDespachos.Add(despacho);
@@ -126,12 +129,12 @@ namespace BitacoraAlfipac.Controllers
             // 🔥 MANEJO INTELIGENTE
             // =========================
 
-            if (!vm.EsSalidaEnFurgon)
+            if (!vm.EsSalidaEnFurgon && entidad != null)
             {
-                // 🗑️ SI EXISTE EN INVENTARIO → ELIMINAR
-                if (contenedorObj != null)
+                if (tipo == "CONTENEDOR")
                 {
-                    switch (contenedorObj)
+                    // 🗑️ eliminar de patio
+                    switch (entidad)
                     {
                         case ContenedorSinAsignarPatio c: _context.ContenedoresSinAsignarPatio.Remove(c); break;
                         case PatioQuimicos c: _context.PatioQuimicos.Remove(c); break;
@@ -140,8 +143,14 @@ namespace BitacoraAlfipac.Controllers
                         case Anden2000 c: _context.Anden2000.Remove(c); break;
                     }
                 }
+                else if (tipo == "VEHICULO")
+                {
+                    // 🚗 desactivar vehículo
+                    var vehiculo = (Vehiculo)entidad;
+                    vehiculo.Activo = false;
+                }
 
-                // 🔎 BUSCAR HISTORIAL
+                // 🔎 HISTORIAL
                 var historial = await _context.HistorialContenedores
                     .Where(h => h.Contenedor == contenedorBuscado && h.FechaHoraSalida == null)
                     .OrderByDescending(h => h.FechaHoraIngreso)
@@ -149,12 +158,10 @@ namespace BitacoraAlfipac.Controllers
 
                 if (historial != null)
                 {
-                    // ✅ CASO NORMAL → cerrar historial
                     historial.FechaHoraSalida = vm.FechaHoraDespacho;
                 }
                 else
                 {
-                    // 🚗 VEHÍCULO / MANUAL → crear solo salida
                     _context.HistorialContenedores.Add(new HistorialContenedor
                     {
                         Contenedor = contenedorBuscado,
@@ -193,6 +200,26 @@ namespace BitacoraAlfipac.Controllers
         }
 
         //Buscar ubicación del contenedor
+        private async Task<(object? entidad, string tipo, string? ubicacion)> BuscarUnidadGlobal(string numero)
+        {
+            numero = numero.ToUpper();
+
+            // 🔹 VEHÍCULO
+            var vehiculo = await _context.Vehiculos
+                .FirstOrDefaultAsync(v => v.Contenedor == numero && v.Activo);
+
+            if (vehiculo != null)
+                return (vehiculo, "VEHICULO", "Vehículos");
+
+            // 🔹 CONTENEDOR (tu lógica actual)
+            var (contenedor, patio) = await BuscarContenedorGlobal(numero);
+
+            if (contenedor != null)
+                return (contenedor, "CONTENEDOR", patio);
+
+            return (null, "", null);
+        }
+
         private async Task<(object? contenedor, string? patio)> BuscarContenedorGlobal(string numero)
         {
             numero = numero.ToUpper();
@@ -225,40 +252,67 @@ namespace BitacoraAlfipac.Controllers
 
             contenedor = contenedor.ToUpper().Trim();
 
-            // 🔍 Verificar si ya fue despachado
-            var historial = await _context.HistorialContenedores
-                .Where(h => h.Contenedor == contenedor && h.FechaHoraSalida != null)
-                .OrderByDescending(h => h.FechaHoraSalida)
-                .FirstOrDefaultAsync();
+            // 🔎 Buscar unidad (vehículo o contenedor)
+            var (entidad, tipo, ubicacion) = await BuscarUnidadGlobal(contenedor);
 
-            if (historial != null)
-            {
-                return Json(new
-                {
-                    encontrado = false,
-                    mensaje = $"Este contenedor ya fue despachado el {historial.FechaHoraSalida:dd/MM/yyyy HH:mm}"
-                });
-            }
-
-            // 🔍 Buscar en patios
-            var (data, patio) = await BuscarContenedorGlobal(contenedor);
-
-            if (data == null)
+            if (entidad == null)
                 return Json(new { encontrado = false });
 
-            var c = (IContenedorInventario)data;
-
-            return Json(new
+            // 🚫 VALIDACIÓN REAL (estado actual)
+            if (tipo == "VEHICULO")
             {
-                encontrado = true,
-                contenedor = c.Contenedor,
-                marchamos = c.Marchamos ?? "",
-                chasis = c.Chasis ?? "",
-                transportista = c.Transportista ?? "",
-                cliente = c.Cliente ?? "",
-                estado = c.EstadoCarga ?? "",
-                patio
-            });
+                var v = (Vehiculo)entidad;
+
+                if (!v.Activo)
+                {
+                    return Json(new
+                    {
+                        encontrado = false,
+                        mensaje = "Este vehículo ya fue despachado"
+                    });
+                }
+
+                return Json(new
+                {
+                    encontrado = true,
+                    contenedor = v.Contenedor,
+                    marchamos = v.Marchamos ?? "",
+                    chasis = v.Chasis ?? "",
+                    transportista = v.Transportista ?? "",
+                    cliente = v.Cliente ?? "",
+                    estado = "Activo",
+                    patio = "Vehículos"
+                });
+            }
+            else
+            {
+                // 🔎 validar contenedor activo (historial abierto)
+                var historialAbierto = await _context.HistorialContenedores
+                    .AnyAsync(h => h.Contenedor == contenedor && h.FechaHoraSalida == null);
+
+                if (!historialAbierto)
+                {
+                    return Json(new
+                    {
+                        encontrado = false,
+                        mensaje = "Este contenedor no está disponible en inventario"
+                    });
+                }
+
+                var c = (IContenedorInventario)entidad;
+
+                return Json(new
+                {
+                    encontrado = true,
+                    contenedor = c.Contenedor,
+                    marchamos = c.Marchamos ?? "",
+                    chasis = c.Chasis ?? "",
+                    transportista = c.Transportista ?? "",
+                    cliente = c.Cliente ?? "",
+                    estado = c.EstadoCarga ?? "",
+                    patio = ubicacion
+                });
+            }
         }
 
         //Exportar a excel
@@ -619,5 +673,4 @@ namespace BitacoraAlfipac.Controllers
             return RedirectToAction("Index", new { fecha = vm.FechaHoraDespacho.Date });
         }
     }
-
 }

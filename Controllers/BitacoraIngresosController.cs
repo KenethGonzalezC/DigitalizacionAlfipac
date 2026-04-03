@@ -93,8 +93,11 @@ public class BitacoraIngresosController : Controller
         });
 
         //manejo de vehiculos
-        if (model.Tamano.Trim().ToUpper() != "VEHICULO")
+        var esVehiculo = model.Tamano.Trim().ToUpper() == "VEHICULO";
+
+        if (!esVehiculo)
         {
+            // 📦 CONTENEDOR NORMAL (SE MANTIENE IGUAL)
             _context.ContenedoresSinAsignarPatio.Add(new ContenedorSinAsignarPatio
             {
                 Contenedor = model.Contenedor,
@@ -106,6 +109,36 @@ public class BitacoraIngresosController : Controller
                 EstadoCarga = "Cargado",
                 Ubicacion = "Sin asignar"
             });
+        }
+        else
+        {
+            // 🚗 VEHÍCULO → NUEVA TABLA
+
+            var existeVehiculo = await _context.Vehiculos
+                .AnyAsync(v => v.Chasis == model.Chasis && v.Activo);
+
+            if (existeVehiculo)
+            {
+                TempData["Error"] = "Este vehículo ya se encuentra registrado.";
+                return RedirectToAction(nameof(Index), new { fecha = fechaHora.Date });
+            }
+
+            var vehiculo = new Vehiculo
+            {
+                Contenedor = model.Contenedor.ToUpper().Trim(),
+                Marchamos = string.IsNullOrWhiteSpace(model.Marchamos) ? "S/M" : model.Marchamos,
+                FechaHoraIngreso = fechaHora,
+                Transportista = model.Transportista,
+                Cliente = model.Cliente,
+                Tamano = "VEHICULO",
+                Chofer = model.Chofer,
+                PlacaCabezal = string.IsNullOrWhiteSpace(model.PlacaCabezal) ? "S/P" : model.PlacaCabezal,
+                Chasis = model.Chasis,
+                ViajeDua = model.ViajeDua,
+                Activo = true
+            };
+
+            _context.Vehiculos.Add(vehiculo);
         }
 
         // 🔹 SI ES REFRIGERADO, CREARLO EN EL MODULO REEFER
@@ -444,26 +477,18 @@ public class BitacoraIngresosController : Controller
     }
 
     //vehiculos
-
+    //eliminar
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EliminarVehiculo(int id)
     {
-        var ingreso = await _context.BitacoraIngresos
+        var vehiculo = await _context.Vehiculos
             .FirstOrDefaultAsync(x => x.Id == id);
 
-        if (ingreso == null)
+        if (vehiculo == null)
             return NotFound();
 
-        // eliminar historial relacionado
-        var historial = await _context.HistorialContenedores
-            .Where(h => h.Contenedor == ingreso.Contenedor &&
-                        h.FechaHoraIngreso == ingreso.FechaHoraIngreso)
-            .ToListAsync();
-
-        _context.HistorialContenedores.RemoveRange(historial);
-
-        _context.BitacoraIngresos.Remove(ingreso);
+        _context.Vehiculos.Remove(vehiculo);
 
         await _context.SaveChangesAsync();
 
@@ -473,26 +498,19 @@ public class BitacoraIngresosController : Controller
     //filtros
     public async Task<IActionResult> Vehiculos(
     string? contenedor,
-    string? marchamo,
+    string? chasis,
     string? cliente,
     DateTime? fechaInicio,
     DateTime? fechaFin)
     {
-        var query = _context.BitacoraIngresos
-            .Where(x => x.Tamaño == "VEHICULO" ||
-            x.FechaHoraIngreso.Year == 1212) //incluir manuales)
-            .AsQueryable();
+        var query = _context.Vehiculos.AsQueryable();
 
-        // 🔴 FILTRO CLAVE: SOLO VEHÍCULOS ACTIVOS (NO DESPACHADOS)
-        //query = query.Where(x => !_context.HistorialContenedores
-            //.Any(h => h.Contenedor == x.Contenedor && h.FechaHoraSalida != null));
-
-        // 🔍 FILTROS DINÁMICOS
+        // 🔍 FILTROS
         if (!string.IsNullOrWhiteSpace(contenedor))
             query = query.Where(x => x.Contenedor.Contains(contenedor));
 
-        if (!string.IsNullOrWhiteSpace(marchamo))
-            query = query.Where(x => x.Chasis.Contains(marchamo));
+        if (!string.IsNullOrWhiteSpace(chasis))
+            query = query.Where(x => x.Chasis.Contains(chasis));
 
         if (!string.IsNullOrWhiteSpace(cliente))
             query = query.Where(x => x.Cliente.Contains(cliente));
@@ -521,46 +539,58 @@ public class BitacoraIngresosController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CrearVehiculoManual(string contenedor, string chasis, string cliente)
+    public async Task<IActionResult> CrearVehiculoManual(
+    string contenedor,
+    string chasis,
+    string? cliente,
+    string? transportista,
+    string? marchamos,
+    string? chofer,
+    string? placaCabezal,
+    string? viajeDua,
+    DateTime? fechaHoraIngreso,
+    string? tamano,
+    bool activo = true)
     {
-        var existe = await _context.BitacoraIngresos
-    .AnyAsync(x => x.Contenedor == contenedor);
+        if (string.IsNullOrWhiteSpace(contenedor) || string.IsNullOrWhiteSpace(chasis))
+            return RedirectToAction("Vehiculos");
+
+        contenedor = contenedor.ToUpper().Trim();
+        chasis = chasis.ToUpper().Trim();
+
+        var existe = await _context.Vehiculos
+            .AnyAsync(x => x.Chasis == chasis && x.Activo);
 
         if (existe)
-        {
-            return RedirectToAction("Vehiculos");
-        }
-
-        if (string.IsNullOrWhiteSpace(contenedor))
             return RedirectToAction("Vehiculos");
 
-        var ingreso = new BitacoraIngreso
+        var vehiculo = new Vehiculo
         {
-            Contenedor = contenedor.ToUpper().Trim(),
-            Marchamos = "-",
+            Contenedor = contenedor,
+            Chasis = chasis,
             Cliente = cliente ?? "",
-            FechaHoraIngreso = new DateTime(1212, 12, 12), // CLAVE
-            Transportista = "-",
-            Tamaño = "VEHICULO",
-            Chofer = "-",
-            PlacaCabezal = "-",
-            Chasis = chasis ?? "",
-            ViajeDua = "-"
+            Transportista = transportista ?? "-",
+            Marchamos = string.IsNullOrWhiteSpace(marchamos) ? "S/M" : marchamos,
+            Chofer = chofer ?? "-",
+            PlacaCabezal = string.IsNullOrWhiteSpace(placaCabezal) ? "S/P" : placaCabezal,
+            ViajeDua = viajeDua ?? "-",
+            FechaHoraIngreso = fechaHoraIngreso ?? DateTime.Now,
+            Tamano = string.IsNullOrWhiteSpace(tamano) ? "VEHICULO" : tamano,
+            Activo = activo
         };
 
-        _context.BitacoraIngresos.Add(ingreso);
-
+        _context.Vehiculos.Add(vehiculo);
         await _context.SaveChangesAsync();
 
         return RedirectToAction("Vehiculos");
     }
 
     //exportaciones
+    //PDF
     [HttpPost]
     public IActionResult ExportarVehiculosPDF(string nombre)
     {
-        var datos = _context.BitacoraIngresos
-            .Where(x => x.Tamaño == "VEHICULO" || x.FechaHoraIngreso.Year == 1212)
+        var datos = _context.Vehiculos
             .OrderByDescending(x => x.FechaHoraIngreso)
             .ToList();
 
@@ -603,10 +633,10 @@ public class BitacoraIngresosController : Controller
                 {
                     table.ColumnsDefinition(columns =>
                     {
-                        columns.RelativeColumn(2); // Fecha
-                        columns.RelativeColumn(2); // Vehículo
-                        columns.RelativeColumn(2); // VIN
-                        columns.RelativeColumn(2); // Cliente
+                        columns.RelativeColumn(2);
+                        columns.RelativeColumn(2);
+                        columns.RelativeColumn(2);
+                        columns.RelativeColumn(2);
                     });
 
                     void Header(string text) =>
@@ -620,9 +650,7 @@ public class BitacoraIngresosController : Controller
                     foreach (var v in datos)
                     {
                         table.Cell().Element(Cell)
-                            .Text(v.FechaHoraIngreso.Year == 1212
-                                ? "-"
-                                : v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm"));
+                            .Text(v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm"));
 
                         table.Cell().Element(Cell).Text(v.Contenedor);
                         table.Cell().Element(Cell).Text(v.Chasis);
@@ -637,7 +665,6 @@ public class BitacoraIngresosController : Controller
 
 
         // ===== ESTILOS =====
-
         static IContainer HeaderCell(IContainer c) =>
             c.Background(Colors.Grey.Lighten3)
              .BorderBottom(1)
@@ -657,11 +684,11 @@ public class BitacoraIngresosController : Controller
              .Background(Colors.Grey.Lighten4);
     }
 
+    //Excel
     [HttpPost]
     public IActionResult ExportarVehiculosExcel(string nombre)
     {
-        var datos = _context.BitacoraIngresos
-            .Where(x => x.Tamaño == "VEHICULO" || x.FechaHoraIngreso.Year == 1212)
+        var datos = _context.Vehiculos
             .OrderByDescending(x => x.FechaHoraIngreso)
             .ToList();
 
@@ -700,10 +727,7 @@ public class BitacoraIngresosController : Controller
         // ===== DATA =====
         foreach (var v in datos)
         {
-            ws.Cell(fila, 1).Value = v.FechaHoraIngreso.Year == 1212
-                ? "-"
-                : v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm");
-
+            ws.Cell(fila, 1).Value = v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm");
             ws.Cell(fila, 2).Value = v.Contenedor;
             ws.Cell(fila, 3).Value = v.Chasis;
             ws.Cell(fila, 4).Value = v.Cliente;
@@ -723,4 +747,50 @@ public class BitacoraIngresosController : Controller
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             $"Vehiculos_{DateTime.Now:dd-MM-yyyy_HH-mm}.xlsx");
     }
+
+    //editar vehiculo
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditarVehiculo(
+    int id,
+    string contenedor,
+    string chasis,
+    string? cliente,
+    string? transportista,
+    string? marchamos,
+    string? chofer,
+    string? placaCabezal,
+    string? viajeDua,
+    bool activo)
+    {
+        var vehiculo = await _context.Vehiculos.FindAsync(id);
+
+        if (vehiculo == null)
+            return RedirectToAction("Vehiculos");
+
+        contenedor = contenedor.ToUpper().Trim();
+        chasis = chasis.ToUpper().Trim();
+
+        // 🔥 evitar duplicados de VIN en otro registro activo
+        var existe = await _context.Vehiculos
+            .AnyAsync(x => x.Chasis == chasis && x.Id != id && x.Activo);
+
+        if (existe)
+            return RedirectToAction("Vehiculos");
+
+        vehiculo.Contenedor = contenedor;
+        vehiculo.Chasis = chasis;
+        vehiculo.Cliente = cliente ?? "";
+        vehiculo.Transportista = transportista ?? "-";
+        vehiculo.Marchamos = string.IsNullOrWhiteSpace(marchamos) ? "S/M" : marchamos;
+        vehiculo.Chofer = chofer ?? "-";
+        vehiculo.PlacaCabezal = string.IsNullOrWhiteSpace(placaCabezal) ? "S/P" : placaCabezal;
+        vehiculo.ViajeDua = viajeDua ?? "-";
+        vehiculo.Activo = activo;
+
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction("Vehiculos");
+    }
+
 }

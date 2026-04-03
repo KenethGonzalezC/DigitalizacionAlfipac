@@ -32,5 +32,7 @@ namespace BitacoraAlfipac.Data
         public DbSet<PabMercanciaSusceptible> PabMercanciasSusceptibles { get; set; }
         public DbSet<TransportistaAutorizado> TransportistasAutorizados { get; set; }
         public DbSet<DatosDespachoViaje> DatosDespachosViajes { get; set; }
+
+        public DbSet<Vehiculo> Vehiculos { get; set; }
     }
 }

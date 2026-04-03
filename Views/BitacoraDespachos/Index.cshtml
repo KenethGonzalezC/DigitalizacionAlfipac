@@ -202,127 +202,6 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById('deleteModal').addEventListener('show.bs.modal', e => {
-            document.getElementById('deleteId').value = e.relatedTarget.dataset.id;
-        });
-    </script>
-
-    <script>
-                        document.addEventListener("DOMContentLoaded", function () {
-
-            async function buscarContenedor() {
-
-                const contenedor = document.getElementById("contenedorInput").value.trim();
-                if (!contenedor) return;
-
-                const infoPatio = document.getElementById("infoPatio");
-
-                try {
-
-                    let datosDespacho = null;
-                    let datosInventario = null;
-
-                    // =========================
-                    // BUSCAR EN DESPACHOS
-                    // =========================
-                    const resDespacho = await fetch(`/Datos/BuscarDespacho?contenedor=${contenedor}`);
-                    const despacho = await resDespacho.json();
-
-                    if (despacho && despacho.encontrado) {
-                        datosDespacho = despacho;
-                    }
-
-                    // =========================
-                    // BUSCAR EN INVENTARIO (PATIO)
-                    // =========================
-                    const resInv = await fetch(`/BitacoraDespachos/BuscarParaDespacho?contenedor=${contenedor}`);
-                    const inv = await resInv.json();
-
-                    if (inv && inv.encontrado) {
-                        datosInventario = inv;
-
-                        // 🔵 SOLO mostrar ubicación
-                        infoPatio.innerText =
-                            `📦 Ubicación: ${inv.patio ?? "-"} | Estado: ${inv.estado ?? "-"}`;
-                    }
-                    else {
-                        infoPatio.innerText = "❌ No está en inventario";
-                    }
-
-                    // =========================
-                    // PRIORIDAD DATOS
-                    // =========================
-
-                    if (datosDespacho) {
-                        llenarCampos(datosDespacho); // 🔥 PRIORIDAD DESPACHO
-                        return;
-                    }
-
-                    if (datosInventario) {
-                        llenarCampos(datosInventario); // fallback inventario
-                        return;
-                    }
-
-                    infoPatio.innerText = "❌ Contenedor no encontrado";
-
-                } catch (error) {
-                    console.error(error);
-                    infoPatio.innerText = "Error consultando el contenedor";
-                }
-            }
-
-
-            function llenarCampos(data) {
-
-                const map = {
-                    Marchamos: data.marchamos,
-                    Transportista: data.transportista,
-                    Chasis: data.chasis,
-                    Cliente: data.cliente,
-                    Informacion: data.cliente,
-                    Chofer: data.chofer,
-                    PlacaCabezal: data.placaCabezal,
-                    ViajeDua: data.viajeDua
-                };
-
-                Object.keys(map).forEach(name => {
-
-                    const input = document.querySelector(`[name='${name}']`);
-
-                    if (input && map[name] !== undefined && map[name] !== null)
-                        input.value = map[name];
-                });
-            }
-
-
-
-
-            document.getElementById("btnBuscarContenedor")
-                ?.addEventListener("click", buscarContenedor);
-
-            document.getElementById("contenedorInput")
-                ?.addEventListener("keypress", e => {
-                    if (e.key === "Enter") {
-                        e.preventDefault();
-                        buscarContenedor();
-                    }
-                });
-                // 🔥 NUEVO COMPORTAMIENTO
-    const chkGuardar = document.getElementById("GuardarContenedorSalida");
-    const chkFurgon = document.getElementById("EsSalidaEnFurgon");
-
-    if (chkGuardar && chkFurgon) {
-        chkGuardar.addEventListener("change", function () {
-            if (this.checked) {
-                chkFurgon.checked = true;
-            }
-        });
-    }
-
-        });
-    </script>
-
     <div class="modal fade" id="modalEditar" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -418,62 +297,165 @@
     </div>
 
     <script>
-            const chkGuardar = document.getElementById("editGuardarSalida");
-            const hiddenGuardar = document.getElementById("hiddenGuardarSalida");
+            document.addEventListener("DOMContentLoaded", function () {
 
-            // 🔁 sincroniza SIEMPRE el hidden cuando cambie
-            chkGuardar.addEventListener("change", function () {
-                hiddenGuardar.value = this.checked;
+                const deleteModal = document.getElementById('deleteModal');
+
+                if (deleteModal) {
+                    deleteModal.addEventListener('show.bs.modal', e => {
+                        document.getElementById('deleteId').value = e.relatedTarget.dataset.id;
+                    });
+                }
+
             });
+    </script>
 
-            document.querySelectorAll(".btnEditar").forEach(btn => {
-                btn.addEventListener("click", function () {
+    <script>
+            document.addEventListener("DOMContentLoaded", function () {
 
-                    document.getElementById("editId").value = this.dataset.id;
-                    document.getElementById("editContenedor").value = this.dataset.contenedor;
-                    document.getElementById("editMarchamos").value = this.dataset.marchamos;
-                    document.getElementById("editFecha").value = this.dataset.fecha;
-                    document.getElementById("editTransportista").value = this.dataset.transportista;
-                    document.getElementById("editInfo").value = this.dataset.info;
-                    document.getElementById("editChofer").value = this.dataset.chofer;
-                    document.getElementById("editPlaca").value = this.dataset.placa;
-                    document.getElementById("editChasis").value = this.dataset.chasis;
-                    document.getElementById("editViaje").value = this.dataset.viaje;
+                async function buscarContenedor() {
 
-                    const esFurgon = this.dataset.furgon === "true";
-                    const guardarSalida = this.dataset.guardarsalida === "true";
+                    const contenedor = document.getElementById("contenedorInput").value.trim();
+                    if (!contenedor) return;
 
-                    // 🔒 Furgón (solo lectura)
-                    document.getElementById("editFurgon").checked = esFurgon;
+                    const infoPatio = document.getElementById("infoPatio");
 
-                    // 🎯 Guardar salida (dinámico)
-                    chkGuardar.checked = guardarSalida;
+                    try {
 
-                    if (esFurgon) {
-                        chkGuardar.disabled = false;
-                    } else {
-                        chkGuardar.disabled = true;
-                        chkGuardar.checked = false;
+                        infoPatio.innerText = "🔍 Buscando...";
+
+                        const res = await fetch(`/BitacoraDespachos/BuscarParaDespacho?contenedor=${contenedor}`);
+
+                        // 🔥 VALIDACIÓN HTTP
+                        if (!res.ok) {
+                            throw new Error(`HTTP ${res.status}`);
+                        }
+
+                        const data = await res.json();
+
+                        if (data && data.encontrado) {
+
+                            infoPatio.innerText =
+                                `📦 Ubicación: ${data.patio ?? "-"} | Estado: ${data.estado ?? "-"}`;
+
+                            llenarCampos(data);
+                        }
+                        else {
+                            infoPatio.innerText = data.mensaje ?? "❌ Unidad no encontrada";
+                        }
+
+                    } catch (error) {
+                        console.error("ERROR FETCH:", error);
+                        infoPatio.innerText = "❌ Error consultando el contenedor";
                     }
+                }
 
-                    // 🔁 actualizar hidden
-                    document.getElementById("hiddenFurgon").value = esFurgon;
+                function llenarCampos(data) {
 
-                    // 📦 Contenedor referencia
-                    const contRefDiv = document.getElementById("contenedorRefContainer");
-                    const contRefInput = document.getElementById("editContenedorRef");
+                    const map = {
+                        Marchamos: data.marchamos,
+                        Transportista: data.transportista,
+                        Chasis: data.chasis,
+                        Informacion: data.cliente,
+                        Chofer: data.chofer,
+                        PlacaCabezal: data.placaCabezal,
+                        ViajeDua: data.viajeDua
+                    };
 
-                    contRefInput.value = this.dataset.contenedorref || "";
+                    Object.keys(map).forEach(name => {
 
-                    if (esFurgon) {
-                        contRefDiv.style.display = "block";
-                    } else {
-                        contRefDiv.style.display = "none";
-                        contRefInput.value = "";
-                    }
+                        const input = document.querySelector(`[name='${name}']`);
 
-                    var modal = new bootstrap.Modal(document.getElementById("modalEditar"));
-                    modal.show();
+                        if (input && map[name] !== undefined && map[name] !== null) {
+                            input.value = map[name];
+                        }
+                    });
+                }
+
+                // 🔘 BOTÓN BUSCAR
+                document.getElementById("btnBuscarContenedor")
+                    ?.addEventListener("click", buscarContenedor);
+
+                // ⌨️ ENTER
+                document.getElementById("contenedorInput")
+                    ?.addEventListener("keypress", e => {
+                        if (e.key === "Enter") {
+                            e.preventDefault();
+                            buscarContenedor();
+                        }
+                    });
+
+                // 🔥 RELACIÓN CHECKBOX
+                const chkGuardar = document.getElementById("GuardarContenedorSalida");
+                const chkFurgon = document.getElementById("EsSalidaEnFurgon");
+
+                if (chkGuardar && chkFurgon) {
+                    chkGuardar.addEventListener("change", function () {
+                        if (this.checked) {
+                            chkFurgon.checked = true;
+                        }
+                    });
+                }
+
+            });
+    </script>
+
+    <script>
+            document.addEventListener("DOMContentLoaded", function () {
+
+                const chkGuardar = document.getElementById("editGuardarSalida");
+                const hiddenFurgon = document.getElementById("hiddenFurgon");
+
+                document.querySelectorAll(".btnEditar").forEach(btn => {
+                    btn.addEventListener("click", function () {
+
+                        document.getElementById("editId").value = this.dataset.id;
+                        document.getElementById("editContenedor").value = this.dataset.contenedor;
+                        document.getElementById("editMarchamos").value = this.dataset.marchamos;
+                        document.getElementById("editFecha").value = this.dataset.fecha;
+                        document.getElementById("editTransportista").value = this.dataset.transportista;
+                        document.getElementById("editInfo").value = this.dataset.info;
+                        document.getElementById("editChofer").value = this.dataset.chofer;
+                        document.getElementById("editPlaca").value = this.dataset.placa;
+                        document.getElementById("editChasis").value = this.dataset.chasis;
+                        document.getElementById("editViaje").value = this.dataset.viaje;
+
+                        const esFurgon = this.dataset.furgon === "true";
+                        const guardarSalida = this.dataset.guardarsalida === "true";
+
+                        // 🔒 Furgón
+                        document.getElementById("editFurgon").checked = esFurgon;
+
+                        // 🎯 Guardar salida
+                        chkGuardar.checked = guardarSalida;
+
+                        if (esFurgon) {
+                            chkGuardar.disabled = false;
+                        } else {
+                            chkGuardar.disabled = true;
+                            chkGuardar.checked = false;
+                        }
+
+                        // 🔁 sincronizar hidden
+                        hiddenFurgon.value = esFurgon;
+
+                        // 📦 Contenedor referencia
+                        const contRefDiv = document.getElementById("contenedorRefContainer");
+                        const contRefInput = document.getElementById("editContenedorRef");
+
+                        contRefInput.value = this.dataset.contenedorref || "";
+
+                        if (esFurgon) {
+                            contRefDiv.style.display = "block";
+                        } else {
+                            contRefDiv.style.display = "none";
+                            contRefInput.value = "";
+                        }
+
+                        var modal = new bootstrap.Modal(document.getElementById("modalEditar"));
+                        modal.show();
+                    });
                 });
+
             });
     </script>
