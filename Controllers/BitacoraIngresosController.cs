@@ -566,14 +566,14 @@ public class BitacoraIngresosController : Controller
 
         var vehiculo = new Vehiculo
         {
-            Contenedor = contenedor,
-            Chasis = chasis,
-            Cliente = cliente ?? "",
-            Transportista = transportista ?? "-",
-            Marchamos = string.IsNullOrWhiteSpace(marchamos) ? "S/M" : marchamos,
-            Chofer = chofer ?? "-",
-            PlacaCabezal = string.IsNullOrWhiteSpace(placaCabezal) ? "S/P" : placaCabezal,
-            ViajeDua = viajeDua ?? "-",
+            Contenedor = string.IsNullOrWhiteSpace(contenedor) ? "-" : contenedor,
+            Chasis = string.IsNullOrWhiteSpace(chasis) ? "-" : chasis,
+            Cliente = string.IsNullOrWhiteSpace(cliente) ? "-" : cliente,
+            Transportista = string.IsNullOrWhiteSpace(transportista) ? "-" : transportista,
+            Marchamos = string.IsNullOrWhiteSpace(marchamos) ? "-" : marchamos,
+            Chofer = string.IsNullOrWhiteSpace(chofer) ? "-" : chofer,
+            PlacaCabezal = string.IsNullOrWhiteSpace(placaCabezal) ? "-" : placaCabezal,
+            ViajeDua = string.IsNullOrWhiteSpace(viajeDua) ? "-" : viajeDua,
             FechaHoraIngreso = fechaHoraIngreso ?? DateTime.Now,
             Tamano = string.IsNullOrWhiteSpace(tamano) ? "VEHICULO" : tamano,
             Activo = activo
@@ -778,14 +778,14 @@ public class BitacoraIngresosController : Controller
         if (existe)
             return RedirectToAction("Vehiculos");
 
-        vehiculo.Contenedor = contenedor;
-        vehiculo.Chasis = chasis;
-        vehiculo.Cliente = cliente ?? "";
-        vehiculo.Transportista = transportista ?? "-";
-        vehiculo.Marchamos = string.IsNullOrWhiteSpace(marchamos) ? "S/M" : marchamos;
-        vehiculo.Chofer = chofer ?? "-";
-        vehiculo.PlacaCabezal = string.IsNullOrWhiteSpace(placaCabezal) ? "S/P" : placaCabezal;
-        vehiculo.ViajeDua = viajeDua ?? "-";
+        vehiculo.Contenedor = string.IsNullOrWhiteSpace(contenedor) ? "-" : contenedor;
+        vehiculo.Chasis = string.IsNullOrWhiteSpace(chasis) ? "-" : chasis;
+        vehiculo.Cliente = string.IsNullOrWhiteSpace(cliente) ? "-" : cliente;
+        vehiculo.Transportista = string.IsNullOrWhiteSpace(transportista) ? "-" : transportista;
+        vehiculo.Marchamos = string.IsNullOrWhiteSpace(marchamos) ? "-" : marchamos;
+        vehiculo.Chofer = string.IsNullOrWhiteSpace(chofer) ? "-" : chofer;
+        vehiculo.PlacaCabezal = string.IsNullOrWhiteSpace(placaCabezal) ? "-" : placaCabezal;
+        vehiculo.ViajeDua = string.IsNullOrWhiteSpace(viajeDua) ? "-" : viajeDua;
         vehiculo.Activo = activo;
 
         await _context.SaveChangesAsync();
