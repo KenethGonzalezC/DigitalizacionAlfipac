@@ -59,6 +59,18 @@ CultureInfo.DefaultThreadCurrentUICulture = culture;
 var app = builder.Build();
 
 // ==========================
+// LOGS
+// ==========================
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseDeveloperExceptionPage(); // 👈 temporal en producción
+}
+
+// ==========================
 // DATABASE MIGRATION + SEED
 // ==========================
 using (var scope = app.Services.CreateScope())
