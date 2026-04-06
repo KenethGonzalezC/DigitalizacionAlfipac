@@ -17,12 +17,34 @@
 <input type="text" id="buscador" class="form-control mb-3"
        placeholder="🔍 Buscar VIN, modelo o cliente" />
 
-<div>
-    <button class="btn btn-success mb-3"
-            data-bs-toggle="modal"
-            data-bs-target="#modalVehiculoManual">
-        + Agregar vehículo manual
-    </button>
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+
+    <!-- IZQUIERDA -->
+    <div>
+        <button class="btn btn-success"
+                data-bs-toggle="modal"
+                data-bs-target="#modalVehiculoManual">
+            <i class="bi bi-plus-circle"></i> Agregar vehículo
+        </button>
+    </div>
+
+    <!-- DERECHA -->
+    <div class="d-flex gap-2">
+
+        <form asp-action="ExportarVehiculosPDF" method="post" class="m-0">
+            <button class="btn btn-danger">
+                <i class="bi bi-file-earmark-pdf"></i> PDF
+            </button>
+        </form>
+
+        <form asp-action="ExportarVehiculosExcel" method="post" class="m-0">
+            <button class="btn btn-success">
+                <i class="bi bi-file-earmark-excel"></i> Excel
+            </button>
+        </form>
+
+    </div>
+
 </div>
 
 <div class="card p-3">
@@ -96,6 +118,7 @@
                                     data-chofer="@v.Chofer"
                                     data-placa="@v.PlacaCabezal"
                                     data-viaje="@v.ViajeDua"
+                                    data-fechaingreso="@v.FechaHoraIngreso.ToString("yyyy-MM-ddTHH:mm")"
                                     data-activo="@v.Activo.ToString().ToLower()">
                                 Editar
                             </button>
@@ -276,6 +299,14 @@
                             <input id="editViaje" name="viajeDua" class="form-control" />
                         </div>
 
+                        <div class="col-md-4">
+                            <label>Fecha y Hora de Ingreso</label>
+                            <input type="datetime-local"
+                                   id="editFechaIngreso"
+                                   name="fechaHoraIngreso"
+                                   class="form-control" />
+                        </div>
+
                         <div class="col-md-4 form-check mt-4">
                             <input type="checkbox" id="editActivo" name="activo" value="true" class="form-check-input" />
                             <input type="hidden" name="activo" value="false" />
@@ -309,6 +340,7 @@
             document.getElementById("editChofer").value = this.dataset.chofer;
             document.getElementById("editPlaca").value = this.dataset.placa;
             document.getElementById("editViaje").value = this.dataset.viaje;
+            document.getElementById("editFechaIngreso").value = this.dataset.fechaingreso;
 
             document.getElementById("editActivo").checked = this.dataset.activo === "true";
 

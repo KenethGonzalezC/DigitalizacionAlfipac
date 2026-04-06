@@ -21,31 +21,44 @@
 
 
     <!-- BUSCAR + VOLVER -->
-    <div class="row mb-4">
+    <div class="row g-2 align-items-end mb-3">
+
         <div class="col-md-4">
+            <label class="form-label">Buscar contenedor</label>
             <input id="buscarContenedorHist" class="form-control" placeholder="Buscar contenedor" />
         </div>
-        <div class="col-md-2">
-            <button id="btnBuscarHist" class="btn btn-warning w-100">Buscar</button>
+
+        <div class="col-md-2 d-grid">
+            <button id="btnBuscarHist" class="btn btn-warning">
+                Buscar
+            </button>
         </div>
-        <div class="col-md-2">
-            <a asp-action="Index" class="btn btn-dark w-100">Volver a Pendientes</a>
+
+        <div class="col-md-2 d-grid">
+            <a asp-action="Index" class="btn btn-dark">
+                Volver
+            </a>
         </div>
-        <div class="col-md-2">
+
+        <div class="col-md-2 d-grid">
             <form method="post" asp-action="ExportarHistorialPDF">
                 <input type="hidden" name="nombre" value="@User.Identity.Name" />
-                <button type="submit" class="btn btn-success mb-3">Exportar Historial a PDF</button>
-            </form>
-        </div>
-        <div class="col-md-2">
-            <form asp-action="LimpiarHistorialIngresados" method="post">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-danger w-100"
-                        onclick="return confirm('¿Seguro que deseas eliminar todo el historial?');">
-                    Limpiar Historial
+                <button type="submit" class="btn btn-success">
+                    Exportar PDF
                 </button>
             </form>
         </div>
+
+        <div class="col-md-2 d-grid">
+            <form asp-action="LimpiarHistorialIngresados" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger"
+                        onclick="return confirm('¿Seguro que deseas eliminar todo el historial?');">
+                    Limpiar
+                </button>
+            </form>
+        </div>
+
     </div>
 
     <!-- ================= ACTAS ================= -->

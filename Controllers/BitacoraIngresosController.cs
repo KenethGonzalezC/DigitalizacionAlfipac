@@ -588,13 +588,17 @@ public class BitacoraIngresosController : Controller
     //exportaciones
     //PDF
     [HttpPost]
-    public IActionResult ExportarVehiculosPDF(string nombre)
+    public IActionResult ExportarVehiculosPDF()
     {
         var datos = _context.Vehiculos
-            .OrderByDescending(x => x.FechaHoraIngreso)
+            .OrderByDescending(v => v.FechaHoraIngreso)
             .ToList();
 
         int total = datos.Count;
+        int activos = datos.Count(v => v.Activo);
+        int despachados = datos.Count(v => !v.Activo);
+
+        var usuario = User.Identity?.Name ?? "Sistema";
 
         QuestPDF.Settings.License = LicenseType.Community;
 
@@ -605,66 +609,108 @@ public class BitacoraIngresosController : Controller
                 page.Size(PageSizes.A4.Landscape());
                 page.Margin(20);
 
-                // ===== HEADER =====
+                // ================= HEADER =================
                 page.Header().Column(col =>
                 {
-                    col.Item().Text("ALFIPAC – VEHÍCULOS EN ALMACÉN")
+                    col.Item().Text("ALFIPAC – CONTROL DE VEHÍCULOS")
                         .Bold().FontSize(18);
+
+                    col.Item().Text("Vehículos en almacén")
+                        .FontSize(14);
 
                     col.Item().LineHorizontal(1);
 
-                    col.Item().Text($"Impreso por: {nombre}");
+                    col.Item().Text($"Impreso por: {usuario}");
                     col.Item().Text($"Fecha de impresión: {DateTime.Now:dd/MM/yyyy HH:mm}");
 
                     col.Item().LineHorizontal(1);
+                });
 
-                    col.Item().Row(row =>
+                // ================= CONTENT =================
+                page.Content().Column(content =>
+                {
+                    // 🔹 RESUMEN
+                    content.Item().Row(row =>
                     {
                         row.RelativeItem().Element(BoxStyle).Column(x =>
                         {
-                            x.Item().Text("TOTAL VEHÍCULOS").Bold();
+                            x.Item().Text("TOTAL").Bold();
                             x.Item().Text(total.ToString()).FontSize(16);
                         });
+
+                        row.RelativeItem().Element(BoxStyle).Column(x =>
+                        {
+                            x.Item().Text("ACTIVOS").Bold();
+                            x.Item().Text(activos.ToString()).FontSize(16);
+                        });
+
+                        row.RelativeItem().Element(BoxStyle).Column(x =>
+                        {
+                            x.Item().Text("DESPACHADOS").Bold();
+                            x.Item().Text(despachados.ToString()).FontSize(16);
+                        });
+                    });
+
+                    content.Item().PaddingVertical(10);
+
+                    // 🔽 TABLA
+                    content.Item().Table(table =>
+                    {
+                        table.ColumnsDefinition(columns =>
+                        {
+                            columns.RelativeColumn(2); // Fecha
+                            columns.RelativeColumn(2); // Vehículo
+                            columns.RelativeColumn(3); // VIN completo
+                            columns.RelativeColumn(3); // VIN chasis
+                            columns.RelativeColumn(2); // Cliente
+                            columns.RelativeColumn(1); // Estado
+                        });
+
+                        // HEADER
+                        table.Header(header =>
+                        {
+                            void HeaderCellText(string text) =>
+                                header.Cell().Element(HeaderCell).Text(text).Bold();
+
+                            HeaderCellText("Ingreso");
+                            HeaderCellText("Vehículo");
+                            HeaderCellText("VIN COMPLETO");
+                            HeaderCellText("VIN (CHASIS)");
+                            HeaderCellText("Cliente");
+                            HeaderCellText("Estado");
+                        });
+
+                        // DATA
+                        foreach (var v in datos)
+                        {
+                            table.Cell().Element(Cell).Text(v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm"));
+                            table.Cell().Element(Cell).Text(v.Contenedor ?? "-");
+                            table.Cell().Element(Cell).Text(v.Marchamos ?? "-");
+                            table.Cell().Element(Cell).Text(v.Chasis ?? "-");
+                            table.Cell().Element(Cell).Text(v.Cliente ?? "-");
+
+                            table.Cell().Element(Cell).Text(v.Activo ? "Activo" : "Despachado");
+                        }
                     });
                 });
 
-                // ===== TABLA =====
-                page.Content().Table(table =>
+                // ================= FOOTER ================= 
+                page.Footer().AlignCenter().Text(x =>
                 {
-                    table.ColumnsDefinition(columns =>
-                    {
-                        columns.RelativeColumn(2);
-                        columns.RelativeColumn(2);
-                        columns.RelativeColumn(2);
-                        columns.RelativeColumn(2);
-                    });
-
-                    void Header(string text) =>
-                        table.Cell().Element(HeaderCell).Text(text).Bold();
-
-                    Header("Ingreso");
-                    Header("Vehículo");
-                    Header("VIN");
-                    Header("Cliente");
-
-                    foreach (var v in datos)
-                    {
-                        table.Cell().Element(Cell)
-                            .Text(v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm"));
-
-                        table.Cell().Element(Cell).Text(v.Contenedor);
-                        table.Cell().Element(Cell).Text(v.Chasis);
-                        table.Cell().Element(Cell).Text(v.Cliente);
-                    }
+                    x.Span("Página ");
+                    x.CurrentPageNumber();
+                    x.Span(" de ");
+                    x.TotalPages();
                 });
             });
         }).GeneratePdf();
 
         return File(pdf, "application/pdf",
-            $"Vehiculos_{DateTime.Now:dd-MM-yyyy_HH-mm}.pdf");
+            $"Vehiculos_{DateTime.Now:dd-MM-yyyy}.pdf");
 
 
         // ===== ESTILOS =====
+
         static IContainer HeaderCell(IContainer c) =>
             c.Background(Colors.Grey.Lighten3)
              .BorderBottom(1)
@@ -686,60 +732,91 @@ public class BitacoraIngresosController : Controller
 
     //Excel
     [HttpPost]
-    public IActionResult ExportarVehiculosExcel(string nombre)
+    public IActionResult ExportarVehiculosExcel()
     {
+        var nombre = User.Identity?.Name ?? "Sistema";
+
         var datos = _context.Vehiculos
-            .OrderByDescending(x => x.FechaHoraIngreso)
+            .OrderByDescending(v => v.FechaHoraIngreso)
             .ToList();
+
+        int total = datos.Count;
+        int activos = datos.Count(v => v.Activo);
+        int despachados = datos.Count(v => !v.Activo);
 
         using var workbook = new XLWorkbook();
         var ws = workbook.Worksheets.Add("Vehículos");
 
-        // ===== TITULOS =====
+        // ================= HEADER =================
         ws.Cell("A1").Value = "ALFIPAC";
-        ws.Range("A1:D1").Merge().Style.Font.SetBold().Font.SetFontSize(18)
+        ws.Range("A1:G1").Merge().Style.Font.SetBold().Font.SetFontSize(18)
             .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
 
-        ws.Cell("A2").Value = "VEHÍCULOS EN ALMACÉN";
-        ws.Range("A2:D2").Merge().Style.Font.SetBold()
+        ws.Cell("A2").Value = "SISTEMA DE CONTROL DE VEHÍCULOS";
+        ws.Range("A2:G2").Merge().Style.Font.SetFontSize(12)
             .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
 
-        ws.Cell("A4").Value = "Encargado:";
-        ws.Cell("B4").Value = nombre;
+        ws.Cell("A3").Value = "INVENTARIO GENERAL DE VEHÍCULOS";
+        ws.Range("A3:G3").Merge().Style.Font.SetBold()
+            .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
 
-        ws.Cell("C4").Value = "Fecha:";
-        ws.Cell("D4").Value = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+        ws.Cell("A5").Value = "Usuario:";
+        ws.Cell("B5").Value = nombre;
 
-        int fila = 6;
+        ws.Cell("D5").Value = "Fecha:";
+        ws.Cell("E5").Value = DateTime.Now.ToString("dd/MM/yyyy");
 
-        // ===== HEADERS =====
+        ws.Cell("A6").Value = "Hora:";
+        ws.Cell("B6").Value = DateTime.Now.ToString("HH:mm");
+
+        // ================= RESUMEN =================
+        ws.Cell("D6").Value = "Total:";
+        ws.Cell("E6").Value = total;
+
+        ws.Cell("D7").Value = "Activos:";
+        ws.Cell("E7").Value = activos;
+
+        ws.Cell("D8").Value = "Despachados:";
+        ws.Cell("E8").Value = despachados;
+
+        // ================= TABLA =================
+        int fila = 10;
+
         ws.Cell(fila, 1).Value = "Ingreso";
         ws.Cell(fila, 2).Value = "Vehículo";
-        ws.Cell(fila, 3).Value = "VIN";
-        ws.Cell(fila, 4).Value = "Cliente";
+        ws.Cell(fila, 3).Value = "VIN Completo";
+        ws.Cell(fila, 4).Value = "VIN (Chasis)";
+        ws.Cell(fila, 5).Value = "Cliente";
+        ws.Cell(fila, 6).Value = "Transportista";
+        ws.Cell(fila, 7).Value = "Estado";
 
-        ws.Range(fila, 1, fila, 4).Style.Font.SetBold()
+        ws.Range(fila, 1, fila, 7).Style
+            .Font.SetBold()
             .Fill.SetBackgroundColor(XLColor.LightGray)
             .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
 
         fila++;
 
-        // ===== DATA =====
         foreach (var v in datos)
         {
             ws.Cell(fila, 1).Value = v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm");
             ws.Cell(fila, 2).Value = v.Contenedor;
-            ws.Cell(fila, 3).Value = v.Chasis;
-            ws.Cell(fila, 4).Value = v.Cliente;
+            ws.Cell(fila, 3).Value = v.Marchamos;
+            ws.Cell(fila, 4).Value = v.Chasis;
+            ws.Cell(fila, 5).Value = v.Cliente;
+            ws.Cell(fila, 6).Value = v.Transportista;
+            ws.Cell(fila, 7).Value = v.Activo ? "Activo" : "Despachado";
 
             fila++;
         }
 
+        // ================= ESTILO =================
         ws.Columns().AdjustToContents();
 
-        ws.Range(6, 1, fila - 1, 4).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-        ws.Range(6, 1, fila - 1, 4).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+        ws.Range(10, 1, fila - 1, 7).Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+        ws.Range(10, 1, fila - 1, 7).Style.Border.InsideBorder = XLBorderStyleValues.Thin;
 
+        // ================= EXPORT =================
         using var stream = new MemoryStream();
         workbook.SaveAs(stream);
 
@@ -761,6 +838,7 @@ public class BitacoraIngresosController : Controller
     string? chofer,
     string? placaCabezal,
     string? viajeDua,
+    DateTime? fechaHoraIngreso,
     bool activo)
     {
         var vehiculo = await _context.Vehiculos.FindAsync(id);
@@ -786,6 +864,10 @@ public class BitacoraIngresosController : Controller
         vehiculo.Chofer = string.IsNullOrWhiteSpace(chofer) ? "-" : chofer;
         vehiculo.PlacaCabezal = string.IsNullOrWhiteSpace(placaCabezal) ? "-" : placaCabezal;
         vehiculo.ViajeDua = string.IsNullOrWhiteSpace(viajeDua) ? "-" : viajeDua;
+
+        if (fechaHoraIngreso.HasValue)
+            vehiculo.FechaHoraIngreso = fechaHoraIngreso.Value;
+
         vehiculo.Activo = activo;
 
         await _context.SaveChangesAsync();
