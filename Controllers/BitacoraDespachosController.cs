@@ -252,13 +252,25 @@ namespace BitacoraAlfipac.Controllers
 
             contenedor = contenedor.ToUpper().Trim();
 
-            // 🔎 Buscar unidad (vehículo o contenedor)
+            // 🔥 1. BUSCAR PRECARGA (PRIORIDAD)
+            var precarga = await _context.DatosDespachosViajes
+                .FirstOrDefaultAsync(x => x.Contenedor == contenedor);
+
+            // 🔥 2. BUSCAR EN INVENTARIO (patios o vehículos)
             var (entidad, tipo, ubicacion) = await BuscarUnidadGlobal(contenedor);
 
             if (entidad == null)
-                return Json(new { encontrado = false });
+            {
+                return Json(new
+                {
+                    encontrado = false,
+                    mensaje = "No se encontró en inventario"
+                });
+            }
 
-            // 🚫 VALIDACIÓN REAL (estado actual)
+            // =========================
+            // 🚗 VEHÍCULO
+            // =========================
             if (tipo == "VEHICULO")
             {
                 var v = (Vehiculo)entidad;
@@ -275,44 +287,46 @@ namespace BitacoraAlfipac.Controllers
                 return Json(new
                 {
                     encontrado = true,
+
                     contenedor = v.Contenedor,
-                    marchamos = v.Marchamos ?? "",
-                    chasis = v.Chasis ?? "",
-                    transportista = v.Transportista ?? "",
-                    cliente = v.Cliente ?? "",
+                    marchamos = precarga?.Marchamos ?? v.Marchamos ?? "",
+                    chasis = precarga?.Chasis ?? v.Chasis ?? "",
+                    transportista = precarga?.Transportista ?? v.Transportista ?? "",
+                    cliente = precarga?.Cliente ?? v.Cliente ?? "",
+
+                    // 🔥 datos precarga si existen
+                    chofer = precarga?.Chofer ?? "",
+                    placaCabezal = precarga?.PlacaCabezal ?? "",
+                    viajeDua = precarga?.ViajeDua ?? "",
+
                     estado = "Activo",
                     patio = "Vehículos"
                 });
             }
-            else
+
+            // =========================
+            // 📦 CONTENEDOR
+            // =========================
+            var c = (IContenedorInventario)entidad;
+
+            return Json(new
             {
-                // 🔎 validar contenedor activo (historial abierto)
-                var historialAbierto = await _context.HistorialContenedores
-                    .AnyAsync(h => h.Contenedor == contenedor && h.FechaHoraSalida == null);
+                encontrado = true,
 
-                if (!historialAbierto)
-                {
-                    return Json(new
-                    {
-                        encontrado = false,
-                        mensaje = "Este contenedor no está disponible en inventario"
-                    });
-                }
+                contenedor = c.Contenedor,
+                marchamos = precarga?.Marchamos ?? c.Marchamos ?? "",
+                chasis = precarga?.Chasis ?? c.Chasis ?? "",
+                transportista = precarga?.Transportista ?? c.Transportista ?? "",
+                cliente = precarga?.Cliente ?? c.Cliente ?? "",
 
-                var c = (IContenedorInventario)entidad;
+                // 🔥 datos precarga
+                chofer = precarga?.Chofer ?? "",
+                placaCabezal = precarga?.PlacaCabezal ?? "",
+                viajeDua = precarga?.ViajeDua ?? "",
 
-                return Json(new
-                {
-                    encontrado = true,
-                    contenedor = c.Contenedor,
-                    marchamos = c.Marchamos ?? "",
-                    chasis = c.Chasis ?? "",
-                    transportista = c.Transportista ?? "",
-                    cliente = c.Cliente ?? "",
-                    estado = c.EstadoCarga ?? "",
-                    patio = ubicacion
-                });
-            }
+                estado = c.EstadoCarga ?? "",
+                patio = ubicacion
+            });
         }
 
         //Exportar a excel
