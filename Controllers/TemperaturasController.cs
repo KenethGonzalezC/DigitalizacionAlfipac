@@ -192,6 +192,64 @@ public class TemperaturasController : Controller
         return RedirectToAction(nameof(Detalle), new { id = contenedorId });
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditarRegistro(
+    int id,
+    DateTime fechaHora,
+    decimal temperatura,
+    string? observacion)
+    {
+        var registro = await _context.RegistrosTemperatura
+            .FindAsync(id);
+
+        if (registro == null)
+            return NotFound();
+
+        var contenedor = await _context.ContenedoresRefrigerados
+            .FindAsync(registro.ContenedorRefrigeradoId);
+
+        if (contenedor == null)
+            return NotFound();
+
+        // 🔥 MISMA LÓGICA QUE CREAR
+        double setPoint = (double)contenedor.SetPoint;
+        double temp = (double)temperatura;
+
+        double diferencia = Math.Abs(temp - setPoint);
+
+        string estado;
+        string mensaje;
+
+        if (diferencia <= 4)
+        {
+            estado = "Normal";
+            mensaje = "Temperatura dentro de tolerancia.";
+        }
+        else if (diferencia <= 10)
+        {
+            estado = "Anormal";
+            mensaje = "ANORMAL: Temperatura fuera de rango permitido.";
+        }
+        else
+        {
+            estado = "Emergencia";
+            mensaje = "EMERGENCIA: Temperatura crítica.";
+        }
+
+        // 🔄 ACTUALIZAR DATOS
+        registro.FechaHora = fechaHora;
+        registro.Temperatura = temperatura;
+
+        registro.Observacion = string.IsNullOrWhiteSpace(observacion)
+            ? $"{mensaje} (SetPoint: {setPoint}°C | Dif: {diferencia:F1}°C)"
+            : observacion;
+
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction("Detalle", new { id = registro.ContenedorRefrigeradoId });
+    }
+
     public async Task<IActionResult> ExportarExcel(int id)
     {
         var c = await _context.ContenedoresRefrigerados

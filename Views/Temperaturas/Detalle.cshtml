@@ -133,16 +133,88 @@
                 <td>@r.Temperatura.ToString("0.0") °C</td>
                 <td>@r.Observacion</td>
                 <td class="text-center">
-                    <form asp-action="EliminarRegistro" method="post">
-                        <input type="hidden" name="id" value="@r.Id" />
-                        <input type="hidden" name="contenedorId" value="@Model.Id" />
-                        <button class="btn btn-danger btn-sm"
-                                onclick="return confirm('¿Eliminar este registro de temperatura?')">
-                            ✖
+                    <div class="d-flex justify-content-center gap-2">
+
+                        <form asp-action="EliminarRegistro" method="post" class="m-0">
+                            <input type="hidden" name="id" value="@r.Id" />
+                            <input type="hidden" name="contenedorId" value="@Model.Id" />
+                            <button type="submit"
+                                    class="btn btn-danger btn-sm"
+                                    onclick="return confirm('¿Eliminar este registro de temperatura?')">
+                                <i class="bi bi-x">✖️</i>
+                            </button>
+                        </form>
+
+                        <button type="button"
+                                class="btn btn-warning btn-sm btnEditarRegistro"
+                                data-id="@r.Id"
+                                data-fecha="@r.FechaHora.ToString("yyyy-MM-ddTHH:mm")"
+                                data-temperatura="@r.Temperatura"
+                                data-observacion="@r.Observacion">
+                            <i class="bi bi-pencil">✏️</i>
                         </button>
-                    </form>
+
+                    </div>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<div class="modal fade" id="modalEditarRegistro" tabindex="-1">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+
+            <form asp-action="EditarRegistro" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">Editar registro</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" id="editIdRegistro" name="id" />
+
+                    <div class="mb-3">
+                        <label>Fecha y hora</label>
+                        <input type="datetime-local" id="editFechaRegistro" name="fechaHora" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Temperatura (°C)</label>
+                        <input type="number" step="0.1" id="editTempRegistro" name="temperatura" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Observación (opcional)</label>
+                        <textarea id="editObsRegistro" name="observacion" class="form-control"></textarea>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-warning">Guardar cambios</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll(".btnEditarRegistro").forEach(btn => {
+        btn.addEventListener("click", function () {
+
+            document.getElementById("editIdRegistro").value = this.dataset.id;
+            document.getElementById("editFechaRegistro").value = this.dataset.fecha;
+            document.getElementById("editTempRegistro").value = this.dataset.temperatura;
+            document.getElementById("editObsRegistro").value = this.dataset.observacion;
+
+            var modal = new bootstrap.Modal(document.getElementById("modalEditarRegistro"));
+            modal.show();
+        });
+    });
+</script>

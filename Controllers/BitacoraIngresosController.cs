@@ -683,11 +683,11 @@ public class BitacoraIngresosController : Controller
                         // DATA
                         foreach (var v in datos)
                         {
-                            table.Cell().Element(Cell).Text(v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm"));
-                            table.Cell().Element(Cell).Text(v.Contenedor ?? "-");
-                            table.Cell().Element(Cell).Text(v.Marchamos ?? "-");
-                            table.Cell().Element(Cell).Text(v.Chasis ?? "-");
-                            table.Cell().Element(Cell).Text(v.Cliente ?? "-");
+                            table.Cell().Element(Cell).ShowEntire().Text(v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm"));
+                            table.Cell().Element(Cell).ShowEntire().Text(v.Contenedor ?? "-");
+                            table.Cell().Element(Cell).ShowEntire().Text(v.Marchamos ?? "-");
+                            table.Cell().Element(Cell).ShowEntire().Text(v.Chasis ?? "-");
+                            table.Cell().Element(Cell).ShowEntire().Text(v.Cliente ?? "-");
 
                             table.Cell().Element(Cell).Text(v.Activo ? "Activo" : "Despachado");
                         }

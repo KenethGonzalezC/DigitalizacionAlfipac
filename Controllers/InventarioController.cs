@@ -541,14 +541,14 @@ public async Task<IActionResult> Mover(
 
                         foreach (var c in datos)
                         {
-                            table.Cell().Element(Cell).Text(c.Contenedor ?? "");
-                            table.Cell().Element(Cell).Text(c.Marchamos ?? "");
-                            table.Cell().Element(Cell).Text(c.Tamano ?? "");
-                            table.Cell().Element(Cell).Text(c.Chasis ?? "");
-                            table.Cell().Element(Cell).Text(c.Transportista ?? "");
-                            table.Cell().Element(Cell).Text(c.Cliente ?? "");
-                            table.Cell().Element(Cell).Text(c.Estado ?? "");
-                            table.Cell().Element(Cell).Text(c.Ubicacion ?? "");
+                            table.Cell().Element(Cell).ShowEntire().Text(c.Contenedor ?? "");
+                            table.Cell().Element(Cell).ShowEntire().Text(c.Marchamos ?? "");
+                            table.Cell().Element(Cell).ShowEntire().Text(c.Tamano ?? "");
+                            table.Cell().Element(Cell).ShowEntire().Text(c.Chasis ?? "");
+                            table.Cell().Element(Cell).ShowEntire().Text(c.Transportista ?? "");
+                            table.Cell().Element(Cell).ShowEntire().Text(c.Cliente ?? "");
+                            table.Cell().Element(Cell).ShowEntire().Text(c.Estado ?? "");
+                            table.Cell().Element(Cell).ShowEntire().Text(c.Ubicacion ?? "");
                         }
                     });
                 });

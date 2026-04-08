@@ -15,7 +15,7 @@ namespace BitacoraAlfipac.Data.Seed
                 Rol = "Administrador",
                 Activo = true,
                 FechaCreacion = DateTime.UtcNow,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123")
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Alfipac@123")
             };
 
             context.Usuarios.Add(admin);
