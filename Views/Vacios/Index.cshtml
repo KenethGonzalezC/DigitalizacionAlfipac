@@ -1,0 +1,264 @@
+﻿@using BitacoraAlfipac.Models.ViewModels
+@model List<InventarioItemVM>
+
+<div class="container mt-4">
+
+    <h3 class="mb-3 text-success">Contenedores Vacíos</h3>
+
+    <!-- 🔎 FILTROS -->
+    <form method="get" class="card p-3 mb-3 shadow-sm">
+
+        <div class="row g-2">
+
+            <div class="col-md-3">
+                <input type="text" name="contenedor" class="form-control"
+                       placeholder="Contenedor"
+                       value="@Context.Request.Query["contenedor"]" />
+            </div>
+
+            <div class="col-md-3">
+                <input type="text" name="cliente" class="form-control"
+                       placeholder="Cliente"
+                       value="@Context.Request.Query["cliente"]" />
+            </div>
+
+            <div class="col-md-3">
+                <input type="text" name="transportista" class="form-control"
+                       placeholder="Transportista"
+                       value="@Context.Request.Query["transportista"]" />
+            </div>
+
+            <div class="col-md-2">
+                <select name="patio" class="form-select">
+                    <option value="">Todos los patios</option>
+                    <option value="S/Pat">Sin asignar</option>
+                    <option value="P1">Patio 1</option>
+                    <option value="P2">Patio 2</option>
+                    <option value="2000">Andén 2000</option>
+                    <option value="AgroQui">Químicos</option>
+                </select>
+            </div>
+
+            <div class="col-md-1 d-grid">
+                <button class="btn btn-success">Buscar</button>
+            </div>
+
+        </div>
+
+        <div class="mt-2">
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                Limpiar filtros
+            </a>
+        </div>
+
+    </form>
+
+    <!-- 📊 TABLA -->
+    <div class="card p-3 shadow-sm">
+
+        <table class="table table-bordered table-sm align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Contenedor</th>
+                    <th>Marchamos</th>
+                    <th>Tamaño</th>
+                    <th>Chasis</th>
+                    <th>Transportista</th>
+                    <th>Cliente</th>
+                    <th class="text-center">Ubicación</th>
+                    <th>Reportar</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            No hay contenedores vacíos con los filtros aplicados
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var v in Model)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@v.Contenedor</td>
+                            <td>@v.Marchamos</td>
+                            <td>@v.Tamano</td>
+                            <td>@v.Chasis</td>
+                            <td>@v.Transportista</td>
+                            <td>@v.Cliente</td>
+
+                            <td class="text-center">
+                                <span class="badge bg-secondary">@v.Patio</span>
+                            </td>
+
+                            <td>
+                                <button class="btn btn-sm btn-primary btnReportarVacio"
+                                        data-contenedor="@v.Contenedor"
+                                        data-cliente="@v.Cliente"
+                                        data-transportista="@v.Transportista">
+                                    📄 Reporte
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<div class="modal fade" id="modalReporteVacio" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form asp-action="GenerarReporteVacioPDF" method="post">
+                @Html.AntiForgeryToken()
+
+                <!-- HEADER -->
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Generar reporte de vacío</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- BODY -->
+                <div class="modal-body">
+
+                    <!-- hidden -->
+                    <input type="hidden" id="repContenedor" name="contenedor" />
+                    <input type="hidden" id="repCliente" name="cliente" />
+                    <input type="hidden" id="repTransportista" name="transportista" />
+
+                    <!-- consecutivo -->
+                    <div class="mb-3">
+                        <label class="form-label">Consecutivo</label>
+                        <input name="consecutivo" class="form-control" required />
+                    </div>
+
+                    <!-- activar multi -->
+                    <div class="form-check mb-3">
+                        <input type="checkbox" id="chkMulti" class="form-check-input" />
+                        <label class="form-check-label">
+                            Agregar más contenedores
+                        </label>
+                    </div>
+
+                    <!-- lista -->
+                    <div id="multiContainer"
+                         class="border rounded p-2"
+                         style="display:none; max-height:200px; overflow-y:auto;">
+
+                        @foreach (var v in Model)
+                        {
+                            <div class="form-check">
+                                <input type="checkbox"
+                                       class="form-check-input multi-check"
+                                       value="@v.Contenedor"
+                                       data-contenedor="@v.Contenedor"
+                                       data-cliente="@v.Cliente"
+                                       data-transportista="@v.Transportista" />
+
+                                <label class="form-check-label">
+                                    <strong>@v.Contenedor</strong>
+                                    <span class="text-muted">(@v.Transportista)</span>
+                                    <span class="text-muted">(@v.Patio)</span>
+                                </label>
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+
+                <!-- FOOTER -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        Generar PDF
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const chkMulti = document.getElementById("chkMulti");
+        const multiContainer = document.getElementById("multiContainer");
+
+        let contenedorBase = "";
+        let clienteBase = "";
+        let transportistaBase = "";
+
+        // 🔘 BOTÓN REPORTE
+        document.querySelectorAll(".btnReportarVacio").forEach(btn => {
+            btn.addEventListener("click", function () {
+
+                contenedorBase = this.dataset.contenedor;
+                clienteBase = this.dataset.cliente;
+                transportistaBase = this.dataset.transportista;
+
+                // set valores base
+                document.getElementById("repContenedor").value = contenedorBase;
+                document.getElementById("repCliente").value = clienteBase;
+                document.getElementById("repTransportista").value = transportistaBase;
+
+                // reset UI
+                chkMulti.checked = false;
+                multiContainer.style.display = "none";
+
+                // 🔥 RESET + OCULTAR EL PRINCIPAL
+                document.querySelectorAll(".multi-check").forEach(c => {
+
+                    c.checked = false;
+
+                    const cont = c.dataset.contenedor;
+
+                    if (cont === contenedorBase) {
+                        c.closest(".form-check").style.display = "none";
+                    } else {
+                        c.closest(".form-check").style.display = "block";
+                    }
+                });
+
+                var modal = new bootstrap.Modal(document.getElementById("modalReporteVacio"));
+                modal.show();
+            });
+        });
+
+        // 🔥 ACTIVAR MULTI
+        chkMulti.addEventListener("change", function () {
+            multiContainer.style.display = this.checked ? "block" : "none";
+        });
+
+        // 📦 SUBMIT FORM
+        document.querySelector("#modalReporteVacio form")
+            .addEventListener("submit", function () {
+
+                if (!chkMulti.checked) return;
+
+                let seleccionados = new Set();
+                seleccionados.add(contenedorBase);
+
+                document.querySelectorAll(".multi-check:checked").forEach(c => {
+                    seleccionados.add(c.value);
+                });
+
+                document.getElementById("repContenedor").value =
+                    Array.from(seleccionados).join(" / ");
+            });
+
+    });
+</script>
