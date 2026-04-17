@@ -1,11 +1,13 @@
 ﻿using BitacoraAlfipac.Data;
+using BitacoraAlfipac.Models.Entidades;
 using BitacoraAlfipac.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using QuestPDF.Fluent;
 using QIContainer = QuestPDF.Infrastructure.IContainer;
+using ClosedXML.Excel;
 
 namespace BitacoraAlfipac.Controllers
 {
@@ -23,10 +25,10 @@ namespace BitacoraAlfipac.Controllers
 
         //lista de contenedores vacios
         public async Task<IActionResult> Index(
-    string? contenedor,
-    string? cliente,
-    string? transportista,
-    string? patio)
+        string? contenedor,
+        string? cliente,
+        string? transportista,
+        string? patio)
         {
             var sinAsignar = await _context.ContenedoresSinAsignarPatio
                 .Select(x => new InventarioItemVM
@@ -128,26 +130,52 @@ namespace BitacoraAlfipac.Controllers
                 .ThenBy(x => x.Contenedor)
                 .ToList();
 
+            //historial de hoy
+            ViewBag.HistorialHoy = _context.Vacios
+            .Where(x => x.Fecha.Date == DateTime.Today)
+            .OrderByDescending(x => x.Fecha)
+            .ToList();
+
             return View(resultado);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult GenerarReporteVacioPDF(
-    string contenedor,
-    string cliente,
-    string transportista,
-    string consecutivo)
+        string contenedor,
+        string cliente,
+        string transportista,
+        string consecutivo)
         {
+            var registro = new Vacio
+            {
+                Fecha = DateTime.Now,
+                Contenedor = contenedor,
+                Cliente = cliente,
+                Transportista = transportista,
+                Consecutivo = consecutivo,
+                Usuario = User.Identity?.Name ?? "Sistema"
+            };
+
+            //if (_context.Vacios.Any(x => x.Consecutivo == consecutivo))
+            //{
+            //    consecutivo = GenerarNuevoConsecutivo();
+            //}
+
+            _context.Vacios.Add(registro);
+            _context.SaveChanges();
+
             var pdfBytes = GenerarReporteVacio(
                 contenedor,
                 cliente,
                 transportista,
                 consecutivo);
 
-            return File(pdfBytes,
+            return File(
+                pdfBytes,
                 "application/pdf",
-                $"ReporteVacio_{contenedor}+{consecutivo}_{DateTime.Now:ddMMyyyy}.pdf");
+                $"ReporteVacio_{contenedor}_{consecutivo}_{DateTime.Now:ddMMyyyy}.pdf"
+            );
         }
 
         public byte[] GenerarReporteVacio(
@@ -305,6 +333,270 @@ namespace BitacoraAlfipac.Controllers
             });
 
             return document.GeneratePdf();
+        }
+
+        //CONSECUTIVO AUTOINCREMENTAL
+        [HttpGet]
+        public JsonResult ObtenerSiguienteConsecutivo()
+        {
+            int maximo = 0;
+
+            var consecutivos = _context.Vacios
+                .Select(x => x.Consecutivo)
+                .ToList();
+
+            foreach (var item in consecutivos)
+            {
+                if (string.IsNullOrWhiteSpace(item))
+                    continue;
+
+                var texto = item.Trim().ToUpper();
+
+                if (texto.StartsWith("CCV"))
+                {
+                    var numeroTexto = texto.Substring(3);
+
+                    if (int.TryParse(numeroTexto, out int numero))
+                    {
+                        if (numero > maximo)
+                            maximo = numero;
+                    }
+                }
+            }
+
+            var siguiente = $"CCV{(maximo + 1):D5}";
+
+            return Json(new { consecutivo = siguiente });
+        }
+
+        //DELETE REGISTRO VACIO
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EliminarRegistroVacio(int id)
+        {
+            var item = _context.Vacios.Find(id);
+
+            if (item != null)
+            {
+                _context.Vacios.Remove(item);
+                _context.SaveChanges();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        //recuperar PDF
+        [HttpGet]
+        public IActionResult Reimprimir(int id)
+        {
+            var registro = _context.Vacios.FirstOrDefault(x => x.Id == id);
+
+            if (registro == null)
+                return NotFound();
+
+            var pdfBytes = GenerarReporteVacio(
+                registro.Contenedor,
+                registro.Cliente,
+                registro.Transportista,
+                registro.Consecutivo
+            );
+
+            return File(
+                pdfBytes,
+                "application/pdf",
+                $"ReporteVacio_{registro.Consecutivo}.pdf"
+            );
+        }
+
+        //historial
+        public IActionResult Historial(DateTime? fecha)
+        {
+            DateTime fechaFiltro = fecha?.Date ?? DateTime.Today;
+
+            var historial = _context.Vacios
+                .Where(x => x.Fecha.Date == fechaFiltro)
+                .OrderByDescending(x => x.Fecha)
+                .ToList();
+
+            ViewBag.Fecha = fechaFiltro.ToString("yyyy-MM-dd");
+
+            return View(historial);
+        }
+
+        //exportar historial a exel
+        [HttpPost]
+        public IActionResult ExportarHistorialExcel(
+    DateTime fechaInicio,
+    DateTime fechaFin,
+    TimeSpan? horaInicio,
+    TimeSpan? horaFin)
+        {
+            // =====================================================
+            // FILTRO FECHA + HORA
+            // =====================================================
+            var desde = fechaInicio.Date;
+            var hasta = fechaFin.Date.AddDays(1).AddTicks(-1);
+
+            var datos = _context.Vacios
+                .Where(x => x.Fecha >= desde && x.Fecha <= hasta)
+                .ToList();
+
+            if (horaInicio.HasValue)
+                datos = datos.Where(x => x.Fecha.TimeOfDay >= horaInicio.Value).ToList();
+
+            if (horaFin.HasValue)
+                datos = datos.Where(x => x.Fecha.TimeOfDay <= horaFin.Value).ToList();
+
+            datos = datos
+                .OrderBy(x => x.Fecha)
+                .ToList();
+
+            // =====================================================
+            // EXCEL
+            // =====================================================
+            using var workbook = new XLWorkbook();
+            var ws = workbook.Worksheets.Add("Historial Vacios");
+
+            // =====================================================
+            // TÍTULO
+            // =====================================================
+            ws.Cell("A1").Value = "ALFIPAC";
+            ws.Range("A1:F1").Merge();
+
+            ws.Range("A1:F1").Style
+                .Font.SetBold()
+                .Font.SetFontSize(18)
+                .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
+                .Fill.SetBackgroundColor(XLColor.DarkBlue)
+                .Font.SetFontColor(XLColor.White);
+
+            ws.Cell("A2").Value = "HISTORIAL DE REPORTES VACÍOS";
+            ws.Range("A2:F2").Merge();
+
+            ws.Range("A2:F2").Style
+                .Font.SetBold()
+                .Font.SetFontSize(14)
+                .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+            ws.Cell("A3").Value = "Desde:";
+            ws.Cell("B3").Value = fechaInicio.ToString("dd/MM/yyyy");
+
+            ws.Cell("C3").Value = "Hasta:";
+            ws.Cell("D3").Value = fechaFin.ToString("dd/MM/yyyy");
+
+            ws.Cell("E3").Value = "Hora:";
+            ws.Cell("F3").Value =
+                $"{horaInicio:hh\\:mm} - {horaFin:hh\\:mm}";
+
+            ws.Range("A3:F3").Style.Font.SetBold();
+
+            // =====================================================
+            // ENCABEZADOS (como imagen)
+            // =====================================================
+            int fila = 5;
+
+            ws.Cell(fila, 1).Value = "Fecha";
+            ws.Cell(fila, 2).Value = "Hora";
+            ws.Cell(fila, 3).Value = "Contenedor";
+            ws.Cell(fila, 4).Value = "Cliente";
+            ws.Cell(fila, 5).Value = "Transportista";
+            ws.Cell(fila, 6).Value = "Consecutivo";
+
+            var header = ws.Range(fila, 1, fila, 6);
+
+            header.Style
+                .Font.SetBold()
+                .Font.SetFontColor(XLColor.Black)
+                .Fill.SetBackgroundColor(XLColor.Lime)
+                .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
+                .Alignment.SetVertical(XLAlignmentVerticalValues.Center)
+                .Border.SetOutsideBorder(XLBorderStyleValues.Thin)
+                .Border.SetInsideBorder(XLBorderStyleValues.Thin);
+
+            fila++;
+
+            // =====================================================
+            // DETALLE
+            // =====================================================
+            foreach (var item in datos)
+            {
+                ws.Cell(fila, 1).Value = item.Fecha.ToString("d/M/yyyy");
+                ws.Cell(fila, 2).Value = item.Fecha.ToString("HH:mm");
+                ws.Cell(fila, 3).Value = item.Contenedor;
+                ws.Cell(fila, 4).Value = item.Cliente;
+                ws.Cell(fila, 5).Value = item.Transportista;
+                ws.Cell(fila, 6).Value = item.Consecutivo;
+
+                fila++;
+            }
+
+            // =====================================================
+            // FORMATO CUERPO
+            // =====================================================
+            var body = ws.Range(6, 1, fila - 1, 6);
+
+            body.Style
+                .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
+                .Alignment.SetVertical(XLAlignmentVerticalValues.Center)
+                .Border.SetOutsideBorder(XLBorderStyleValues.Thin)
+                .Border.SetInsideBorder(XLBorderStyleValues.Thin);
+
+            // Zebra rows (similar visual)
+            for (int i = 6; i < fila; i++)
+            {
+                if (i % 2 == 0)
+                    ws.Range(i, 1, i, 6)
+                      .Style.Fill.SetBackgroundColor(XLColor.White);
+                else
+                    ws.Range(i, 1, i, 6)
+                      .Style.Fill.SetBackgroundColor(XLColor.FromHtml("#F2F2F2"));
+            }
+
+            // =====================================================
+            // ANCHOS PARECIDOS A IMAGEN
+            // =====================================================
+            ws.Column(1).Width = 12;
+            ws.Column(2).Width = 10;
+            ws.Column(3).Width = 18;
+            ws.Column(4).Width = 55;
+            ws.Column(5).Width = 22;
+            ws.Column(6).Width = 15;
+
+            // Freeze header
+            ws.SheetView.FreezeRows(5);
+
+            // Filtro automático
+            ws.Range(5, 1, fila - 1, 6).SetAutoFilter();
+
+            // =====================================================
+            // DESCARGA
+            // =====================================================
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+
+            return File(
+                stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"Historial_Vacios_{DateTime.Now:ddMMyyyy_HHmm}.xlsx");
+        }
+
+        //editar historial
+        [HttpPost]
+        public IActionResult EditarHistorial(Vacio model)
+        {
+            var item = _context.Vacios.Find(model.Id);
+
+            if (item == null)
+                return RedirectToAction("Historial");
+
+            item.Contenedor = model.Contenedor;
+            item.Cliente = model.Cliente;
+            item.Transportista = model.Transportista;
+            item.Consecutivo = model.Consecutivo;
+
+            _context.SaveChanges();
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

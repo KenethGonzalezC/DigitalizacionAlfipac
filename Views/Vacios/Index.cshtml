@@ -1,9 +1,20 @@
-﻿@using BitacoraAlfipac.Models.ViewModels
+﻿@using BitacoraAlfipac.Models.Entidades
+@using BitacoraAlfipac.Models.ViewModels
 @model List<InventarioItemVM>
 
 <div class="container mt-4">
 
     <h3 class="mb-3 text-success">Contenedores Vacíos</h3>
+
+    <h5></h5>
+
+    <div>
+        <a asp-controller="Vacios"
+               asp-action="Historial"
+               class="btn btn-dark mb-3">
+            📚 Historial Reportes
+        </a>
+    </div>
 
     <!-- 🔎 FILTROS -->
     <form method="get" class="card p-3 mb-3 shadow-sm">
@@ -118,7 +129,10 @@
     <div class="modal-dialog">
         <div class="modal-content">
 
-            <form asp-action="GenerarReporteVacioPDF" method="post">
+            <form asp-action="GenerarReporteVacioPDF"
+                  method="post"
+                  target="_blank"
+                  id="formReporte">
                 @Html.AntiForgeryToken()
 
                 <!-- HEADER -->
@@ -138,7 +152,10 @@
                     <!-- consecutivo -->
                     <div class="mb-3">
                         <label class="form-label">Consecutivo</label>
-                        <input name="consecutivo" class="form-control" required />
+                        <input id="txtConsecutivo"
+                               name="consecutivo"
+                               class="form-control"
+                               required />
                     </div>
 
                     <!-- activar multi -->
@@ -234,6 +251,11 @@
                 });
 
                 var modal = new bootstrap.Modal(document.getElementById("modalReporteVacio"));
+                fetch('/Vacios/ObtenerSiguienteConsecutivo')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById("txtConsecutivo").value = data.consecutivo;
+                });
                 modal.show();
             });
         });
@@ -259,6 +281,211 @@
                 document.getElementById("repContenedor").value =
                     Array.from(seleccionados).join(" / ");
             });
+
+    });
+</script>
+
+<script>
+    document.getElementById("formReporte")
+    .addEventListener("submit", function () {
+
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
+
+    });
+</script>
+
+<hr />
+
+<h4 class="mt-4 text-primary">Reportes emitidos hoy</h4>
+
+<table class="table table-sm table-bordered">
+    <thead class="table-light">
+        <tr>
+            <th>Hora</th>
+            <th>Contenedor</th>
+            <th>Cliente</th>
+            <th>Transportista</th>
+            <th>Consecutivo</th>
+            <th>Usuario</th>
+            <th>Reimprimir</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var r in (List<Vacio>)ViewBag.HistorialHoy)
+        {
+            <tr>
+                <td>@r.Fecha.ToString("HH:mm")</td>
+                <td>@r.Contenedor</td>
+                <td>@r.Cliente</td>
+                <td>@r.Transportista</td>
+                <td>@r.Consecutivo</td>
+                <td>@r.Usuario</td>
+                <td>
+                    <a asp-action="Reimprimir"
+                           asp-route-id="@r.Id"
+                           target="_blank"
+                           class="btn btn-sm btn-outline-primary">
+                        PDF
+                    </a>
+                </td>
+                <td>
+                    <form asp-action="EliminarRegistroVacio" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@r.Id" />
+                        <button class="btn btn-sm btn-danger">
+                            Eliminar
+                        </button>
+                    </form>
+                </td>
+                <td>
+                    <button type="button"
+                            class="btn btn-warning btn-sm btnEditarVacio"
+                            data-id="@r.Id"
+                            data-fecha="@r.Fecha.ToString("yyyy-MM-ddTHH:mm")"
+                            data-contenedor="@r.Contenedor"
+                            data-cliente="@r.Cliente"
+                            data-transportista="@r.Transportista"
+                            data-consecutivo="@r.Consecutivo"
+                            data-usuario="@r.Usuario">
+                        ✏️ Editar
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- MODAL EDITAR HISTORIAL VACÍOS -->
+<div class="modal fade" id="modalEditarVacio" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <form asp-action="EditarHistorial" method="post">
+                @Html.AntiForgeryToken()
+
+                <!-- HEADER -->
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title text-dark">
+                        Editar reporte de vacío
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+                </div>
+
+                <!-- BODY -->
+                <div class="modal-body">
+
+                    <input type="hidden" id="editId" name="Id" />
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha</label>
+                            <input type="datetime-local"
+                                   id="editFecha"
+                                   name="Fecha"
+                                   class="form-control"
+                                   required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Consecutivo</label>
+                            <input type="text"
+                                   id="editConsecutivo"
+                                   name="Consecutivo"
+                                   class="form-control"
+                                   required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Contenedor</label>
+                            <input type="text"
+                                   id="editContenedor"
+                                   name="Contenedor"
+                                   class="form-control"
+                                   required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Cliente</label>
+                            <input type="text"
+                                   id="editCliente"
+                                   name="Cliente"
+                                   class="form-control" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Transportista</label>
+                            <input type="text"
+                                   id="editTransportista"
+                                   name="Transportista"
+                                   class="form-control" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Usuario</label>
+                            <input type="text"
+                                   id="editUsuario"
+                                   name="Usuario"
+                                   class="form-control" />
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- FOOTER -->
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-success">
+                        Guardar cambios
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        document.querySelectorAll(".btnEditarVacio").forEach(btn => {
+
+            btn.addEventListener("click", function () {
+
+                document.getElementById("editId").value = this.dataset.id;
+                document.getElementById("editFecha").value = this.dataset.fecha;
+                document.getElementById("editConsecutivo").value = this.dataset.consecutivo;
+                document.getElementById("editContenedor").value = this.dataset.contenedor;
+                document.getElementById("editCliente").value = this.dataset.cliente;
+                document.getElementById("editTransportista").value = this.dataset.transportista;
+                document.getElementById("editUsuario").value = this.dataset.usuario;
+
+                var modal = new bootstrap.Modal(
+                    document.getElementById("modalEditarVacio")
+                );
+
+                modal.show();
+            });
+
+        });
 
     });
 </script>

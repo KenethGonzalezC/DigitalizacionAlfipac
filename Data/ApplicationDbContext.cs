@@ -34,5 +34,6 @@ namespace BitacoraAlfipac.Data
         public DbSet<DatosDespachoViaje> DatosDespachosViajes { get; set; }
 
         public DbSet<Vehiculo> Vehiculos { get; set; }
+        public DbSet<Vacio> Vacios { get; set; }
     }
 }
