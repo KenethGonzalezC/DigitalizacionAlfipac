@@ -65,6 +65,11 @@
             </div>
 
             <div class="col-md-4">
+                <label class="form-label">Marchamo</label>
+                <input name="Marchamo" class="form-control" required />
+            </div>
+
+            <div class="col-md-4">
                 <label class="form-label">Recinto Origen</label>
                 <input name="RecintoOrigen" class="form-control" />
             </div>
@@ -165,6 +170,7 @@
                 <tr>
                     <th>Viaje</th>
                     <th>Contenedor</th>
+                    <th>Marchamo</th>
                     <th>Recinto</th>
                     <th>Fecha Creación</th>
                     <th>Declarante</th>
@@ -177,7 +183,7 @@
                 @if (!Model.Any())
                 {
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">
+                        <td colspan="9" class="text-center text-muted py-4">
                             No hay registros
                         </td>
                     </tr>
@@ -189,8 +195,9 @@
                         <tr>
                             <td>@item.Viaje</td>
                             <td>@item.Contenedor</td>
+                            <td>@item.Marchamo</td>
                             <td>@item.RecintoOrigen</td>
-                            <td>@item.FechaCreacionViaje.ToString("dd/MM/yyyy")</td>
+                            <td>@item.FechaCreacionViaje?.ToString("dd/MM/yyyy")</td>
                             <td>@item.Declarante</td>
                             <td>@item.Transportista</td>
                             <td>@item.Mercancia</td>
@@ -262,6 +269,11 @@
                         <div class="col-md.4">
                             <label>Contenedor</label>
                             <input name="Contenedor" id="editContenedor" class="form-control" />
+                        </div>
+
+                        <div class="col-md.4">
+                            <label>Marchamo</label>
+                            <input name="Marchamo" id="editMarchamo" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
@@ -340,6 +352,7 @@
 
         document.getElementById("editId").value = item.Id;
         document.getElementById("editContenedor").value = item.Contenedor;
+        document.getElementById("editMarchamo").value = item.Marchamo;
         document.getElementById("editViaje").value = item.Viaje;
         document.getElementById("editRecinto").value = item.RecintoOrigen;
         document.getElementById("editFecha").value = item.FechaCreacionViaje?.substring(0,10);

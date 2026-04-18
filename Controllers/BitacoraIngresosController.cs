@@ -414,6 +414,7 @@ public class BitacoraIngresosController : Controller
 
         var resultado = new
         {
+            marchamo = ingreso.Marchamo,
             cliente = ingreso.Declarante,
             transportista = transportistaAutorizado?.Codigo ?? ingreso.Transportista,
             viaje = ingreso.Viaje

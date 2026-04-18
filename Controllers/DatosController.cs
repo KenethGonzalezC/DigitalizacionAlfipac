@@ -25,6 +25,7 @@ public class DatosController : Controller
     public IActionResult Ingresos(
     string viaje,
     string contenedor,
+    string marchamo,
     string recinto,
     DateTime? fechaCreacion,
     string declarante,
@@ -52,6 +53,7 @@ public class DatosController : Controller
         bool sinFiltros =
             string.IsNullOrEmpty(viaje) &&
             string.IsNullOrEmpty(contenedor) &&
+            string.IsNullOrEmpty(marchamo) &&
             string.IsNullOrEmpty(recinto) &&
             !fechaCreacion.HasValue &&
             string.IsNullOrEmpty(declarante) &&
@@ -76,7 +78,13 @@ public class DatosController : Controller
             query = query.Where(x => x.RecintoOrigen.Contains(recinto));
 
         if (fechaCreacion.HasValue)
-            query = query.Where(x => x.FechaCreacionViaje.Date == fechaCreacion.Value.Date);
+        {
+            var fecha = fechaCreacion.Value.Date;
+
+            query = query.Where(x =>
+                x.FechaCreacionViaje != null &&
+                x.FechaCreacionViaje.Value.Date == fecha);
+        }
 
         if (!string.IsNullOrEmpty(declarante))
             query = query.Where(x => x.Declarante.Contains(declarante));
@@ -125,6 +133,7 @@ public class DatosController : Controller
 
         registro.Viaje = model.Viaje;
         registro.Contenedor = model.Contenedor;
+        registro.Marchamo = model.Marchamo;
         registro.RecintoOrigen = model.RecintoOrigen;
         registro.FechaCreacionViaje = model.FechaCreacionViaje;
         registro.Declarante = model.Declarante;
@@ -188,6 +197,7 @@ public class DatosController : Controller
 
                 var viaje = row.Cell(1).GetValue<string>()?.Trim();
                 var contenedor = row.Cell(2).GetValue<string>()?.Trim();
+                var marchamo = row.Cell(3).GetValue<string>()?.Trim();
 
                 if (string.IsNullOrWhiteSpace(viaje) || string.IsNullOrWhiteSpace(contenedor))
                     continue;
@@ -199,7 +209,7 @@ public class DatosController : Controller
                 }
 
                 DateTime fechaCreacion;
-                var celdaFecha = row.Cell(4);
+                var celdaFecha = row.Cell(5);
 
                 if (celdaFecha.DataType == XLDataType.DateTime)
                     fechaCreacion = celdaFecha.GetDateTime();
@@ -210,11 +220,12 @@ public class DatosController : Controller
                 {
                     Viaje = viaje,
                     Contenedor = contenedor,
-                    RecintoOrigen = row.Cell(3).GetValue<string>()?.Trim() ?? "",
+                    Marchamo = marchamo ?? "",
+                    RecintoOrigen = row.Cell(4).GetValue<string>()?.Trim() ?? "",
                     FechaCreacionViaje = fechaCreacion,
-                    Declarante = row.Cell(5).GetValue<string>()?.Trim() ?? "",
-                    Transportista = row.Cell(6).GetValue<string>()?.Trim() ?? "",
-                    Mercancia = row.Cell(7).GetValue<string>()?.Trim() ?? "",
+                    Declarante = row.Cell(6).GetValue<string>()?.Trim() ?? "",
+                    Transportista = row.Cell(7).GetValue<string>()?.Trim() ?? "",
+                    Mercancia = row.Cell(8).GetValue<string>()?.Trim() ?? "",
                     FechaRegistroSistema = DateTime.Now
                 };
 
@@ -228,7 +239,6 @@ public class DatosController : Controller
                 _context.SaveChanges();
             }
 
-            // 🔔 Mensajes
             if (duplicados.Any())
             {
                 TempData["Warning"] =

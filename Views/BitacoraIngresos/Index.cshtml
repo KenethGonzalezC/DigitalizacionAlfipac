@@ -422,6 +422,7 @@
 
             // Autocompletar datos ingreso
             if (ingresoData) {
+                document.getElementById("Marchamos").value = ingresoData.marchamo ?? "";
                 document.getElementById("Cliente").value = ingresoData.cliente ?? "";
                 document.getElementById("Transportista").value = ingresoData.transportista ?? "";
                 document.getElementById("ViajeDua").value = ingresoData.viaje ?? "";
