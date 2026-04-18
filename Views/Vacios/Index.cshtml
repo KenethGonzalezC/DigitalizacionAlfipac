@@ -310,7 +310,8 @@
             <th>Consecutivo</th>
             <th>Usuario</th>
             <th>Reimprimir</th>
-            <th></th>
+            <th>Editar</th>
+            <th>Eliminar</th>
         </tr>
     </thead>
     <tbody>
@@ -332,15 +333,6 @@
                     </a>
                 </td>
                 <td>
-                    <form asp-action="EliminarRegistroVacio" method="post">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="id" value="@r.Id" />
-                        <button class="btn btn-sm btn-danger">
-                            Eliminar
-                        </button>
-                    </form>
-                </td>
-                <td>
                     <button type="button"
                             class="btn btn-warning btn-sm btnEditarVacio"
                             data-id="@r.Id"
@@ -353,6 +345,15 @@
                         ✏️ Editar
                     </button>
                 </td>
+                <td>
+                    <form asp-action="EliminarRegistroVacio" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@r.Id" />
+                        <button class="btn btn-sm btn-danger">
+                            Eliminar
+                        </button>
+                    </form>
+                </td>                
             </tr>
         }
     </tbody>
@@ -365,6 +366,8 @@
 
             <form asp-action="EditarHistorial" method="post">
                 @Html.AntiForgeryToken()
+
+                <input type="hidden" id="editOrigen" name="origen" />
 
                 <!-- HEADER -->
                 <div class="modal-header bg-warning">
@@ -409,7 +412,7 @@
                                    id="editContenedor"
                                    name="Contenedor"
                                    class="form-control"
-                                   required />
+                                   readonly />
                         </div>
 
                         <div class="col-md-6">
@@ -469,6 +472,8 @@
         document.querySelectorAll(".btnEditarVacio").forEach(btn => {
 
             btn.addEventListener("click", function () {
+
+                document.getElementById("editOrigen").value = "Index";
 
                 document.getElementById("editId").value = this.dataset.id;
                 document.getElementById("editFecha").value = this.dataset.fecha;

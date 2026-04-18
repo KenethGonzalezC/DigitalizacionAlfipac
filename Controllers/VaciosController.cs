@@ -1,13 +1,14 @@
 ﻿using BitacoraAlfipac.Data;
 using BitacoraAlfipac.Models.Entidades;
 using BitacoraAlfipac.Models.ViewModels;
+using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Presentation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using QIContainer = QuestPDF.Infrastructure.IContainer;
-using ClosedXML.Excel;
 
 namespace BitacoraAlfipac.Controllers
 {
@@ -582,19 +583,24 @@ namespace BitacoraAlfipac.Controllers
 
         //editar historial
         [HttpPost]
-        public IActionResult EditarHistorial(Vacio model)
+        public IActionResult EditarHistorial(Vacio model, string origen)
         {
             var item = _context.Vacios.Find(model.Id);
 
             if (item == null)
                 return RedirectToAction("Historial");
 
+            item.Fecha = model.Fecha;
             item.Contenedor = model.Contenedor;
             item.Cliente = model.Cliente;
             item.Transportista = model.Transportista;
             item.Consecutivo = model.Consecutivo;
+            item.Usuario = model.Usuario;
 
             _context.SaveChanges();
+
+            if (origen == "Historial")
+                return RedirectToAction(nameof(Historial));
 
             return RedirectToAction(nameof(Index));
         }
