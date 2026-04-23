@@ -15,6 +15,17 @@
 
     <h2 class="mb-3">Datos Anticipados de Ingresos</h2>
 
+    <div>
+        <span class="badge bg-primary">
+            Contenedores por ingresar: @ViewBag.TotalContenedores
+        </span>
+
+    </div>
+
+    <div>
+        <h5></h5>
+    </div>
+
     <form asp-action="ImportarExcel" method="post" enctype="multipart/form-data" class="card p-3 mb-4 shadow-sm">
         @Html.AntiForgeryToken()
 

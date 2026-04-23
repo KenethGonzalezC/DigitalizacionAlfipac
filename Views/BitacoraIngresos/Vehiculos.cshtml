@@ -100,9 +100,15 @@
                                 </a>
                             }
 
-                            <form asp-action="EliminarVehiculo" method="post" class="m-0">
+                            <form asp-action="EliminarVehiculo"
+                                  method="post"
+                                  class="m-0"
+                                  onsubmit="return confirm('¿Seguro que deseas eliminar este vehículo?');">
+
                                 @Html.AntiForgeryToken()
+
                                 <input type="hidden" name="id" value="@v.Id" />
+
                                 <button class="btn btn-danger btn-sm">
                                     Eliminar
                                 </button>

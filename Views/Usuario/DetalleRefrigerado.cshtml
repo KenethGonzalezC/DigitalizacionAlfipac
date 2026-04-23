@@ -1,0 +1,124 @@
+﻿@model BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado
+
+<h3 class="mb-4">
+    Contenedor Refrigerado
+</h3>
+
+<div class="card p-4 mb-4 shadow-sm">
+
+    <div class="row g-3">
+
+        <div class="col-md-4">
+            <label class="form-label fw-bold">Contenedor</label>
+            <div class="form-control bg-light">
+                @Model.Contenedor
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label fw-bold">Fecha / Hora Ingreso</label>
+            <div class="form-control bg-light">
+                @(Model.FechaHoraIngreso?.ToString("dd/MM/yyyy HH:mm") ?? "-")
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label fw-bold">Fecha / Hora Conexión</label>
+            <div class="form-control bg-light">
+                @(Model.FechaHoraConexion?.ToString("dd/MM/yyyy HH:mm") ?? "-")
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label fw-bold">Set Point (°C)</label>
+            <div class="form-control bg-light">
+                @(Model.SetPoint?.ToString("0.0") ?? "-")
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label fw-bold">Fecha / Hora Despacho</label>
+            <div class="form-control bg-light">
+                @(Model.FechaHoraDespacho?.ToString("dd/MM/yyyy HH:mm") ?? "-")
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <label class="form-label fw-bold">Fecha / Hora Desconexión</label>
+            <div class="form-control bg-light">
+                @(Model.FechaHoraDesconexion?.ToString("dd/MM/yyyy HH:mm") ?? "-")
+            </div>
+        </div>
+
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="Refrigerados" class="btn btn-secondary">
+            Volver
+        </a>
+    </div>
+
+</div>
+
+<div class="d-flex flex-wrap gap-2 align-items-center mb-4">
+    <h4 class="mb-0 me-2">Exportar temperaturas</h4>
+
+    <a asp-action="ExportarPdf"
+           asp-route-id="@Model.Id"
+           class="btn btn-danger">
+        PDF
+    </a>
+
+    <a asp-action="ExportarExcel"
+           asp-route-id="@Model.Id"
+           class="btn btn-success">
+        Excel
+    </a>
+
+    <a asp-action="ExportarCsv"
+           asp-route-id="@Model.Id"
+           class="btn btn-secondary">
+        CSV
+    </a>
+</div>
+
+<div class="card p-3 shadow-sm">
+
+    <h5 class="mb-3">Historial de Temperaturas</h5>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-sm align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Fecha / Hora</th>
+                    <th>Temperatura</th>
+                    <th>Observación</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.RegistrosTemperatura != null && Model.RegistrosTemperatura.Any())
+                {
+                    @foreach (var r in Model.RegistrosTemperatura.OrderByDescending(x => x.FechaHora))
+                    {
+                        <tr>
+                            <td>@r.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>@r.Temperatura.ToString("0.0") °C</td>
+                            <td>@r.Observacion</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-3">
+                            Sin registros de temperatura
+                        </td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+    </div>
+
+</div>

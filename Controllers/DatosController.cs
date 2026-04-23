@@ -38,6 +38,9 @@ public class DatosController : Controller
 
         var query = _context.DatosIngresosViajes.AsQueryable();
 
+        // ✅ TOTAL GENERAL (sin filtros)
+        ViewBag.TotalContenedores = _context.DatosIngresosViajes.Count();
+
         // 🔹 Convertir fechaRegistro (string) a DateTime?
         DateTime? fechaRegistroDate = null;
 
