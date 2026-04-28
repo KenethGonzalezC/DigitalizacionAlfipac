@@ -14,4 +14,6 @@ public class PatioQuimicos : IContenedorInventario
 
     public string? EstadoCarga { get; set; }
     public string? Ubicacion { get; set; }
+
+    public int Orden { get; set; }   // 👈 NUEVO
 }

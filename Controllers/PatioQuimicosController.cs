@@ -30,7 +30,10 @@ namespace BitacoraAlfipac.Controllers
             if (!string.IsNullOrWhiteSpace(contenedor))
                 query = query.Where(c => c.Contenedor.Contains(contenedor));
 
-            var lista = query.OrderBy(c => c.Contenedor).ToList();
+            var lista = _context.PatioQuimicos
+                .OrderBy(x => x.Orden)
+                .ThenBy(x => x.Contenedor)
+                .ToList();
 
             return View(lista);
         }
@@ -199,7 +202,7 @@ namespace BitacoraAlfipac.Controllers
         [HttpPost]
         public IActionResult ExportarPDF(string nombre, DateTime fecha, string turno)
         {
-            var datos = _context.PatioQuimicos.OrderBy(c => c.Contenedor).ToList();
+            var datos = _context.PatioQuimicos.OrderBy(c => c.Orden).ToList();
 
             int total = datos.Count;
             int cargados = datos.Count(c => c.EstadoCarga == "Cargado");
@@ -350,7 +353,7 @@ namespace BitacoraAlfipac.Controllers
         [HttpPost]
         public IActionResult ExportarExcel(string nombre, DateTime fecha, string turno)
         {
-            var datos = _context.PatioQuimicos.OrderBy(c => c.Contenedor).ToList();
+            var datos = _context.PatioQuimicos.OrderBy(c => c.Orden).ToList();
 
             using var workbook = new XLWorkbook();
             var ws = workbook.Worksheets.Add("Inventario Patio Químicos");
@@ -451,6 +454,28 @@ namespace BitacoraAlfipac.Controllers
             return File(Encoding.UTF8.GetBytes(sb.ToString()),
                 "text/csv",
                 $"Inventario_PatioQuimicos_{DateTime.Now:dd-MM-yyyy}_Turno_{turno}.csv");
+        }
+
+        public class OrdenItem
+        {
+            public int Id { get; set; }
+            public int Orden { get; set; }
+        }
+
+        [HttpPost]
+        public IActionResult GuardarOrden([FromBody] List<OrdenItem> lista)
+        {
+            foreach (var item in lista)
+            {
+                var registro = _context.PatioQuimicos.FirstOrDefault(x => x.Id == item.Id);
+
+                if (registro != null)
+                    registro.Orden = item.Orden;
+            }
+
+            _context.SaveChanges();
+
+            return Json(new { success = true });
         }
 
     }

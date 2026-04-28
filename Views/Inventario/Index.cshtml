@@ -5,40 +5,50 @@
 
 <div>
     <a asp-controller="Inventario"
-       asp-action="InventarioGeneral"
-       class="btn btn-dark mb-3">
+           asp-action="InventarioGeneral"
+           class="btn btn-dark mb-3">
         📊 Ver Inventario General
     </a>
 </div>
 
 <div>
-    <a asp-controller="BitacoraIngresos" asp-action="Vehiculos" class="btn btn-outline-primary">
+    <a asp-controller="BitacoraIngresos"
+           asp-action="Vehiculos"
+           class="btn btn-outline-primary">
         🚗 Vehículos en almacén
     </a>
 </div>
 
-<H5></H5>
+<h5></h5>
 
 <div class="row mb-4">
     <div class="col">
-        <a asp-controller="Patio1" asp-action="Index" class="btn btn-outline-primary w-100">Patio 1</a>
+        <a asp-controller="Patio1" asp-action="Index"
+           class="btn btn-outline-primary w-100">Patio 1</a>
     </div>
+
     <div class="col">
-        <a asp-controller="Patio2" asp-action="Index"class="btn btn-outline-success w-100">Patio 2</a>
+        <a asp-controller="Patio2" asp-action="Index"
+           class="btn btn-outline-success w-100">Patio 2</a>
     </div>
+
     <div class="col">
-        <a asp-controller="Anden2000" asp-action="Index" class="btn btn-outline-warning w-100">Andén 2000</a>
+        <a asp-controller="Anden2000" asp-action="Index"
+           class="btn btn-outline-warning w-100">Andén 2000</a>
     </div>
+
     <div class="col">
-        <a asp-controller="PatioQuimicos" asp-action="Index" class="btn btn-outline-danger w-100">Patio Químicos</a>
+        <a asp-controller="PatioQuimicos" asp-action="Index"
+           class="btn btn-outline-danger w-100">Patio Químicos</a>
     </div>
 </div>
 
-<!-- BUSQUEDA GLOBAL -->
 <form id="formBusquedaGlobal">
     <div class="row align-items-end">
         <div class="col-md-4">
-            <input name="contenedor" class="form-control" placeholder="Buscar contenedor..." />
+            <input name="contenedor"
+                   class="form-control"
+                   placeholder="Buscar contenedor..." />
         </div>
 
         <div class="col-md-4 d-flex gap-2">
@@ -46,20 +56,391 @@
                 Buscar
             </button>
 
-            <a asp-action="Index" class="btn btn-secondary flex-fill">
+            <a asp-action="Index"
+                   class="btn btn-secondary flex-fill">
                 Limpiar
             </a>
         </div>
     </div>
 </form>
 
-<div>
-    <h5></h5>
+<div class="my-3 d-flex gap-2">
+    <button class="btn btn-dark"
+            data-bs-toggle="modal"
+            data-bs-target="#modalExportarGeneral">
+        🌎 Exportar Inventario General
+    </button>
+
+    <button id="btnGuardarOrden" class="btn btn-success">
+        💾 Guardar orden
+    </button>
 </div>
 
-<button class="btn btn-dark mb-3" data-bs-toggle="modal" data-bs-target="#modalExportarGeneral">
-    🌎 Exportar Inventario General
-</button>
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">🚚 Traslado rápido de contenedores</h5>
+        <small>Tome el ícono ☰ y suéltelo en el patio destino</small>
+    </div>
+
+    <div class="card-body">
+        <div class="row g-3">
+
+            <div class="col-md-3">
+                <div class="drop-box border rounded p-4 text-center bg-light"
+                     data-destino="Patio1">
+                    📦 Patio 1
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="drop-box border rounded p-4 text-center bg-light"
+                     data-destino="Patio2">
+                    📦 Patio 2
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="drop-box border rounded p-4 text-center bg-light"
+                     data-destino="Anden2000">
+                    🏗️ Andén 2000
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="drop-box border rounded p-4 text-center bg-light"
+                     data-destino="PatioQuimicos">
+                    ☣️ Químicos
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<h4 class="mt-4">Contenedores sin asignar patio</h4>
+
+<table class="table table-sm table-bordered">
+    <thead>
+        <tr>
+            <th style="width:50px;">Mover</th>
+            <th>Contenedor</th>
+            <th>Marchamos</th>
+            <th>Tamaño</th>
+            <th>Chasis</th>
+            <th>Transportista</th>
+            <th>Cliente</th>
+            <th>Estado</th>
+            <th>Confirmar</th>
+            <th>Ubicación</th>
+            <th>Acción Mover</th>
+        </tr>
+    </thead>
+
+    <tbody id="tablaOrden">
+        @foreach (var c in Model.ContenedoresSinAsignar)
+        {
+            <tr data-id="@c.Id">
+                <form method="post">
+
+                    <input type="hidden" name="id" value="@c.Id" />
+
+                    <!-- SOLO ESTA COLUMNA MUEVE -->
+                    <td class="text-center align-middle">
+                        <span class="handle fw-bold fs-5"
+                              style="cursor:grab; user-select:none;">
+                            ☰
+                        </span>
+                    </td>
+
+                    <td class="contenedor-nombre">@c.Contenedor</td>
+
+                    <td>
+                        <input name="marchamos"
+                               value="@c.Marchamos"
+                               class="form-control form-control-sm" />
+                    </td>
+
+                    <td>@c.Tamano</td>
+
+                    <td>
+                        <input name="chasis"
+                               value="@c.Chasis"
+                               class="form-control form-control-sm" />
+                    </td>
+
+                    <td>
+                        <input name="transportista"
+                               value="@c.Transportista"
+                               class="form-control form-control-sm" />
+                    </td>
+
+                    <td>
+                        <input name="cliente"
+                               value="@c.Cliente"
+                               class="form-control form-control-sm" />
+                    </td>
+
+                    <td>
+                        <select name="estadoCarga"
+                                class="form-select form-select-sm">
+                            <option value="Vacio"
+                                    selected="@(c.EstadoCarga == "Vacio")">
+                                Vacío
+                            </option>
+
+                            <option value="Cargado"
+                                    selected="@(c.EstadoCarga == "Cargado")">
+                                Cargado
+                            </option>
+                        </select>
+                    </td>
+
+                    <td class="text-center">
+                        <button type="submit"
+                                formaction="@Url.Action("ConfirmarEdicion", "Inventario")"
+                                class="btn btn-sm btn-primary">
+                            ✔
+                        </button>
+                    </td>
+
+                    <td>
+                        <select name="ubicacion"
+                                class="form-select form-select-sm">
+                            <option value="">No mover</option>
+                            <option value="SinAsignar">Sin asignar</option>
+                            <option value="Patio1">Patio 1</option>
+                            <option value="Patio2">Patio 2</option>
+                            <option value="Anden2000">Andén 2000</option>
+                            <option value="PatioQuimicos">Patio Químicos</option>
+                        </select>
+                    </td>
+
+                    <td>
+                        <button type="submit"
+                                formaction="@Url.Action("Mover", "Inventario")"
+                                class="btn btn-sm btn-success">
+                            Mover
+                        </button>
+                    </td>
+
+                </form>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- MODAL BUSQUEDA -->
+<div class="modal fade" id="modalBusquedaGlobal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Resultado de búsqueda</h5>
+
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body" id="contenidoModalBusqueda"></div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+        let filaSeleccionada = null;
+
+        // =========================
+        // ORDENAR TABLA
+        // =========================
+        new Sortable(document.getElementById("tablaOrden"), {
+        animation: 150,
+        handle: ".handle",
+        ghostClass: "table-warning",
+
+        onStart: function (evt) {
+        filaSeleccionada = evt.item;
+        },
+
+        onEnd: function () {
+        setTimeout(() => {
+        filaSeleccionada = null;
+        }, 150);
+        }
+        });
+
+
+        // =========================
+        // BOXES DESTINO
+        // =========================
+        document.querySelectorAll(".drop-box").forEach(box => {
+
+        box.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        this.classList.add("bg-success", "text-white");
+        });
+
+        box.addEventListener("dragleave", function () {
+        this.classList.remove("bg-success", "text-white");
+        });
+
+        box.addEventListener("drop", function (e) {
+
+        e.preventDefault();
+
+        this.classList.remove("bg-success", "text-white");
+
+        if (!filaSeleccionada) return;
+
+        const destino = this.dataset.destino;
+        const id = filaSeleccionada.dataset.id;
+
+        const nombre =
+        filaSeleccionada.querySelector(".contenedor-nombre").innerText;
+
+        const marchamos =
+        filaSeleccionada.querySelector("input[name='marchamos']").value;
+
+        const estado =
+        filaSeleccionada.querySelector("select[name='estadoCarga']").value;
+
+        if (!confirm(`¿Mover contenedor ${nombre} a ${destino}?`)) {
+        filaSeleccionada = null;
+        return;
+        }
+
+        const data = new URLSearchParams();
+        data.append("id", id);
+        data.append("marchamos", marchamos);
+        data.append("estadoCarga", estado);
+        data.append("ubicacion", destino);
+
+        fetch('/Inventario/Mover', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: data.toString()
+        })
+        .then(r => {
+        if (r.ok) {
+        location.reload();
+        } else {
+        alert("No se pudo mover.");
+        }
+        });
+
+        });
+
+        });
+
+
+        // =========================
+        // GUARDAR ORDEN
+        // =========================
+        document.getElementById("btnGuardarOrden")
+        .addEventListener("click", function () {
+
+        let lista = [];
+
+        document.querySelectorAll("#tablaOrden tr")
+        .forEach((fila, index) => {
+
+        lista.push({
+        id: parseInt(fila.dataset.id),
+        orden: index + 1
+        });
+
+        });
+
+        fetch('/Inventario/GuardarOrden', {
+        method: 'POST',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(lista)
+        })
+        .then(r => r.json())
+        .then(res => {
+
+        if (res.success) {
+        alert("Orden guardado correctamente");
+        location.reload();
+        }
+
+        });
+
+        });
+
+
+        // =========================
+        // BUSQUEDA GLOBAL
+        // =========================
+        document.getElementById("formBusquedaGlobal")
+        .addEventListener("submit", function (e) {
+
+        e.preventDefault();
+
+        const contenedor =
+        this.querySelector("input[name='contenedor']").value;
+
+        fetch(`/Inventario/BuscarGlobal?contenedor=${contenedor}`)
+        .then(r => r.text())
+        .then(html => {
+
+        document.getElementById("contenidoModalBusqueda").innerHTML = html;
+
+        new bootstrap.Modal(
+        document.getElementById("modalBusquedaGlobal")
+        ).show();
+
+        });
+
+        });
+
+
+        // =========================
+        // FORMULARIOS MODAL
+        // =========================
+        document.addEventListener("submit", function (e) {
+
+        const form = e.target.closest("#modalBusquedaGlobal form");
+
+        if (!form) return;
+
+        e.preventDefault();
+
+        fetch(form.action, {
+        method: "POST",
+        body: new FormData(form)
+        })
+        .then(r => r.json())
+        .then(res => {
+
+        if (res.success) {
+
+        bootstrap.Modal.getInstance(
+        document.getElementById("modalBusquedaGlobal")
+        ).hide();
+
+        location.reload();
+        }
+
+        });
+
+        });
+
+        });
+    </script>
+}
 
 <div class="modal fade" id="modalExportarGeneral" tabindex="-1">
     <div class="modal-dialog">
@@ -85,150 +466,3 @@
         </div>
     </div>
 </div>
-
-<h4 class="mt-4">Contenedores sin asignar patio</h4>
-
-<table class="table table-sm table-bordered">
-    <thead>
-        <tr>
-            <th>Contenedor</th>
-            <th>Marchamos</th>
-            <th>Tamaño</th>
-            <th>Chasis</th>
-            <th>Transportista</th>
-            <th>Cliente</th>
-            <th>Estado</th>
-            <th>Confirmar</th>
-            <th>Ubicación</th>
-            <th>Acción Mover</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var c in Model.ContenedoresSinAsignar)
-        {
-            <tr>
-                <form method="post">
-                    <input type="hidden" name="id" value="@c.Id" />
-
-                <td>@c.Contenedor</td>
-
-                <td>
-                    <input name="marchamos" value="@c.Marchamos" class="form-control form-control-sm" />
-                </td>
-
-                <td>@c.Tamano</td>
-
-                <td>
-                    <input name="chasis" value="@c.Chasis" class="form-control form-control-sm" />
-                </td>
-
-                <td>
-                    <input name="transportista" value="@c.Transportista" class="form-control form-control-sm" />
-                </td>
-                <td>
-                    <input name="cliente" value="@c.Cliente" class="form-control form-control-sm" />
-                </td>
-
-                <td>
-                    <select name="estadoCarga" class="form-select form-select-sm">
-                        <option value="Vacio" selected="@(c.EstadoCarga == "Vacio")">Vacío</option>
-                        <option value="Cargado" selected="@(c.EstadoCarga == "Cargado")">Cargado</option>
-                    </select>
-                </td>
-
-                <!-- BOTÓN CONFIRMAR EDICIÓN -->
-                <td class="text-center">
-                    <button type="submit"
-                            formaction="@Url.Action("ConfirmarEdicion", "Inventario")"
-                            class="btn btn-sm btn-primary">
-                        ✔
-                    </button>
-                </td>
-
-                <!-- UBICACIÓN -->
-                <td>
-                    <select name="ubicacion" class="form-select form-select-sm">
-                        <option value="">No mover</option>
-                        <option value="SinAsignar">Sin asignar</option>
-                        <option value="Patio1">Patio 1</option>
-                        <option value="Patio2">Patio 2</option>
-                        <option value="Anden2000">Andén 2000</option>
-                        <option value="PatioQuimicos">Patio Químicos</option>
-                    </select>
-                </td>
-
-                <!-- BOTÓN MOVER -->
-                <td>
-                    <button type="submit"
-                            formaction="@Url.Action("Mover", "Inventario")"
-                            class="btn btn-sm btn-success">
-                        Mover
-                    </button>
-                </td>
-
-                </form>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<!-- MODAL -->
-<div class="modal fade" id="modalBusquedaGlobal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Resultado de búsqueda</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="contenidoModalBusqueda"></div>
-        </div>
-    </div>
-</div>
-
-@section Scripts {
-    <script>
-        document.getElementById("formBusquedaGlobal").addEventListener("submit", function (e) {
-            e.preventDefault();
-
-            const contenedor = this.querySelector("input[name='contenedor']").value;
-
-            fetch(`/Inventario/BuscarGlobal?contenedor=${contenedor}`)
-                .then(r => r.text())
-                .then(html => {
-                    document.getElementById("contenidoModalBusqueda").innerHTML = html;
-                    new bootstrap.Modal(document.getElementById('modalBusquedaGlobal')).show();
-                });
-        });
-
-        // 👉 ESTE MANEJA SOLO EL FORM DEL MODAL (dinámico)
-                    document.addEventListener("submit", function (e) {
-            const form = e.target.closest("#modalBusquedaGlobal form");
-            if (!form) return;
-
-            e.preventDefault();
-
-            fetch(form.action, {
-                method: "POST",
-                body: new FormData(form)
-            })
-            .then(async r => {
-                const text = await r.text();
-
-                try {
-                    return JSON.parse(text);
-                } catch {
-                    console.error("El servidor no devolvió JSON:", text);
-                    throw new Error("Respuesta inválida");
-                }
-            })
-            .then(res => {
-                if (res.success) {
-                    bootstrap.Modal.getInstance(document.getElementById('modalBusquedaGlobal')).hide();
-                    location.reload();
-                }
-            })
-            .catch(err => console.error("ERROR REAL:", err));
-        });
-
-    </script>
-}

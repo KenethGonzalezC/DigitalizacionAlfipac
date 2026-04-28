@@ -12,5 +12,7 @@ public class Patio1 : IContenedorInventario
     public string? Chasis { get; set; }
     public string? EstadoCarga { get; set; }
     public string? Ubicacion { get; set; }
-    
+
+    public int Orden { get; set; }   // 👈 NUEVO
+
 }

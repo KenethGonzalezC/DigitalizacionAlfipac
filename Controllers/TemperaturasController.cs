@@ -394,7 +394,18 @@ public class TemperaturasController : Controller
             .OrderByDescending(c => c.FechaHoraIngreso)
             .ToListAsync();
 
-        return View("Index", resultado); // reutiliza la misma vista
+        var activos = resultado
+            .Where(c => c.FechaHoraDespacho == null)
+            .ToList();
+
+        var despachados = resultado
+            .Where(c => c.FechaHoraDespacho != null)
+            .ToList();
+
+        ViewBag.Activos = activos;
+        ViewBag.Despachados = despachados;
+
+        return View("Index");
     }
 
 }

@@ -30,12 +30,12 @@ namespace BitacoraAlfipac.Controllers
 
             if (!string.IsNullOrWhiteSpace(contenedor))
             {
-                query = query.Where(c =>
-                    c.Contenedor.Contains(contenedor));
+                query = query.Where(c => c.Contenedor.Contains(contenedor));
             }
 
             var lista = query
-                .OrderBy(c => c.Contenedor)
+                .OrderBy(c => c.Orden)
+                .ThenBy(c => c.Contenedor)
                 .ToList();
 
             return View(lista);
@@ -207,7 +207,7 @@ namespace BitacoraAlfipac.Controllers
         [HttpPost]
         public IActionResult ExportarPDF(string nombre, DateTime fecha, string turno)
         {
-            var datos = _context.Patio1.OrderBy(c => c.Contenedor).ToList();
+            var datos = _context.Patio1.OrderBy(c => c.Orden).ToList();
 
             int total = datos.Count;
             int cargados = datos.Count(c => c.EstadoCarga == "Cargado");
@@ -352,7 +352,7 @@ namespace BitacoraAlfipac.Controllers
         [HttpPost]
         public IActionResult ExportarExcel(string nombre, DateTime fecha, string turno)
         {
-            var datos = _context.Patio1.OrderBy(c => c.Contenedor).ToList();
+            var datos = _context.Patio1.OrderBy(c => c.Orden).ToList();
 
             using var workbook = new XLWorkbook();
             var ws = workbook.Worksheets.Add("Inventario Patio 1");
@@ -455,6 +455,28 @@ namespace BitacoraAlfipac.Controllers
                 $"Inventario_Patio1_{DateTime.Now:dd-MM-yyyy}_Turno_{turno}.csv");
         }
 
+        [HttpPost]
+        public IActionResult GuardarOrden([FromBody] List<OrdenVM> lista)
+        {
+            foreach (var item in lista)
+            {
+                var cont = _context.Patio1.FirstOrDefault(x => x.Id == item.Id);
+
+                if (cont != null)
+                    cont.Orden = item.Orden;
+            }
+
+            _context.SaveChanges();
+
+            return Json(new { success = true });
+        }
+
+        public class OrdenVM
+        {
+            public int Id { get; set; }
+            public int Orden { get; set; }
+        }
+
     }
 
-}
+    }

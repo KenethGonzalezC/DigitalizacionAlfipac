@@ -37,8 +37,9 @@ namespace BitacoraAlfipac.Controllers
                     c.Contenedor.Contains(contenedor));
             }
 
-            var lista = query
-                .OrderBy(c => c.Contenedor)
+            var lista = _context.Patio2
+                .OrderBy(x => x.Orden)
+                .ThenBy(x => x.Contenedor)
                 .ToList();
 
             return View(lista);
@@ -210,7 +211,7 @@ namespace BitacoraAlfipac.Controllers
         [HttpPost]
         public IActionResult ExportarPDF(string nombre, DateTime fecha, string turno)
         {
-            var datos = _context.Patio2.OrderBy(c => c.Contenedor).ToList();
+            var datos = _context.Patio2.OrderBy(c => c.Orden).ToList();
 
             int total = datos.Count;
             int cargados = datos.Count(c => c.EstadoCarga == "Cargado");
@@ -361,7 +362,7 @@ namespace BitacoraAlfipac.Controllers
         [HttpPost]
         public IActionResult ExportarExcel(string nombre, DateTime fecha, string turno)
         {
-            var datos = _context.Patio2.OrderBy(c => c.Contenedor).ToList();
+            var datos = _context.Patio2.OrderBy(c => c.Orden).ToList();
 
             using var workbook = new XLWorkbook();
             var ws = workbook.Worksheets.Add("Inventario Patio 2");
@@ -478,6 +479,28 @@ namespace BitacoraAlfipac.Controllers
             return File(Encoding.UTF8.GetBytes(sb.ToString()),
                 "text/csv",
                 $"Inventario_Patio2 {DateTime.Now:dd/MM/yyyy} Turno: {turno}.csv");
+        }
+
+        [HttpPost]
+        public IActionResult GuardarOrden([FromBody] List<OrdenItem> lista)
+        {
+            foreach (var item in lista)
+            {
+                var registro = _context.Patio2.FirstOrDefault(x => x.Id == item.Id);
+
+                if (registro != null)
+                    registro.Orden = item.Orden;
+            }
+
+            _context.SaveChanges();
+
+            return Json(new { success = true });
+        }
+
+        public class OrdenItem
+        {
+            public int Id { get; set; }
+            public int Orden { get; set; }
         }
     }
 }

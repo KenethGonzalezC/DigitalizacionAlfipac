@@ -30,7 +30,8 @@ public class InventarioController : Controller
         var vm = new InventarioIndexVM
         {
             ContenedoresSinAsignar = _context.ContenedoresSinAsignarPatio
-                .OrderByDescending(c => c.Id)
+                .OrderBy(x => x.Orden)
+                .ThenBy(x => x.Contenedor)
                 .ToList()
         };
 
@@ -418,7 +419,7 @@ public async Task<IActionResult> Mover(
             Ubicacion = "Patio Químicos"
         }));
 
-        return lista.OrderBy(c => c.Contenedor).ToList();
+        return lista.OrderBy(c => c.Ubicacion).ToList();
     }
 
     [HttpPost]
@@ -884,6 +885,29 @@ public async Task<IActionResult> Mover(
         var viewResult = resultado as ViewResult;
 
         return View(viewResult!.Model);
+    }
+
+    public class OrdenItem
+    {
+        public int Id { get; set; }
+        public int Orden { get; set; }
+    }
+
+    [HttpPost]
+    public IActionResult GuardarOrden([FromBody] List<OrdenItem> lista)
+    {
+        foreach (var item in lista)
+        {
+            var registro = _context.ContenedoresSinAsignarPatio
+                .FirstOrDefault(x => x.Id == item.Id);
+
+            if (registro != null)
+                registro.Orden = item.Orden;
+        }
+
+        _context.SaveChanges();
+
+        return Json(new { success = true });
     }
 
 }

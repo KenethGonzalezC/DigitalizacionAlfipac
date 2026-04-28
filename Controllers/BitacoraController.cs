@@ -456,9 +456,10 @@ public class BitacoraController : Controller
         .Where(d => d.FechaHoraDespacho.Date == dia)
         .Select(d => new BitacoraDiaVM
         {
-            Contenedor = d.ContenedorReferencia != null && d.ContenedorReferencia != ""
-                            ? "REF: " + d.ContenedorReferencia
-                            : d.Contenedor,
+            Contenedor =
+            !string.IsNullOrWhiteSpace(d.ContenedorReferencia)
+                ? $"{d.Contenedor} / REF: {d.ContenedorReferencia}"
+                : d.Contenedor,
             Marchamos = d.Marchamos,
             HoraEntrada = null,
             HoraSalida = d.FechaHoraDespacho,
@@ -476,5 +477,3 @@ public class BitacoraController : Controller
 }
 
 }
-
-

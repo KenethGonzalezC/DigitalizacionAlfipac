@@ -39,7 +39,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var c in (List<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>)ViewBag.Activos)
+        @foreach (var c in (ViewBag.Activos as IEnumerable<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado> ?? Enumerable.Empty<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>()))
         {
             <tr>
                 <td>
@@ -74,7 +74,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var c in (List<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>)ViewBag.Despachados)
+        @foreach (var c in (ViewBag.Despachados as IEnumerable<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado> ?? Enumerable.Empty<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>()))
         {
             <tr>
                 <td>
