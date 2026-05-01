@@ -4,6 +4,15 @@
     ViewData["Title"] = $"Ingresos del día - {Model.FechaSeleccionada:dd/MM/yyyy}";
 }
 
+@if (TempData["Ok"] != null)
+{
+    <div class="alert alert-success">@TempData["Ok"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
 <div class="container mt-4">
 
     <!-- FORMULARIO INGRESO -->

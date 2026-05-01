@@ -15,6 +15,8 @@
         public string? Chofer { get; set; }
         public string? PlacaCabezal { get; set; }
         public string? ViajeDua { get; set; }
+
+        public string? Boleta { get; set; }
         public DateTime FechaCreacion { get; set; } = DateTime.Now;
     }
 }

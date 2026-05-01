@@ -74,6 +74,11 @@
                 <input name="ViajeDua" class="form-control" />
             </div>
 
+            <div class="col-md-3">
+                <label>Boleta</label>
+                <input name="Boleta" class="form-control" />
+            </div>
+
         </div>
 
         <button class="btn btn-primary mt-3">
@@ -100,6 +105,10 @@
 
             <div class="col-12 col-sm-6 col-md">
                 <input name="viajeDua" value="@ViewBag.ViajeDua" class="form-control" placeholder="Viaje / DUA" />
+            </div>
+
+            <div class="col-12 col-sm-6 col-md">
+                <input name="Boleta" value="@ViewBag.Boleta" class="form-control" placeholder="Boleta" />
             </div>
 
             <div class="col">
@@ -135,6 +144,7 @@
                     <th>Chofer</th>
                     <th>Placa</th>
                     <th>Viaje/DUA</th>
+                    <th>Boleta</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -160,6 +170,7 @@
                             <td>@item.Chofer</td>
                             <td>@item.PlacaCabezal</td>
                             <td>@item.ViajeDua</td>
+                            <td>@item.Boleta</td>
 
                             <td>
 
@@ -251,6 +262,11 @@
                             <input name="ViajeDua" id="editViajeDua" class="form-control" />
                         </div>
 
+                        <div class="col-md-4">
+                            <label>Boleta</label>
+                            <input name="Boleta" id="editBoleta" class="form-control" />
+                        </div>
+
                     </div>
 
                 </div>
@@ -331,6 +347,7 @@
         document.getElementById("editPlaca").value = item.PlacaCabezal;
         document.getElementById("editChasis").value = item.Chasis;
         document.getElementById("editViajeDua").value = item.ViajeDua;
+        document.getElementById("editBoleta").value = item.Boleta;
 
         document.getElementById("tituloContenedor").textContent = item.Contenedor;
     }

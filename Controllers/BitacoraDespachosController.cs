@@ -129,11 +129,10 @@ namespace BitacoraAlfipac.Controllers
             // 🔥 MANEJO INTELIGENTE
             // =========================
 
-            if (!vm.EsSalidaEnFurgon && entidad != null)
+            if (entidad != null)
             {
                 if (tipo == "CONTENEDOR")
                 {
-                    // 🗑️ eliminar de patio
                     switch (entidad)
                     {
                         case ContenedorSinAsignarPatio c: _context.ContenedoresSinAsignarPatio.Remove(c); break;
@@ -145,9 +144,8 @@ namespace BitacoraAlfipac.Controllers
                 }
                 else if (tipo == "VEHICULO")
                 {
-                    // 🚗 desactivar vehículo
                     var vehiculo = (Vehiculo)entidad;
-                    vehiculo.Activo = false;
+                    _context.Vehiculos.Remove(vehiculo);
                 }
 
                 // 🔎 HISTORIAL

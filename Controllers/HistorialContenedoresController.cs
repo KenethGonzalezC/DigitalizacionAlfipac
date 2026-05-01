@@ -34,7 +34,7 @@ public class HistorialContenedoresController : Controller
         }
 
         // 📦 Orden lógico: más reciente primero
-        query = query.OrderByDescending(h => h.FechaHoraIngreso);
+        query = query.OrderByDescending(h => h.FechaHoraSalida);
 
         int totalRegistros = await query.CountAsync();
         int totalPaginas = (int)Math.Ceiling(totalRegistros / (double)PageSize);

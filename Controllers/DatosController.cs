@@ -407,6 +407,7 @@ public class DatosController : Controller
             Chofer = null,
             PlacaCabezal = null,
             ViajeDua = null,
+            Boleta = null,
 
             FechaCreacion = DateTime.Now
         });
@@ -532,6 +533,7 @@ public class DatosController : Controller
         data.Chofer = model.Chofer;
         data.PlacaCabezal = model.PlacaCabezal;
         data.ViajeDua = model.ViajeDua;
+        data.Boleta = model.Boleta;
 
         await _context.SaveChangesAsync();
 
