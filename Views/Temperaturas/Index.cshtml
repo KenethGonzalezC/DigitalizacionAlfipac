@@ -1,97 +1,197 @@
 ﻿@model List<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>
 
-<h2>Contenedores Refrigerados</h2>
-
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
+@{
+    ViewData["Title"] = "Contenedores Refrigerados";
 }
 
-<form asp-action="Create" method="post" class="row g-2 mb-4">
-    <div class="col-md-4">
-        <input name="contenedor" class="form-control" placeholder="Número de contenedor" />
-    </div>
-    <div class="col-md-2">
-        <button class="btn btn-primary w-100">Crear</button>
-    </div>
-</form>
+<div class="container mt-4">
 
-<form asp-action="Buscar" method="get" class="row g-2 mb-3">
-    <div class="col-md-4">
-        <input name="contenedor" class="form-control" placeholder="Buscar contenedor..." />
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>❄️ Contenedores Refrigerados</h3>
     </div>
-    <div class="col-md-2">
-        <button class="btn btn-primary w-100">Buscar</button>
-    </div>
-    <div class="col-md-2">
-        <a asp-action="Index" class="btn btn-secondary w-100">Limpiar</a>
-    </div>
-</form>
 
-<h3 class="mt-4">🟢 Contenedores Activos</h3>
+    <!-- ALERT -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success shadow-sm">
+            @TempData["Success"]
+        </div>
+    }
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Contenedor</th>
-            <th>Ingreso</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var c in (ViewBag.Activos as IEnumerable<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado> ?? Enumerable.Empty<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>()))
-        {
-            <tr>
-                <td>
-                    <a asp-action="Detalle" asp-route-id="@c.Id">
-                        @c.Contenedor
+    <!-- CREAR -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+
+            <form asp-action="Create" method="post" class="row g-2 align-items-end">
+
+                <div class="col-md-6">
+                    <label class="form-label">Nuevo contenedor</label>
+                    <input name="contenedor"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-2 d-grid">
+                    <label class="form-label invisible">crear</label>
+                    <button class="btn btn-primary">
+                        ➕ Crear
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- BUSCAR -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <form asp-action="Buscar" method="get" class="row g-2 align-items-end">
+
+                <div class="col-md-6">
+                    <label class="form-label">Buscar contenedor</label>
+                    <input name="contenedor"
+                           class="form-control"
+                           placeholder="Buscar..." />
+                </div>
+
+                <div class="col-md-2 d-grid">
+                    <label class="form-label invisible">buscar</label>
+                    <button class="btn btn-primary">
+                        🔎 Buscar
+                    </button>
+                </div>
+
+                <div class="col-md-2 d-grid">
+                    <label class="form-label invisible">limpiar</label>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        Limpiar
                     </a>
-                </td>
-                <td>
-                    @(c.FechaHoraIngreso?.ToString("dd/MM/yyyy HH:mm") ?? "-")
-                </td>
-                <td>
-                    <form asp-action="Delete" method="post"
-                          onsubmit="return confirm('¿Eliminar contenedor?')">
-                        <input type="hidden" name="id" value="@c.Id" />
-                        <button class="btn btn-sm btn-danger">Eliminar</button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                </div>
 
-<h3 class="mt-5">🔴 Contenedores Despachados</h3>
+            </form>
 
-<table class="table table-bordered table-sm">
-    <thead class="table-light">
-        <tr>
-            <th>Contenedor</th>
-            <th>Ingreso</th>
-            <th>Despacho</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var c in (ViewBag.Despachados as IEnumerable<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado> ?? Enumerable.Empty<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>()))
-        {
-            <tr>
-                <td>
-                    <a asp-action="Detalle" asp-route-id="@c.Id">
-                        @c.Contenedor
-                    </a>
-                </td>
-                <td>@(c.FechaHoraIngreso?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
-                <td>@(c.FechaHoraDespacho?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
-                <td>
-                    <form asp-action="Delete" method="post"
-                          onsubmit="return confirm('¿Eliminar contenedor?')">
-                        <input type="hidden" name="id" value="@c.Id" />
-                        <button class="btn btn-sm btn-danger">Eliminar</button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+        </div>
+    </div>
+
+    <!-- ACTIVOS -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header bg-white">
+            <h5 class="mb-0 text-success">🟢 Contenedores Activos</h5>
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+                <table class="table table-hover table-striped table-sm align-middle mb-0">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Contenedor</th>
+                            <th>Ingreso</th>
+                            <th style="width:120px;">Acción</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var c in (ViewBag.Activos as IEnumerable<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>
+                            ?? Enumerable.Empty<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>()))
+                        {
+                            <tr>
+                                <td class="fw-semibold">
+                                    <a asp-action="Detalle" asp-route-id="@c.Id">
+                                        @c.Contenedor
+                                    </a>
+                                </td>
+
+                                <td>
+                                    @(c.FechaHoraIngreso?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+                                </td>
+
+                                <td>
+                                    <form asp-action="Delete" method="post"
+                                          onsubmit="return confirm('¿Eliminar contenedor?')">
+
+                                        <input type="hidden" name="id" value="@c.Id" />
+
+                                        <button class="btn btn-sm btn-outline-danger">
+                                            Eliminar
+                                        </button>
+
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- DESPACHADOS -->
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-white">
+            <h5 class="mb-0 text-danger">🔴 Contenedores Despachados</h5>
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-sm shadow">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Contenedor</th>
+                            <th>Ingreso</th>
+                            <th>Despacho</th>
+                            <th style="width:120px;">Acción</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var c in (ViewBag.Despachados as IEnumerable<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>
+                            ?? Enumerable.Empty<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>()))
+                        {
+                            <tr>
+                                <td class="fw-semibold">
+                                    <a asp-action="Detalle" asp-route-id="@c.Id">
+                                        @c.Contenedor
+                                    </a>
+                                </td>
+
+                                <td>
+                                    @(c.FechaHoraIngreso?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+                                </td>
+
+                                <td>
+                                    @(c.FechaHoraDespacho?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+                                </td>
+
+                                <td>
+                                    <form asp-action="Delete" method="post"
+                                          onsubmit="return confirm('¿Eliminar contenedor?')">
+
+                                        <input type="hidden" name="id" value="@c.Id" />
+
+                                        <button class="btn btn-sm btn-outline-danger">
+                                            Eliminar
+                                        </button>
+
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>

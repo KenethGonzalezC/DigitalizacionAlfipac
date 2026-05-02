@@ -1,76 +1,148 @@
 ﻿@using BitacoraAlfipac.Models.ViewModels
 @model BusquedaGlobalContenedorVM
 
-@if (Model == null)
-{
-    <div class="alert alert-warning mt-3 shadow-sm">
-        Contenedor no encontrado
-    </div>
-}
-else
-{
-    <div class="card mt-3 shadow-sm border-primary">    
-        <div class="card-body">
-            <form asp-controller="Inventario" asp-action="ConfirmarEdicionSinAsignar" method="post">
+<div class="container mt-3">
 
-                @Html.AntiForgeryToken()
-
-                <input type="hidden" name="id" value="@Model.Id" />
-                <input type="hidden" name="ubicacionActual" value="@Model.UbicacionActual" />
-
-                <div class="row mb-2">
-                    <div class="col-md-6">
-                        <strong>Contenedor:</strong> @Model.Contenedor
-                    </div>
-                    <div class="col-md-6">
-                        <strong>Ubicación:</strong> @Model.UbicacionActual
-                    </div>
-                </div>
-
-                <div class="row g-3 mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Chasis</label>
-                        <input name="Chasis" value="@Model.Chasis" class="form-control form-control-sm" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Transportista</label>
-                        <input name="Transportista" value="@Model.Transportista" class="form-control form-control-sm" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Cliente</label>
-                        <input name="Cliente" value="@Model.Cliente" class="form-control form-control-sm" />
-                    </div>
-                </div>
-
-                <div class="row g-3 mb-3">
-                    <div class="col-md-4">
-                        <label class="form-label">Marchamos</label>
-                        <input name="Marchamos" value="@Model.Marchamos" class="form-control form-control-sm" />
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Estado</label>
-                        <select name="EstadoCarga" class="form-select form-select-sm">
-                            <option selected="@(Model.EstadoCarga == "Vacio")">Vacio</option>
-                            <option selected="@(Model.EstadoCarga == "Cargado")">Cargado</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label">Mover a</label>
-                        <select name="Ubicacion" class="form-select form-select-sm">
-                            <option value="">No mover</option>
-                            <option>SinAsignar</option>
-                            <option>Patio1</option>
-                            <option>Patio2</option>
-                            <option>Anden2000</option>
-                            <option>PatioQuimicos</option>
-                        </select>
-                    </div>
-                </div>
-
-                <button class="btn btn-success w-100">
-                    Confirmar cambios
-                </button>
-            </form>
+    @if (Model == null)
+    {
+        <div class="alert alert-warning shadow-sm">
+            ⚠️ Contenedor no encontrado
         </div>
-    </div>
-}
+    }
+    else
+    {
+        <!-- HEADER -->
+        <div class="mb-3">
+
+            <h4 class="mb-0">
+                ✏️ Edición de contenedor
+            </h4>
+
+            <small class="text-muted">
+                Actualización rápida desde búsqueda global
+            </small>
+
+        </div>
+
+        <!-- CARD PRINCIPAL -->
+        <div class="card shadow-sm border-0">
+
+            <div class="card-body">
+
+                <form asp-controller="Inventario"
+                      asp-action="ConfirmarEdicionSinAsignar"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <input type="hidden" name="ubicacionActual" value="@Model.UbicacionActual" />
+
+                    <!-- INFO -->
+                    <div class="row mb-3">
+
+                        <div class="col-md-6">
+                            <div class="p-2 border rounded bg-light">
+                                <small class="text-muted">Contenedor</small>
+                                <div class="fw-semibold fs-5">
+                                    @Model.Contenedor
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-2 border rounded bg-light">
+                                <small class="text-muted">Ubicación actual</small>
+                                <div class="fw-semibold">
+                                    @Model.UbicacionActual
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- DATOS OPERATIVOS -->
+                    <div class="row g-3 mb-3">
+
+                        <div class="col-md-4">
+                            <label class="form-label">Chasis</label>
+                            <input name="Chasis"
+                                   value="@Model.Chasis"
+                                   class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Transportista</label>
+                            <input name="Transportista"
+                                   value="@Model.Transportista"
+                                   class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Cliente</label>
+                            <input name="Cliente"
+                                   value="@Model.Cliente"
+                                   class="form-control" />
+                        </div>
+
+                    </div>
+
+                    <div class="row g-3 mb-4">
+
+                        <div class="col-md-4">
+                            <label class="form-label">Marchamos</label>
+                            <input name="Marchamos"
+                                   value="@Model.Marchamos"
+                                   class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Estado</label>
+                            <select name="EstadoCarga" class="form-select">
+
+                                <option value="Vacio" selected="@(Model.EstadoCarga == "Vacio")">
+                                    Vacío
+                                </option>
+
+                                <option value="Cargado" selected="@(Model.EstadoCarga == "Cargado")">
+                                    Cargado
+                                </option>
+
+                            </select>
+                        </div>
+
+                        <!-- ACCIÓN CRÍTICA -->
+                        <div class="col-md-4">
+
+                            <label class="form-label text-primary">
+                                📍 Mover ubicación
+                            </label>
+
+                            <select name="Ubicacion" class="form-select border-primary">
+
+                                <option value="">No mover</option>
+                                <option value="SinAsignar">Sin asignar</option>
+                                <option value="Patio1">Patio 1</option>
+                                <option value="Patio2">Patio 2</option>
+                                <option value="Anden2000">Andén 2000</option>
+                                <option value="PatioQuimicos">Químicos</option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <!-- BOTÓN -->
+                    <button class="btn btn-success w-100 py-2">
+                        ✔ Confirmar cambios
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+    }
+
+</div>

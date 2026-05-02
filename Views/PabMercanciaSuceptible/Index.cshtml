@@ -1,54 +1,111 @@
 ﻿@model List<BitacoraAlfipac.Models.Entidades.PabMercanciaSusceptible>
 
-<div class="container mt-4">
+<div class="container-fluid py-4">
 
-    <h2>Informacion de PAB</h2>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-0">📦 Catálogo PAB</h2>
+            <small class="text-muted">Mercancía susceptible registrada</small>
+        </div>
 
-    <button class="btn btn-primary mb-3"
-            data-bs-toggle="modal"
-            data-bs-target="#createModal">
-        Nuevo Registro
-    </button>
+        <div>
+            <a asp-controller="ActasPermanencias" asp-action="Index" class="btn btn-outline-dark">
+                ← Volver
+            </a>
+        </div>
 
-    <table class="table table-bordered table-sm">
-        <thead class="table-dark">
-            <tr>
-                <th>Descripción</th>
-                <th>Codigo</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.Descripcion</td>
-                    <td>@item.Codigo</td>
-                    <td class="d-flex gap-2">
+        <button class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#createModal">
+            ➕ Nuevo
+        </button>
+    </div>
 
-                        <button class="btn btn-warning btn-sm btnEditar"
-                                data-id="@item.Id"
-                                data-descripcion="@item.Descripcion"
-                                data-codigo="@item.Codigo">
-                            Editar
-                        </button>
+    <!-- TABLA -->
+    <div class="card shadow-sm">
+        <div class="card-body">
 
-                        <form asp-action="Delete" method="post"
-                              onsubmit="return confirmarEliminacion();"
-                              style="display:inline;">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@item.Id" />
-                            <button class="btn btn-danger btn-sm">Eliminar</button>
-                        </form>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light text-center">
+                        <tr>
+                            <th>Descripción</th>
+                            <th>Código</th>
+                            <th style="width:150px;">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">
+                                    No hay registros disponibles
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+
+                                    <td class="fw-semibold">
+                                        @item.Descripcion
+                                    </td>
+
+                                    <td class="text-center">
+                                        <span class="badge bg-dark">
+                                            @item.Codigo
+                                        </span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+
+                                            <button class="btn btn-sm btn-outline-primary btnEditar"
+                                                    data-id="@item.Id"
+                                                    data-descripcion="@item.Descripcion"
+                                                    data-codigo="@item.Codigo">
+                                                ✏️
+                                            </button>
+
+                                            <form asp-action="Delete"
+                                                  method="post"
+                                                  onsubmit="return confirmarEliminacion();"
+                                                  class="m-0">
+
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@item.Id" />
+
+                                                <button class="btn btn-sm btn-danger">
+                                                    🗑
+                                                </button>
+                                            </form>
+
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    </div>
 
 </div>
 
-<div class="modal fade" id="editarModal">
+<div class="modal fade" id="editarModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
 
@@ -57,8 +114,8 @@
 
                 <input type="hidden" name="Id" id="editId" />
 
-                <div class="modal-header bg-warning">
-                    <h5 class="modal-title">Editar Mercancía</h5>
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">✏️ Editar PAB</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
@@ -66,12 +123,19 @@
 
                     <div class="mb-3">
                         <label class="form-label">Descripción</label>
-                        <input name="Descripcion" id="editDescripcion" class="form-control" required />
+                        <input name="Descripcion"
+                               id="editDescripcion"
+                               class="form-control"
+                               required />
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Código</label>
-                        <input name="Codigo" id="editCodigo" class="form-control" required />
+                        <input name="Codigo"
+                               id="editCodigo"
+                               type="number"
+                               class="form-control"
+                               required />
                     </div>
 
                 </div>
@@ -80,6 +144,7 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         Cancelar
                     </button>
+
                     <button class="btn btn-success">
                         Guardar Cambios
                     </button>
@@ -91,25 +156,6 @@
     </div>
 </div>
 
-<script>
-    document.querySelectorAll(".btnEditar").forEach(btn => {
-
-        btn.addEventListener("click", () => {
-
-            document.getElementById("editId").value = btn.dataset.id;
-            document.getElementById("editDescripcion").value = btn.dataset.descripcion;
-            document.getElementById("editCodigo").value = btn.dataset.codigo;
-
-            new bootstrap.Modal(document.getElementById('editarModal')).show();
-        });
-
-    });
-
-    function confirmarEliminacion() {
-        return confirm("¿Seguro que deseas eliminar este registro?");
-    }
-</script>
-
 <div class="modal fade" id="createModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -117,7 +163,7 @@
             <form asp-action="Create" method="post">
 
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Nuevo Registro</h5>
+                    <h5 class="modal-title">➕ Nuevo PAB</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
@@ -140,7 +186,7 @@
                         Cancelar
                     </button>
 
-                    <button type="submit" class="btn btn-success">
+                    <button class="btn btn-success">
                         Guardar
                     </button>
                 </div>
@@ -151,3 +197,27 @@
     </div>
 </div>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // ✏️ EDITAR (event delegation PRO)
+        document.addEventListener("click", function (e) {
+
+            const btn = e.target.closest(".btnEditar");
+
+            if (!btn) return;
+
+            document.getElementById("editId").value = btn.dataset.id;
+            document.getElementById("editDescripcion").value = btn.dataset.descripcion;
+            document.getElementById("editCodigo").value = btn.dataset.codigo;
+
+            new bootstrap.Modal(document.getElementById('editarModal')).show();
+        });
+
+    });
+
+    // ❗ CONFIRMAR ELIMINACIÓN
+    function confirmarEliminacion() {
+        return confirm("¿Seguro que deseas eliminar este registro?");
+    }
+</script>

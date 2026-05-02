@@ -458,12 +458,34 @@ namespace BitacoraAlfipac.Controllers
         [HttpPost]
         public IActionResult GuardarOrden([FromBody] List<OrdenVM> lista)
         {
+            if (lista == null || !lista.Any())
+                return BadRequest();
+
             foreach (var item in lista)
             {
                 var cont = _context.Patio1.FirstOrDefault(x => x.Id == item.Id);
 
-                if (cont != null)
-                    cont.Orden = item.Orden;
+                if (cont == null)
+                    continue;
+
+                // 🔹 actualización de orden
+                cont.Orden = item.Orden;
+
+                // 🔹 actualización de edición (solo si vienen datos)
+                if (!string.IsNullOrEmpty(item.Marchamos))
+                    cont.Marchamos = item.Marchamos;
+
+                if (!string.IsNullOrEmpty(item.EstadoCarga))
+                    cont.EstadoCarga = item.EstadoCarga;
+
+                if (!string.IsNullOrEmpty(item.Chasis))
+                    cont.Chasis = item.Chasis;
+
+                if (!string.IsNullOrEmpty(item.Transportista))
+                    cont.Transportista = item.Transportista;
+
+                if (!string.IsNullOrEmpty(item.Cliente))
+                    cont.Cliente = item.Cliente;
             }
 
             _context.SaveChanges();
@@ -475,6 +497,13 @@ namespace BitacoraAlfipac.Controllers
         {
             public int Id { get; set; }
             public int Orden { get; set; }
+
+            // campos de edición
+            public string? Marchamos { get; set; }
+            public string? EstadoCarga { get; set; }
+            public string? Chasis { get; set; }
+            public string? Transportista { get; set; }
+            public string? Cliente { get; set; }
         }
 
     }

@@ -1,148 +1,223 @@
 ﻿@model BitacoraAlfipac.Models.ViewModels.InventarioGeneralVM
 
-<h2 class="mb-4">📦 Inventario General de Contenedores</h2>
+<div class="container mt-4">
 
-<div class="row mb-4">
-
-    <div class="col-md-3">
-        <div class="card bg-dark text-white shadow">
-            <div class="card-body">
-                <h5>Total</h5>
-                <h2>@Model.Total</h2>
-            </div>
-        </div>
+    <!-- HEADER -->
+    <div class="mb-3">
+        <h3 class="mb-0">📦 Inventario General de Contenedores</h3>
+        <small class="text-muted">Resumen operativo del sistema</small>
     </div>
 
-    <div class="col-md-3">
-        <div class="card bg-success text-white shadow">
-            <div class="card-body">
-                <h5>Cargados</h5>
-                <h2>@Model.Cargados</h2>
+    <!-- KPIs PRINCIPALES -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card bg-dark text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6>Total</h6>
+                            <h3>@Model.Total</h3>
+                        </div>
+                        <span class="fs-2">📦</span>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <div class="col-md-4">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6>Cargados</h6>
+                            <h3>@Model.Cargados</h3>
+                        </div>
+                        <span class="fs-2">🚛</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-warning text-dark shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6>Vacíos</h6>
+                            <h3>@Model.Vacios</h3>
+                        </div>
+                        <span class="fs-2">⚠️</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div class="col-md-3">
-        <div class="card bg-warning text-dark shadow">
-            <div class="card-body">
-                <h5>Vacíos</h5>
-                <h2>@Model.Vacios</h2>
-            </div>
+    <!-- UBICACIONES -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header bg-white">
+            <strong>📍 Distribución por ubicación</strong>
         </div>
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-2">
+                    <div class="text-center border rounded p-2">
+                        <h6>Sin Patio</h6>
+                        <h4>@Model.SinAsignar</h4>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="text-center border rounded p-2">
+                        <h6>Patio 1</h6>
+                        <h4>@Model.Patio1</h4>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="text-center border rounded p-2">
+                        <h6>Patio 2</h6>
+                        <h4>@Model.Patio2</h4>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="text-center border rounded p-2">
+                        <h6>Andén 2000</h6>
+                        <h4>@Model.Anden2000</h4>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="text-center border rounded p-2 border-danger">
+                        <h6>Químicos</h6>
+                        <h4>@Model.Quimicos</h4>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FILTROS -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form method="get">
+
+                <div class="row g-2">
+
+                    <div class="col-md-2">
+                        <input name="contenedor" class="form-control" placeholder="Contenedor" />
+                    </div>
+
+                    <div class="col-md-2">
+                        <input name="transportista" class="form-control" placeholder="Transportista" />
+                    </div>
+
+                    <div class="col-md-2">
+                        <input name="cliente" class="form-control" placeholder="Cliente" />
+                    </div>
+
+                    <div class="col-md-2">
+                        <select name="estado" class="form-select">
+                            <option value="">Estado</option>
+                            <option>Cargado</option>
+                            <option>Vacio</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <input name="tamano" class="form-control" placeholder="Tamaño" />
+                    </div>
+
+                    <div class="col-md-2">
+                        <select name="patio" class="form-select">
+                            <option value="">Patio</option>
+                            <option value="S/Pat">Sin Patio</option>
+                            <option value="P1">Patio 1</option>
+                            <option value="P2">Patio 2</option>
+                            <option value="2000">Andén 2000</option>
+                            <option value="AgroQui">Químicos</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 d-grid">
+                        <button class="btn btn-primary">
+                            🔎 Filtrar
+                        </button>
+                    </div>
+
+                    <div class="col-md-2 d-grid">
+                        <a asp-action="InventarioLectura"
+                               class="btn btn-outline-secondary">
+                            Limpiar
+                        </a>
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- TABLA -->
+    <div class="card shadow-sm">
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover table-sm mb-0 align-middle">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Contenedor</th>
+                            <th>Marchamos</th>
+                            <th>Tamaño</th>
+                            <th>Chasis</th>
+                            <th>Transportista</th>
+                            <th>Cliente</th>
+                            <th>Estado</th>
+                            <th>Ubicación</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var c in Model.Items)
+                        {
+                            <tr>
+
+                                <td class="fw-semibold">@c.Contenedor</td>
+                                <td>@c.Marchamos</td>
+                                <td>@c.Tamano</td>
+                                <td>@c.Chasis</td>
+                                <td>@c.Transportista</td>
+                                <td>@c.Cliente</td>
+                                <td>@c.EstadoCarga</td>
+                                <td>@c.Patio</td>
+
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
     </div>
 
 </div>
-
-<div class="d-flex flex-nowrap gap-3 mb-4 overflow-auto pb-2">
-    <div class="card border-primary shadow flex-shrink-0" style="min-width: 180px; max-width: 220px;">
-        <div class="card-body text-center">
-            <h6>Sin Patio</h6>
-            <h3>@Model.SinAsignar</h3>
-        </div>
-    </div>
-
-    <div class="card border-primary shadow flex-shrink-0" style="min-width: 180px; max-width: 220px;">
-        <div class="card-body text-center">
-            <h6>Patio 1</h6>
-            <h3>@Model.Patio1</h3>
-        </div>
-    </div>
-
-    <div class="card border-primary shadow flex-shrink-0" style="min-width: 180px; max-width: 220px;">
-        <div class="card-body text-center">
-            <h6>Patio 2</h6>
-            <h3>@Model.Patio2</h3>
-        </div>
-    </div>
-
-    <div class="card border-primary shadow flex-shrink-0" style="min-width: 180px; max-width: 220px;">
-        <div class="card-body text-center">
-            <h6>Andén 2000</h6>
-            <h3>@Model.Anden2000</h3>
-        </div>
-    </div>
-
-    <div class="card border-danger shadow flex-shrink-0" style="min-width: 180px; max-width: 220px;">
-        <div class="card-body text-center">
-            <h6>Químicos</h6>
-            <h3>@Model.Quimicos</h3>
-        </div>
-    </div>
-</div>
-
-<form method="get" class="row g-2 mb-4">
-
-    <div class="col-md-2">
-        <input name="contenedor" class="form-control" placeholder="Contenedor" />
-    </div>
-
-    <div class="col-md-2">
-        <input name="transportista" class="form-control" placeholder="Transportista" />
-    </div>
-
-    <div class="col-md-2">
-        <input name="cliente" class="form-control" placeholder="Cliente" />
-    </div>
-
-    <div class="col-md-2">
-        <select name="estado" class="form-select">
-            <option value="">Estado</option>
-            <option>Cargado</option>
-            <option>Vacio</option>
-        </select>
-    </div>
-
-    <div class="col-md-2">
-        <input name="tamano" class="form-control" placeholder="Tamaño" />
-    </div>
-
-    <div class="col-md-2">
-        <select name="patio" class="form-select">
-            <option value="">Patio</option>
-            <option value="S/Pat">Sin Patio</option>
-            <option value="P1">Patio 1</option>
-            <option value="P2">Patio 2</option>
-            <option value="2000">Andén 2000</option>
-            <option value="AgroQui">Químicos</option>
-        </select>
-    </div>
-
-    <div class="col-md-1">
-        <button class="btn btn-primary w-100">Filtrar</button>
-    </div>
-
-    <div class="col-md-1">
-        <a asp-action="InventarioLectura" class="btn btn-secondary w-100">Limpiar</a>
-    </div>
-
-</form>
-
-<table class="table table-bordered table-striped table-sm shadow">
-    <thead class="table-dark">
-        <tr>
-            <th>Contenedor</th>
-            <th>Marchamos</th>
-            <th>Tamaño</th>
-            <th>Chasis</th>
-            <th>Transportista</th>
-            <th>Cliente</th>
-            <th>Estado</th>
-            <th>Ubicación</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var c in Model.Items)
-        {
-            <tr>
-                <td>@c.Contenedor</td>
-                <td>@c.Marchamos</td>
-                <td>@c.Tamano</td>
-                <td>@c.Chasis</td>
-                <td>@c.Transportista</td>
-                <td>@c.Cliente</td>
-                <td>@c.EstadoCarga</td>
-                <td>@c.Patio</td>
-            </tr>
-        }
-    </tbody>
-</table>

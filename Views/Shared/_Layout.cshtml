@@ -7,203 +7,216 @@
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BitacoraAlfipac.styles.css" asp-append-version="true" />
+
+    <!-- ICONOS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
+
 <body>
 
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
+    <div class="app-wrapper">
 
-                <!-- LOGO / MARCA -->
-                <a class="navbar-brand fw-semibold d-flex align-items-center gap-2"
-                   asp-controller="Home"
-                   asp-action="Index">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
 
-                    <img src="~/images/logo.jpg"
-                         alt="Logo"
-                         style="height:40px; width:auto;" />
+            <!-- HEADER -->
+            <div class="sidebar-header">
+                <img src="~/images/logo.jpg" />
+                <span>SCL</span>
+            </div>
 
-                    <span>SCL - Alfipac</span>
+            <!-- MENÚ -->
+            <nav class="sidebar-menu">
 
+                @if (!User.IsInRole("Usuario"))
+                {
+                    <a asp-controller="Home" asp-action="Index" class="menu-item">
+                        <i class="bi bi-house-door"></i>
+                        <span>Inicio</span>
+                    </a>
+                 }
+
+                @if (User.IsInRole("Usuario"))
+                {
+                    <a asp-controller="Usuario" asp-action="Index" class="menu-item">
+                        <i class="bi bi-house-door"></i>
+                        <span>Inicio (Solo Lectura)</span>
+                    </a>
+                }
+
+                @if (User.IsInRole("Usuario"))
+                {
+                    <a asp-controller="Bitacora" asp-action="Index" class="menu-item">
+                        <i class="bi bi-journal-text"></i>
+                        <span>Bitacora</span>
+                    </a>
+                }
+
+                @if (User.IsInRole("Usuario"))
+                {
+                    <a asp-controller="Inventario" asp-action="InventarioLectura" class="menu-item">
+                        <i class="bi bi-box-seam"></i>
+                        <span>Inventario</span>
+                    </a>
+                }
+
+                @if (User.IsInRole("Usuario"))
+                {
+                    <a asp-controller="Usuario" asp-action="Refrigerados" class="menu-item">
+                        <i class="bi bi-thermometer-half"></i>
+                        <span>Refrigerados</span>
+                    </a>
+                }
+
+                @if (User.IsInRole("Administrador") || User.IsInRole("Digitador") || User.IsInRole("Patio"))
+                {
+                    <a asp-controller="Inventario" asp-action="Index" class="menu-item">
+                        <i class="bi bi-box-seam"></i>
+                        <span>Inventario</span>
+                    </a>
+                }
+
+                @if (User.IsInRole("Administrador") || User.IsInRole("Digitador"))
+                {
+                    <a asp-controller="BitacoraIngresos" asp-action="Index" class="menu-item">
+                        <i class="bi bi-arrow-down-circle"></i>
+                        <span>Ingresos</span>
+                    </a>
+
+                    <a asp-controller="BitacoraDespachos" asp-action="Index" class="menu-item">
+                        <i class="bi bi-arrow-up-circle"></i>
+                        <span>Despachos</span>
+                    </a>
+                }
+
+                @if (User.IsInRole("Administrador") || User.IsInRole("Digitador") || User.IsInRole("Patio"))
+                {
+                    <a asp-controller="Temperaturas" asp-action="Index" class="menu-item">
+                        <i class="bi bi-thermometer-half"></i>
+                        <span>Refrigerados</span>
+                    </a>
+                }
+
+                <a asp-controller="HistorialContenedores" asp-action="Index" class="menu-item">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Historial</span>
                 </a>
 
-                <!-- TOGGLER -->
-                <button class="navbar-toggler"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#navbarContent"
-                        aria-controls="navbarContent"
-                        aria-expanded="false"
-                        aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+                @if (User.IsInRole("Administrador") || User.IsInRole("Digitador"))
+                {
+                    <a asp-controller="Bitacora" asp-action="Index" class="menu-item">
+                        <i class="bi bi-journal-text"></i>
+                        <span>Bitácora</span>
+                    </a>
 
-                <div class="collapse navbar-collapse justify-content-between" id="navbarContent">
+                    <a asp-controller="Datos" asp-action="Index" class="menu-item">
+                        <i class="bi bi-database"></i>
+                        <span>Datos</span>
+                    </a>
 
-                    <!-- MENÚ PRINCIPAL -->
-                    <ul class="navbar-nav">
+                    <a asp-controller="ActasPermanencias" asp-action="Index" class="menu-item">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>Actas y PAB</span>
+                    </a>
+                }
 
-                        @if (User.IsInRole("Administrador") || (User.IsInRole("Digitador") || (User.IsInRole("Patio"))))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                asp-controller="Inventario"
-                                asp-action="Index">
-                                    Inventario
-                                </a>
-                            </li>
-                        }
+                @if (User.IsInRole("Administrador"))
+                {
+                    <a asp-controller="Usuarios" asp-action="Index" class="menu-item text-danger">
+                        <i class="bi bi-people"></i>
+                        <span>Usuarios</span>
+                    </a>
+                }              
+                
+            </nav>
 
-                        @if (User.IsInRole("Administrador") || (User.IsInRole("Digitador")))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                asp-controller="BitacoraIngresos"
-                                asp-action="Index">
-                                    Ingresos
-                                </a>
-                            </li>
-                        }
+        </aside>
 
-                        @if (User.IsInRole("Administrador") || (User.IsInRole("Digitador")))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                asp-controller="BitacoraDespachos"
-                                asp-action="Index">
-                                    Despachos
-                                </a>
-                            </li>
-                        }
+        <!-- MAIN -->
+        <div class="main-content">
 
-                        @if (User.IsInRole("Administrador") || (User.IsInRole("Digitador") || (User.IsInRole("Patio"))))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                asp-controller="Temperaturas"
-                                asp-action="Index">
-                                    Refrigerados
-                                </a>
-                            </li>
-                        }
+            <!-- TOPBAR -->
+            <header class="topbar">
 
-                        @if (User.IsInRole("Administrador") || (User.IsInRole("Digitador") || (User.IsInRole("Patio") || User.IsInRole("Usuario"))))
-                        {
-                            @if (User.IsInRole("Administrador") || (User.IsInRole("Digitador") || (User.IsInRole("Patio") || User.IsInRole("Usuario"))))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link"
-                                       asp-controller="HistorialContenedores"
-                                       asp-action="Index">
-                                        Historial
-                                    </a>
-                                </li>
-                            }
-                        }
+                <div class="d-flex align-items-center gap-3">
 
-                        @if (User.IsInRole("Administrador") || (User.IsInRole("Digitador") || (User.IsInRole("Usuario"))))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                   asp-controller="Bitacora"
-                                   asp-action="Index">
-                                    Bitacora
-                                </a>
-                            </li>
-                        }
+                    <button id="toggleSidebar" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-list"></i>
+                    </button>
 
-                        @if (User.IsInRole("Administrador") || (User.IsInRole("Digitador")))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                   asp-controller="Datos"
-                                   asp-action="Index">
-                                    Datos
-                                </a>
-                            </li>
-                        }
-
-                        @if (User.IsInRole("Administrador") || (User.IsInRole("Digitador")))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                   asp-controller="ActasPermanencias"
-                                   asp-action="Index">
-                                    Actas y PAB
-                                </a>
-                            </li>
-                        }
-
-                        @if (User.IsInRole("Administrador"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-danger fw-semibold"
-                                   asp-controller="Usuarios"
-                                   asp-action="Index">
-                                    Gestión de usuarios
-                                </a>
-                            </li>
-                        }
-
-                        @if (User.IsInRole("Usuario"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link"
-                                       asp-controller="Inventario"
-                                       asp-action="InventarioLectura">
-                                    Inventario
-                                </a>
-                            </li>
-                        }
-
-                    </ul>
-
-                    <!-- USUARIO / LOGOUT -->
-                    <ul class="navbar-nav">
-
-                        @if (User.Identity != null && User.Identity.IsAuthenticated)
-                        {
-                            <li class="nav-item d-flex align-items-center me-3">
-                                <span class="text-muted small">
-                                    @User.Identity.Name
-                                </span>
-                            </li>
-
-                            <li class="nav-item">
-                                <form asp-controller="Account"
-                                      asp-action="Logout"
-                                      method="post">
-                                    <button type="submit"
-                                            class="btn btn-outline-danger btn-sm">
-                                        Cerrar sesión
-                                    </button>
-                                </form>
-                            </li>
-                        }
-
-                    </ul>
+                    <strong>@ViewData["Title"]</strong>
 
                 </div>
-            </div>
-        </nav>
-    </header>
 
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+                <div class="user-section d-flex align-items-center gap-3">
 
-    <footer class="border-top footer text-muted mt-4">
-        <div class="container">
-            &copy; 2026 - Sistema de Control Logistico · Almacén Fiscal del Pacífico · By SK
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        <span class="text-muted small">
+                            <i class="bi bi-person-circle"></i>
+                            @User.Identity.Name
+                        </span>
+
+                        <form asp-controller="Account" asp-action="Logout" method="post">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="bi bi-box-arrow-right"></i>
+                            </button>
+                        </form>
+                    }
+
+                </div>
+
+            </header>
+
+            <!-- CONTENT -->
+            <main class="content">
+                @RenderBody()
+            </main>
+
+            <!-- FOOTER -->
+            <footer class="footer text-muted">
+                <div class="px-4 py-2">
+                    &copy; 2026 - Sistema de Control Logístico · Alfipac
+                </div>
+            </footer>
+
         </div>
-    </footer>
+
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <!-- SIDEBAR TOGGLE + ESTADO -->
+    <script>
+            const toggleBtn = document.getElementById("toggleSidebar");
+
+            if (localStorage.getItem("sidebar") === "collapsed") {
+                document.body.classList.add("sidebar-collapsed");
+            }
+
+            toggleBtn.addEventListener("click", () => {
+                document.body.classList.toggle("sidebar-collapsed");
+
+                const isCollapsed = document.body.classList.contains("sidebar-collapsed");
+                localStorage.setItem("sidebar", isCollapsed ? "collapsed" : "expanded");
+            });
+    </script>
+
+    <!-- ITEM ACTIVO -->
+    <script>
+            const links = document.querySelectorAll(".sidebar-menu a");
+            const currentUrl = window.location.pathname.toLowerCase();
+
+            links.forEach(link => {
+                if (currentUrl.includes(link.getAttribute("href").toLowerCase())) {
+                    link.classList.add("active");
+                }
+            });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
 

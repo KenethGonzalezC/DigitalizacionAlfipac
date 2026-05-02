@@ -1,0 +1,229 @@
+﻿/* =========================
+   VARIABLES (DISEÑO BASE)
+========================= */
+:root {
+    --color-primary: #0d2b45;
+    --color-accent: #f59e0b;
+    --color-accent-hover: #d97706;
+    --color-bg: #f5f7fb;
+    --color-card: #ffffff;
+    --color-text: #1f2937;
+    --color-muted: #6b7280;
+    --radius: 12px;
+    --transition: 0.2s ease;
+}
+
+/* =========================
+   BASE
+========================= */
+body {
+    background: var(--color-bg);
+    font-family: 'Segoe UI', sans-serif;
+    color: var(--color-text);
+}
+
+/* =========================
+   LAYOUT
+========================= */
+.app-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+.sidebar {
+    width: 240px;
+    background: var(--color-primary);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    transition: width 0.3s ease;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    margin-bottom: 30px;
+}
+
+    .sidebar-header img {
+        height: 35px;
+    }
+
+/* MENU */
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    color: #cfd8e3;
+    text-decoration: none;
+    margin-bottom: 6px;
+    transition: var(--transition);
+    font-size: 14px;
+}
+
+    .sidebar-menu a:hover {
+        background: rgba(255,255,255,0.1);
+        color: white;
+    }
+
+    .sidebar-menu a.active {
+        background: rgba(255,255,255,0.2);
+        color: white;
+    }
+
+/* =========================
+   SIDEBAR COLLAPSED
+========================= */
+.sidebar-collapsed .sidebar {
+    width: 70px;
+}
+
+    .sidebar-collapsed .sidebar span {
+        display: none;
+    }
+
+.sidebar-collapsed .sidebar-header span {
+    display: none;
+}
+
+.sidebar-collapsed .sidebar-menu a {
+    justify-content: center;
+    padding: 12px 5px;
+}
+
+/* =========================
+   MAIN
+========================= */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================
+   TOPBAR
+========================= */
+.topbar {
+    background: white;
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+}
+
+/* =========================
+   CONTENT
+========================= */
+.content {
+    padding: 25px;
+}
+
+/* =========================
+   CARDS
+========================= */
+.card {
+    border: none;
+    border-radius: var(--radius);
+    background: var(--color-card);
+}
+
+/* =========================
+   DASHBOARD
+========================= */
+.dashboard-link {
+    text-decoration: none;
+}
+
+/* CARDS PRINCIPALES */
+.dashboard-main-card {
+    padding: 20px;
+    text-align: center;
+    transition: var(--transition);
+}
+
+    .dashboard-main-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+    }
+
+.dashboard-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+    color: var(--color-primary);
+}
+
+/* CARDS PEQUEÑAS */
+.dashboard-small-card {
+    padding: 15px;
+    transition: var(--transition);
+}
+
+    .dashboard-small-card:hover {
+        background: #f8fafc;
+        transform: translateY(-3px);
+    }
+
+    .dashboard-small-card .card-body {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .dashboard-small-card i {
+        font-size: 20px;
+        color: var(--color-primary);
+    }
+
+/* =========================
+   BOTONES
+========================= */
+.btn-primary {
+    background-color: var(--color-accent);
+    border: none;
+}
+
+    .btn-primary:hover {
+        background-color: var(--color-accent-hover);
+    }
+
+/* =========================
+   UTILIDADES UX (CLAVE)
+========================= */
+
+/* Hover suave general */
+a, button {
+    transition: var(--transition);
+}
+
+/* Inputs más claros */
+.form-control {
+    border-radius: 8px;
+}
+
+    .form-control:focus {
+        box-shadow: 0 0 0 0.15rem rgba(245, 158, 11, 0.25);
+        border-color: var(--color-accent);
+    }
+
+/* Botón toggle */
+#toggleSidebar {
+    border-radius: 8px;
+}
+
+/* =========================
+   FOOTER
+========================= */
+.footer {
+    margin-top: auto;
+    background: transparent;
+    font-size: 13px;
+}

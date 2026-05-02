@@ -1,4 +1,5 @@
-﻿using BitacoraAlfipac.Data;
+﻿using Aspose.Pdf.AI;
+using BitacoraAlfipac.Data;
 using BitacoraAlfipac.Models.Entidades;
 using BitacoraAlfipac.Models.ViewModels;
 using ClosedXML.Excel;
@@ -410,16 +411,28 @@ namespace BitacoraAlfipac.Controllers
         }
 
         //historial
-        public IActionResult Historial(DateTime? fecha)
+        public IActionResult Historial(DateTime? fecha, string? contenedor)
         {
-            DateTime fechaFiltro = fecha?.Date ?? DateTime.Today;
+            var query = _context.Vacios.AsQueryable();
 
-            var historial = _context.Vacios
-                .Where(x => x.Fecha.Date == fechaFiltro)
+            // filtro por fecha (solo si viene)
+            if (fecha.HasValue)
+            {
+                DateTime fechaFiltro = fecha.Value.Date;
+                query = query.Where(x => x.Fecha.Date == fechaFiltro);
+            }
+
+            // filtro por contenedor (solo si viene)
+            if (!string.IsNullOrWhiteSpace(contenedor))
+            {
+                query = query.Where(x => x.Contenedor.Contains(contenedor));
+            }
+
+            var historial = query
                 .OrderByDescending(x => x.Fecha)
                 .ToList();
 
-            ViewBag.Fecha = fechaFiltro.ToString("yyyy-MM-dd");
+            ViewBag.Fecha = fecha?.ToString("yyyy-MM-dd");
 
             return View(historial);
         }

@@ -5,110 +5,135 @@
     ViewData["Title"] = $"Bitácora del día - {fecha:dd/MM/yyyy}";
 }
 
-<div class="container mt-4">
+<div class="container-fluid">
 
-    <!-- ENCABEZADO + BUSCADOR -->
-    <form method="get" class="d-flex align-items-center gap-3 mb-4">
-        <h2 class="fw-semibold mb-0">
-            Bitácora del dia – @fecha.ToString("dd/MM/yyyy")
-        </h2>
-
-        <input type="date"
-               name="fecha"
-               class="form-control w-auto"
-               value="@fecha.ToString("yyyy-MM-dd")" />
-
-        <button type="submit" class="btn btn-outline-primary">
-            Confirmar
-        </button>
+    <!-- HEADER -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
 
         <div>
+            <h2 class="fw-bold mb-0">📋 Bitácora del día</h2>
+            <small class="text-muted">@fecha.ToString("dd MMMM yyyy")</small>
+        </div>
+
+        <form method="get" class="d-flex align-items-center gap-2 flex-wrap">
+
+            <input type="date"
+                   name="fecha"
+                   class="form-control"
+                   value="@fecha.ToString("yyyy-MM-dd")" />
+
+            <button type="submit" class="btn btn-outline-primary">
+                Filtrar
+            </button>
+
+            <div>
+                <a asp-action="Index" class="btn btn-secondary">
+                    Hoy
+                </a>
+            </div>
+
             <button type="button"
                     class="btn btn-danger"
                     data-bs-toggle="modal"
                     data-bs-target="#modalExportarPdf">
-                Exportar PDF
+                PDF
             </button>
-        </div>
 
-        <div>
-        <a asp-action="ExportarExcel"
-           asp-route-fecha="@fecha.ToString("yyyy-MM-dd")"
-           class="btn btn-success">
-            Exportar Excel
-        </a>
-        </div>
+            <a asp-action="ExportarExcel"
+                   asp-route-fecha="@fecha.ToString("yyyy-MM-dd")"
+                   class="btn btn-success">
+                Excel
+            </a>
 
-    </form>
+        </form>
 
+    </div>
 
     <!-- TABLA -->
-    <div class="card shadow-sm">
-        <div class="table-responsive">
-            <table class="table table-striped align-middle mb-0 text-center">
-                <thead class="table-light">
-                    <tr>
-                        <th>Contenedor</th>
-                        <th>Marchamos</th>
-                        <th>Hora Entrada</th>
-                        <th>Hora Salida</th>
-                        <th>Transportista</th>
-                        <th>Información</th>
-                        <th>Chofer</th>
-                        <th>Placa</th>
-                        <th>Chasis</th>
-                        <th>Viaje / DUA</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (!Model.Any())
-                    {
-                        <tr>
-                            <td colspan="10" class="text-center text-muted py-4">
-                                No existen movimientos para esta fecha
-                            </td>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+                        <tr class="text-center">
+                            <th>Contenedor</th>
+                            <th>Marchamos</th>
+                            <th>Entrada</th>
+                            <th>Salida</th>
+                            <th>Transportista</th>
+                            <th>Información</th>
+                            <th>Chofer</th>
+                            <th>Placa</th>
+                            <th>Chasis</th>
+                            <th>Viaje / DUA</th>
                         </tr>
-                    }
-                    else
-                    {
-                        foreach (var item in Model)
+                    </thead>
+
+                    <tbody>
+
+                        @if (!Model.Any())
                         {
                             <tr>
-                                <td class="fw-bold">@item.Contenedor</td>
-                                <td>@item.Marchamos</td>
-
-                                <td class="fw-bold">
-                                    @(item.HoraEntrada?.ToString("HH:mm") ?? "")
+                                <td colspan="10" class="text-center text-muted py-5">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <span class="fs-1">📭</span>
+                                        <span>No existen movimientos para esta fecha</span>
+                                    </div>
                                 </td>
-
-                                <td class="fw-bold">
-                                    @(item.HoraSalida?.ToString("HH:mm") ?? "")
-                                </td>
-
-                                <td>@item.Transportista</td>
-                                <td>@item.Informacion</td>
-                                <td>@item.Chofer</td>
-                                <td>@item.Placa</td>
-                                <td>@item.Chasis</td>
-                                <td>@item.ViajeODua</td>
                             </tr>
                         }
-                    }
-                </tbody>
-            </table>
+                        else
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr class="text-center">
+
+                                    <td class="fw-bold">
+                                        @item.Contenedor
+                                    </td>
+
+                                    <td>@item.Marchamos</td>
+
+                                    <td class="fw-bold">
+                                        @(item.HoraEntrada?.ToString("HH:mm") ?? "")
+                                    </td>
+
+                                    <td class="fw-bold">
+                                        @(item.HoraSalida?.ToString("HH:mm") ?? "")
+                                    </td>
+
+                                    <td>@item.Transportista</td>
+                                    <td>@item.Informacion</td>
+                                    <td>@item.Chofer</td>
+                                    <td>@item.Placa</td>
+                                    <td>@item.Chasis</td>
+                                    <td>@item.ViajeODua</td>
+
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+
+                </table>
+            </div>
+
         </div>
     </div>
 
 </div>
 
+<!-- MODAL EXPORTAR -->
 <div class="modal fade" id="modalExportarPdf" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
             <form asp-action="ExportarPdf" method="get">
 
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">Exportar Bitácora</h5>
+                    <h5 class="modal-title">📄 Exportar Bitácora</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
@@ -118,16 +143,16 @@
 
                     <div class="form-check mb-3">
                         <input type="checkbox" id="todoDia" class="form-check-input" />
-                        <label class="form-check-label">Todo el día</label>
+                        <label class="form-check-label fw-semibold">Todo el día</label>
                     </div>
 
                     <div id="rangoHoras" class="row g-2" style="display:none;">
                         <div class="col">
-                            <label>Hora inicio</label>
+                            <label class="form-label">Hora inicio</label>
                             <input type="time" name="horaInicio" class="form-control" />
                         </div>
                         <div class="col">
-                            <label>Hora fin</label>
+                            <label class="form-label">Hora fin</label>
                             <input type="time" name="horaFin" class="form-control" />
                         </div>
                     </div>
@@ -135,7 +160,9 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-danger">Exportar</button>
+                    <button class="btn btn-danger w-100">
+                        Exportar PDF
+                    </button>
                 </div>
 
             </form>
@@ -155,14 +182,10 @@
         function toggleRango() {
             if (chk.checked) {
                 rango.style.display = "none";
-
-                // 🔴 CLAVE: desactivar inputs
                 horaInicio.disabled = true;
                 horaFin.disabled = true;
-
             } else {
                 rango.style.display = "flex";
-
                 horaInicio.disabled = false;
                 horaFin.disabled = false;
             }
@@ -170,7 +193,6 @@
 
         chk.addEventListener("change", toggleRango);
 
-        // Estado inicial
         toggleRango();
     });
 </script>

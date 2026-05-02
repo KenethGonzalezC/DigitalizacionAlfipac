@@ -1,103 +1,151 @@
-﻿/* =========================
-   FONDO GENERAL
-========================= */
-.login-bg {
-    background: linear-gradient( rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55) ), url('/images/logo.jpg') no-repeat center center fixed;
-    background-size: cover;
+﻿/* WRAPPER */
+.login-wrapper {
+    display: flex;
     height: 100vh;
+}
+
+/* LEFT */
+.login-left {
+    flex: 1;
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo {
+    height: 70px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+/* RIGHT */
+.login-right {
+    flex: 1;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* CARD */
+.login-card {
+    width: 100%;
+    max-width: 380px;
+    background: white;
+    padding: 35px;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    animation: fadeInUp 0.5s ease;
+}
+
+/* INPUTS */
+.form-control {
+    border: none;
+    background: #f1f3f5;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 2px rgba(13,110,253,0.2);
+    background: white;
+}
+
+/* PASSWORD BUTTON */
+#togglePassword {
+    position: absolute;
+    right: 10px;
+    top: 38px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* BUTTON */
+.btn-primary {
+    border-radius: 8px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+}
+
+/* CAPS WARNING */
+.caps-warning {
+    display: none;
+    color: #dc3545;
+    font-size: 13px;
+}
+
+/* FOOTER */
+.footer {
+    text-align: center;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+/* SHAKE */
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    50% { transform: translateX(6px); }
+    75% { transform: translateX(-4px); }
+    100% { transform: translateX(0); }
+}
+
+.shake {
+    animation: shake 0.4s;
+}
+
+/* ANIMACIÓN */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .login-left {
+        display: none;
+    }
+}
+
+body, html {
+    height: 100%;
+    margin: 0;
+}
+
+.login-wrapper {
+    display: flex;
+    height: 100vh;
+}
+
+.login-left {
+    flex: 1;
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+    color: white;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-
-/* =========================
-   CONTENEDOR
-========================= */
-.login-container {
-    width: 100%;
-    max-width: 420px;
-    padding: 20px;
+.login-right {
+    flex: 1;
+    background: #f8f9fa;
 }
 
-
-/* =========================
-   TARJETA GLASS
-========================= */
 .login-card {
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-radius: 16px;
-    padding: 35px 30px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255,255,255,0.2);
-    color: white;
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
 }
 
-
-    /* =========================
-   TITULOS
-========================= */
-    .login-card h3 {
-        font-weight: 700;
-        color: #ffffff;
-    }
-
-    .login-card p {
-        color: rgba(255,255,255,0.8);
-    }
-
-
-    /* =========================
-   INPUTS
-========================= */
-    .login-card .form-control {
-        border-radius: 8px;
-        border: none;
-        padding: 10px 12px;
-        background: rgba(255,255,255,0.85);
-        backdrop-filter: blur(4px);
-    }
-
-        .login-card .form-control:focus {
-            box-shadow: 0 0 0 2px rgba(13,110,253,0.25);
-        }
-
-
-    /* =========================
-   BOTÓN
-========================= */
-    .login-card .btn-primary {
-        border-radius: 8px;
-        font-weight: 600;
-        padding: 10px;
-        background: linear-gradient(135deg, #0d6efd, #0b5ed7);
-        border: none;
-        transition: 0.25s;
-    }
-
-        .login-card .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.25);
-        }
-
-
-    /* =========================
-   ALERTAS
-========================= */
-    .login-card .alert {
-        border-radius: 8px;
-    }
-
-
-    /* =========================
-   FOOTER
-========================= */
-    .login-card hr {
-        border-color: rgba(255,255,255,0.3);
-    }
-
-    .login-card .small {
-        color: rgba(255,255,255,0.7);
-    }
+.logo {
+    max-width: 120px;
+}

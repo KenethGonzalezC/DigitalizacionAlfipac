@@ -38,7 +38,7 @@ namespace BitacoraAlfipac.Controllers
             }
 
             var lista = await query
-                .OrderByDescending(x => x.FechaHoraIngreso)
+                .OrderByDescending(x => x.FechaHoraDespacho)
                 .ToListAsync();
 
             ViewBag.Activos = lista

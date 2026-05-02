@@ -60,7 +60,7 @@ public class HistorialContenedoresController : Controller
             query = query.Where(h => h.Contenedor.Contains(contenedor));
 
         var historial = await query
-            .OrderByDescending(h => h.FechaHoraIngreso)
+            .OrderByDescending(h => h.FechaHoraSalida)
             .ToListAsync();
 
         var doc = new HistorialContenedoresPdf(historial, contenedor);

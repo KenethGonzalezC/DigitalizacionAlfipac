@@ -2,229 +2,142 @@
     ViewData["Title"] = "Inicio";
 }
 
-<div class="container mt-4">
+<div class="dashboard">
 
-    <h2 class="mb-4 fw-semibold">
-        Panel principal
-    </h2>
+    <!-- HEADER -->
+    <div class="mb-4">
+        <h2 class="fw-bold">Panel principal</h2>
+        <p class="text-muted mb-0">
+            Accesos rápidos al sistema
+        </p>
+    </div>
 
-    <div class="row g-4">
+    <!-- ACCESOS PRINCIPALES -->
+    <div class="row g-4 mb-4">
 
-        <!-- INVENTARIO -->
-        @if (
-            User.IsInRole("Administrador") ||
-            User.IsInRole("Digitador") ||
-            User.IsInRole("Patio")
-        )
+        @if (User.IsInRole("Administrador") || User.IsInRole("Digitador") || User.IsInRole("Patio"))
         {
             <div class="col-md-6 col-lg-4">
-                <a asp-controller="Inventario"
-                   asp-action="Index"
-                   class="text-decoration-none">
-
-                    <div class="card h-100 shadow-sm dashboard-card">
+                <a asp-controller="Inventario" asp-action="Index" class="dashboard-link">
+                    <div class="card dashboard-main-card">
                         <div class="card-body">
-                            <h5 class="card-title">Inventario de contenedores</h5>
-                            <p class="card-text text-muted">
-                                Registro y control de contenedores almacenados.
-                            </p>
+                            <i class="bi bi-box-seam dashboard-icon"></i>
+                            <h5>Inventario</h5>
+                            <p class="text-muted">Contenedores almacenados</p>
                         </div>
                     </div>
-
                 </a>
             </div>
         }
 
-        <!-- INGRESOS -->
-        @if (
-            User.IsInRole("Administrador") ||
-            User.IsInRole("Digitador")
-        )
+        @if (User.IsInRole("Administrador") || User.IsInRole("Digitador"))
         {
             <div class="col-md-6 col-lg-4">
-                <a asp-controller="BitacoraIngresos"
-                   asp-action="Index"
-                   class="text-decoration-none">
-
-                    <div class="card h-100 shadow-sm dashboard-card">
+                <a asp-controller="BitacoraIngresos" asp-action="Index" class="dashboard-link">
+                    <div class="card dashboard-main-card">
                         <div class="card-body">
-                            <h5 class="card-title">Bitácora de ingresos</h5>
-                            <p class="card-text text-muted">
-                                Registro de ingresos a almacén fiscal.
-                            </p>
+                            <i class="bi bi-arrow-down-circle dashboard-icon text-success"></i>
+                            <h5>Ingresos</h5>
+                            <p class="text-muted">Registrar entradas</p>
                         </div>
                     </div>
-
                 </a>
             </div>
-        }
 
-        <!-- DESPACHOS -->
-        @if (
-            User.IsInRole("Administrador") ||
-            User.IsInRole("Digitador")
-        )
-        {
             <div class="col-md-6 col-lg-4">
-                <a asp-controller="BitacoraDespachos"
-                   asp-action="Index"
-                   class="text-decoration-none">
-
-                    <div class="card h-100 shadow-sm dashboard-card">
+                <a asp-controller="BitacoraDespachos" asp-action="Index" class="dashboard-link">
+                    <div class="card dashboard-main-card">
                         <div class="card-body">
-                            <h5 class="card-title">Bitácora de despachos</h5>
-                            <p class="card-text text-muted">
-                                Control de salidas y despachos autorizados.
-                            </p>
+                            <i class="bi bi-arrow-up-circle dashboard-icon text-danger"></i>
+                            <h5>Despachos</h5>
+                            <p class="text-muted">Registrar salidas</p>
                         </div>
                     </div>
-
-                </a>
-            </div>
-        }
-
-        <!-- TEMPERATURAS -->
-        @if (
-            User.IsInRole("Administrador") ||
-            User.IsInRole("Digitador") ||
-            User.IsInRole("Patio")
-        )
-        {
-            <div class="col-md-6 col-lg-4">
-                <a asp-controller="Temperaturas"
-                   asp-action="Index"
-                   class="text-decoration-none">
-
-                    <div class="card h-100 shadow-sm dashboard-card">
-                        <div class="card-body">
-                            <h5 class="card-title">Temperaturas refrigerados</h5>
-                            <p class="card-text text-muted">
-                                Seguimiento de contenedores refrigerados.
-                            </p>
-                        </div>
-                    </div>
-
-                </a>
-            </div>
-        }
-
-        <!-- Historial de contenedores -->
-        @if (
-                User.IsInRole("Administrador") ||
-                User.IsInRole("Digitador") ||
-                User.IsInRole("Patio")
-                )
-        {
-            <div class="col-md-6 col-lg-4">
-                <a asp-controller="HistorialContenedores"
-                   asp-action="Index"
-                   class="text-decoration-none">
-
-                    <div class="card h-100 shadow-sm dashboard-card">
-                        <div class="card-body">
-                            <h5 class="card-title">Historial de Contenedores</h5>
-                            <p class="card-text text-muted">
-                                Historial de Contenedores.
-                            </p>
-                        </div>
-                    </div>
-
-                </a>
-            </div>
-        }
-
-        <!-- BitacoraGeneral -->
-        @if (
-                User.IsInRole("Administrador") ||
-                User.IsInRole("Digitador")
-                )
-        {
-            <div class="col-md-6 col-lg-4">
-                <a asp-controller="Bitacora"
-                   asp-action="Index"
-                   class="text-decoration-none">
-
-                    <div class="card h-100 shadow-sm dashboard-card">
-                        <div class="card-body">
-                            <h5 class="card-title">Bitácora del día</h5>
-                            <p class="card-text text-muted">
-                                Registro de todos los movimientos del almacén fiscal.
-                            </p>
-                        </div>
-                    </div>
-
-                </a>
-            </div>
-        }
-
-        <!-- Datos -->
-        @if (
-                User.IsInRole("Administrador") ||
-                User.IsInRole("Digitador")
-                )
-        {
-            <div class="col-md-6 col-lg-4">
-                <a asp-controller="Datos"
-                   asp-action="Index"
-                   class="text-decoration-none">
-
-                    <div class="card h-100 shadow-sm dashboard-card">
-                        <div class="card-body">
-                            <h5 class="card-title">Datos</h5>
-                            <p class="card-text text-muted">
-                                Precargar informacion de ingresos y despachos.
-                            </p>
-                        </div>
-                    </div>
-
-                </a>
-            </div>
-        }
-
-        <!-- Actas y Permanencias -->
-        @if (
-                User.IsInRole("Administrador") ||
-                User.IsInRole("Digitador")
-                )
-        {
-            <div class="col-md-6 col-lg-4">
-                <a asp-controller="ActasPermanencias"
-                   asp-action="Index"
-                   class="text-decoration-none">
-
-                    <div class="card h-100 shadow-sm dashboard-card">
-                        <div class="card-body">
-                            <h5 class="card-title">Actas y Permanencias</h5>
-                            <p class="card-text text-muted">
-                                Gestion de Actas y Permanencias.
-                            </p>
-                        </div>
-                    </div>
-
-                </a>
-            </div>
-        }
-
-        <!-- USUARIOS (ADMIN) -->
-        @if (User.IsInRole("Administrador"))
-        {
-            <div class="col-md-6 col-lg-4">
-                <a asp-controller="Usuarios"
-                   asp-action="Index"
-                   class="text-decoration-none">
-
-                    <div class="card h-100 shadow-sm dashboard-card border-danger">
-                        <div class="card-body">
-                            <h5 class="card-title text-danger">Gestión de usuarios</h5>
-                            <p class="card-text text-muted">
-                                Administración de accesos y roles del sistema.
-                            </p>
-                        </div>
-                    </div>
-
                 </a>
             </div>
         }
 
     </div>
+
+    <!-- OPERACIONES -->
+    <div class="mb-3">
+        <h5 class="fw-semibold">Operaciones</h5>
+    </div>
+
+    <div class="row g-3">
+
+        <div class="col-md-6 col-lg-3">
+            <a asp-controller="Temperaturas" asp-action="Index" class="dashboard-link">
+                <div class="card dashboard-small-card">
+                    <div class="card-body">
+                        <i class="bi bi-thermometer-half"></i>
+                        <span>Refrigerados</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <a asp-controller="HistorialContenedores" asp-action="Index" class="dashboard-link">
+                <div class="card dashboard-small-card">
+                    <div class="card-body">
+                        <i class="bi bi-clock-history"></i>
+                        <span>Historial</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        @if (User.IsInRole("Administrador") || User.IsInRole("Digitador"))
+        {
+            <div class="col-md-6 col-lg-3">
+                <a asp-controller="Bitacora" asp-action="Index" class="dashboard-link">
+                    <div class="card dashboard-small-card">
+                        <div class="card-body">
+                            <i class="bi bi-journal-text"></i>
+                            <span>Bitácora</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <a asp-controller="Datos" asp-action="Index" class="dashboard-link">
+                    <div class="card dashboard-small-card">
+                        <div class="card-body">
+                            <i class="bi bi-database"></i>
+                            <span>Datos</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <a asp-controller="ActasPermanencias" asp-action="Index" class="dashboard-link">
+                    <div class="card dashboard-small-card">
+                        <div class="card-body">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <span>Actas</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+
+        @if (User.IsInRole("Administrador"))
+        {
+            <div class="col-md-6 col-lg-3">
+                <a asp-controller="Usuarios" asp-action="Index" class="dashboard-link">
+                    <div class="card dashboard-small-card border-danger">
+                        <div class="card-body text-danger">
+                            <i class="bi bi-people"></i>
+                            <span>Usuarios</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+
+    </div>
+
 </div>

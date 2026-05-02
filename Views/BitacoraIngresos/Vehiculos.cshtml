@@ -1,223 +1,226 @@
 ﻿@model List<BitacoraAlfipac.Models.Entidades.Vehiculo>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>🚗 Vehículos en almacén</h3>
+<div class="container-fluid py-4">
 
-    <div>
-        <span class="badge bg-primary">
-            Activos: @Model.Count(v => v.Activo)
-        </span>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-0">🚗 Vehículos en almacén</h2>
+            <small class="text-muted">Control de ingresos y despachos</small>
+        </div>
 
-        <span class="badge bg-secondary">
-            Total: @Model.Count()
-        </span>
-    </div>
-</div>
-
-<input type="text" id="buscador" class="form-control mb-3"
-       placeholder="🔍 Buscar VIN, modelo o cliente" />
-
-<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-
-    <!-- IZQUIERDA -->
-    <div>
-        <button class="btn btn-success"
-                data-bs-toggle="modal"
-                data-bs-target="#modalVehiculoManual">
-            <i class="bi bi-plus-circle"></i> Agregar vehículo
-        </button>
+        <div class="d-flex gap-2">
+            <span class="badge bg-success">
+                Activos: @Model.Count(v => v.Activo)
+            </span>
+            <span class="badge bg-secondary">
+                Total: @Model.Count()
+            </span>
+        </div>
     </div>
 
-    <!-- DERECHA -->
-    <div class="d-flex gap-2">
+    <!-- ACCIONES -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex flex-wrap gap-3 justify-content-between align-items-center">
 
-        <form asp-action="ExportarVehiculosPDF" method="post" class="m-0">
-            <button class="btn btn-danger">
-                <i class="bi bi-file-earmark-pdf"></i> PDF
-            </button>
-        </form>
+            <div class="flex-grow-1">
+                <input type="text" id="buscador" class="form-control"
+                       placeholder="🔍 Buscar VIN, modelo o cliente..." />
+            </div>
 
-        <form asp-action="ExportarVehiculosExcel" method="post" class="m-0">
-            <button class="btn btn-success">
-                <i class="bi bi-file-earmark-excel"></i> Excel
-            </button>
-        </form>
+            <div class="d-flex gap-2">
 
+                <button class="btn btn-success"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalVehiculoManual">
+                    ➕ Agregar
+                </button>
+
+                <form asp-action="ExportarVehiculosPDF" method="post" class="m-0">
+                    <button class="btn btn-danger">📄 PDF</button>
+                </form>
+
+                <form asp-action="ExportarVehiculosExcel" method="post" class="m-0">
+                    <button class="btn btn-success">📊 Excel</button>
+                </form>
+
+            </div>
+        </div>
     </div>
 
-</div>
+    <!-- TABLA -->
+    <div class="card shadow-sm">
+        <div class="card-body">
 
-<div class="card p-3">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle table-striped" id="tablaVehiculos">
 
-    <table class="table table-bordered table-sm" id="tablaVehiculos">
-        <thead class="table-light">
-            <tr>
-                <th>Ingreso</th>
-                <th>Vehículo</th>
-                <th>VIN COMPLETO</th>
-                <th>VIN (CHASIS)</th>                
-                <th>Cliente</th>
-                <th>Estado</th>
-                <th class="text-center">Acciones</th>
-            </tr>
-        </thead>
+                    <thead class="table-light text-center">
+                        <tr>
+                            <th>Ingreso</th>
+                            <th>Vehículo</th>
+                            <th>VIN Completo</th>
+                            <th>Chasis</th>
+                            <th>Cliente</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
 
-        <tbody>
-            @foreach (var v in Model)
-            {
-                <tr class="@(v.Activo ? "" : "table-secondary")">
-
-                    <td>@v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td>@v.Contenedor</td>
-                    <td>@v.Marchamos</td>
-                    <td>@v.Chasis</td>                    
-                    <td>@v.Cliente</td>
-
-                    <td>
-                        @if (v.Activo)
+                    <tbody>
+                        @if (!Model.Any())
                         {
-                            <span class="badge bg-success">Activo</span>
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">
+                                    Sin registros
+                                </td>
+                            </tr>
                         }
                         else
                         {
-                            <span class="badge bg-danger">Despachado</span>
-                        }
-                    </td>
-
-                    <td class="text-center">
-                        <div class="d-flex justify-content-center gap-2">
-
-                            @if (v.Activo)
+                            foreach (var v in Model)
                             {
-                                <a class="btn btn-success btn-sm"
-                                       asp-controller="BitacoraDespachos"
-                                       asp-action="Index"
-                                       asp-route-contenedor="@v.Contenedor"
-                                       asp-route-marchamos="@v.Marchamos"
-                                       asp-route-cliente="@v.Cliente"
-                                       asp-route-chasis="@v.Chasis">
-                                    Despachar
-                                </a>
+                                <tr class="@(v.Activo ? "" : "table-secondary")">
+
+                                    <td class="text-nowrap">
+                                        @v.FechaHoraIngreso.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+
+                                    <td class="fw-semibold">@v.Contenedor</td>
+                                    <td>@v.Marchamos</td>
+                                    <td>@v.Chasis</td>
+                                    <td>@v.Cliente</td>
+
+                                    <td class="text-center">
+                                        <span class="badge @(v.Activo ? "bg-success" : "bg-danger")">
+                                            @(v.Activo ? "Activo" : "Despachado")
+                                        </span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+
+                                            @if (v.Activo)
+                                            {
+                                                <a class="btn btn-sm btn-success"
+                                                       asp-controller="BitacoraDespachos"
+                                                       asp-action="Index"
+                                                       asp-route-contenedor="@v.Contenedor"
+                                                       asp-route-marchamos="@v.Marchamos"
+                                                       asp-route-cliente="@v.Cliente"
+                                                       asp-route-chasis="@v.Chasis">
+                                                    Despachar
+                                                </a>
+                                            }
+
+                                            <button class="btn btn-sm btn-outline-primary btnEditarVehiculo"
+                                                    data-id="@v.Id"
+                                                    data-contenedor="@v.Contenedor"
+                                                    data-chasis="@v.Chasis"
+                                                    data-marchamos="@v.Marchamos"
+                                                    data-cliente="@v.Cliente"
+                                                    data-transportista="@v.Transportista"
+                                                    data-chofer="@v.Chofer"
+                                                    data-placa="@v.PlacaCabezal"
+                                                    data-viaje="@v.ViajeDua"
+                                                    data-fechaingreso="@v.FechaHoraIngreso.ToString("yyyy-MM-ddTHH:mm")"
+                                                    data-activo="@v.Activo.ToString().ToLower()">
+                                                ✏️
+                                            </button>
+
+                                            <form asp-action="EliminarVehiculo"
+                                                  method="post"
+                                                  class="m-0"
+                                                  onsubmit="return confirm('¿Seguro que deseas eliminar este vehículo?');">
+
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@v.Id" />
+
+                                                <button class="btn btn-sm btn-danger">
+                                                    🗑
+                                                </button>
+                                            </form>
+
+                                        </div>
+                                    </td>
+
+                                </tr>
                             }
+                        }
+                    </tbody>
 
-                            <form asp-action="EliminarVehiculo"
-                                  method="post"
-                                  class="m-0"
-                                  onsubmit="return confirm('¿Seguro que deseas eliminar este vehículo?');">
+                </table>
+            </div>
 
-                                @Html.AntiForgeryToken()
-
-                                <input type="hidden" name="id" value="@v.Id" />
-
-                                <button class="btn btn-danger btn-sm">
-                                    Eliminar
-                                </button>
-                            </form>
-
-                            <button class="btn btn-warning btn-sm btnEditarVehiculo"
-                                    data-id="@v.Id"
-                                    data-contenedor="@v.Contenedor"
-                                    data-chasis="@v.Chasis"
-                                    data-marchamos="@v.Marchamos"
-                                    data-cliente="@v.Cliente"
-                                    data-transportista="@v.Transportista"
-                                    data-chofer="@v.Chofer"
-                                    data-placa="@v.PlacaCabezal"
-                                    data-viaje="@v.ViajeDua"
-                                    data-fechaingreso="@v.FechaHoraIngreso.ToString("yyyy-MM-ddTHH:mm")"
-                                    data-activo="@v.Activo.ToString().ToLower()">
-                                Editar
-                            </button>
-
-                        </div>
-                    </td>
-
-                </tr>
-            }
-        </tbody>
-    </table>
+        </div>
+    </div>
 
 </div>
 
-<script>
-    document.getElementById("buscador").addEventListener("keyup", function () {
-        let filtro = this.value.toLowerCase();
-        let filas = document.querySelectorAll("#tablaVehiculos tbody tr");
-
-        filas.forEach(f => {
-            let texto = f.innerText.toLowerCase();
-            f.style.display = texto.includes(filtro) ? "" : "none";
-        });
-    });
-</script>
-
+<!-- ================= MODAL CREAR ================= -->
 <div class="modal fade" id="modalVehiculoManual" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content shadow">
 
             <form asp-action="CrearVehiculoManual" method="post">
                 @Html.AntiForgeryToken()
 
-                <!-- HEADER -->
                 <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title">Registrar vehículo manual</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title">➕ Registrar vehículo</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
-                <!-- BODY -->
                 <div class="modal-body">
 
                     <div class="row g-3">
 
                         <div class="col-md-4">
-                            <label>Contenedor (Modelo)</label>
+                            <label class="form-label">Modelo</label>
                             <input name="contenedor" class="form-control" required />
                         </div>
-                                                
+
                         <div class="col-md-4">
-                            <label>Marchamos (VIN COMPLETO)</label>
+                            <label class="form-label">VIN completo</label>
                             <input name="marchamos" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Cliente</label>
+                            <label class="form-label">Cliente</label>
                             <input name="cliente" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Transportista</label>
+                            <label class="form-label">Transportista</label>
                             <input name="transportista" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Chofer</label>
+                            <label class="form-label">Chofer</label>
                             <input name="chofer" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Placa cabezal</label>
+                            <label class="form-label">Placa</label>
                             <input name="placaCabezal" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Chasis (VIN)</label>
+                            <label class="form-label">VIN/CHASIS</label>
                             <input name="chasis" class="form-control" required />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Viaje / DUA</label>
+                            <label class="form-label">Viaje / DUA</label>
                             <input name="viajeDua" class="form-control" />
                         </div>
 
-                        <!-- 🔥 CAMPOS EXTRA DEL MODELO -->
-
                         <div class="col-md-4">
-                            <label>Fecha ingreso</label>
+                            <label class="form-label">Fecha ingreso</label>
                             <input name="fechaHoraIngreso" type="datetime-local" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Tamaño</label>
+                            <label class="form-label">Tipo</label>
                             <input name="tamano" class="form-control" value="VEHICULO" />
                         </div>
 
@@ -230,14 +233,13 @@
 
                 </div>
 
-                <!-- FOOTER -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         Cancelar
                     </button>
 
-                    <button type="submit" class="btn btn-success">
-                        Guardar vehículo
+                    <button class="btn btn-success">
+                        Guardar
                     </button>
                 </div>
 
@@ -247,15 +249,16 @@
     </div>
 </div>
 
+<!-- ================= MODAL EDITAR ================= -->
 <div class="modal fade" id="modalEditarVehiculo" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content shadow">
 
             <form asp-action="EditarVehiculo" method="post">
                 @Html.AntiForgeryToken()
 
                 <div class="modal-header bg-warning">
-                    <h5 class="modal-title">Editar vehículo</h5>
+                    <h5 class="modal-title">✏️ Editar vehículo</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
@@ -266,47 +269,47 @@
                     <div class="row g-3">
 
                         <div class="col-md-4">
-                            <label>Contenedor (MODELO)</label>
+                            <label class="form-label">Modelo</label>
                             <input id="editContenedor" name="contenedor" class="form-control" />
-                        </div>                     
+                        </div>
 
                         <div class="col-md-4">
-                            <label>Marchamos (VIN COMPLETO)</label>
+                            <label class="form-label">VIN completo</label>
                             <input id="editMarchamos" name="marchamos" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Cliente</label>
+                            <label class="form-label">Cliente</label>
                             <input id="editCliente" name="cliente" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Transportista</label>
+                            <label class="form-label">Transportista</label>
                             <input id="editTransportista" name="transportista" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Chofer</label>
+                            <label class="form-label">Chofer</label>
                             <input id="editChofer" name="chofer" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Placa</label>
+                            <label class="form-label">Placa</label>
                             <input id="editPlaca" name="placaCabezal" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Chasis(VIN)</label>
+                            <label class="form-label">Chasis</label>
                             <input id="editChasis" name="chasis" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Viaje / DUA</label>
+                            <label class="form-label">Viaje / DUA</label>
                             <input id="editViaje" name="viajeDua" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Fecha y Hora de Ingreso</label>
+                            <label class="form-label">Fecha ingreso</label>
                             <input type="datetime-local"
                                    id="editFechaIngreso"
                                    name="fechaHoraIngreso"
@@ -324,7 +327,9 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-warning">Guardar cambios</button>
+                    <button class="btn btn-warning">
+                        Guardar cambios
+                    </button>
                 </div>
 
             </form>
@@ -332,6 +337,18 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById("buscador").addEventListener("keyup", function () {
+        let filtro = this.value.toLowerCase();
+        let filas = document.querySelectorAll("#tablaVehiculos tbody tr");
+
+        filas.forEach(f => {
+            let texto = f.innerText.toLowerCase();
+            f.style.display = texto.includes(filtro) ? "" : "none";
+        });
+    });
+</script>
 
 <script>
     document.querySelectorAll(".btnEditarVehiculo").forEach(btn => {

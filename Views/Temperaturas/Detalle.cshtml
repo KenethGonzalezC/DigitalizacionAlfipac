@@ -1,206 +1,337 @@
 ﻿@model BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado
 
-<h3 class="mb-3">
-    Contenedor refrigerado
-</h3>
+<div class="container mt-4">
 
-<form asp-action="ActualizarEncabezado" method="post" class="card p-3 mb-4">
-    <input type="hidden" name="Id" value="@Model.Id" />
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
 
-    <div class="row g-3">
-
-        <div class="col-md-4">
-            <label class="form-label">Contenedor</label>
-            <input type="text"
-                   name="Contenedor"
-                   class="form-control"
-                   value="@Model.Contenedor"
-                   required />
+        <div>
+            <h3 class="mb-0">❄️ Contenedor Refrigerado</h3>
+            <small class="text-muted">Gestión de temperatura y control operativo</small>
         </div>
 
-        <div class="col-md-4">
-            <label class="form-label">Fecha / Hora Ingreso</label>
-            <input type="datetime-local"
-                   name="FechaHoraIngreso"
-                   class="form-control"
-                   value="@Model.FechaHoraIngreso?.ToString("yyyy-MM-ddTHH:mm")" />
-        </div>
-
-        <div class="col-md-4">
-            <label class="form-label">Fecha / Hora Conexión</label>
-            <input type="datetime-local"
-                   name="FechaHoraConexion"
-                   class="form-control"
-                   value="@Model.FechaHoraConexion?.ToString("yyyy-MM-ddTHH:mm")" />
-        </div>
-
-        <div class="col-md-4">
-            <label class="form-label">Set Point (°C)</label>
-            <input type="number"
-                   step="0.1"
-                   name="SetPoint"
-                   class="form-control"
-                   value="@Model.SetPoint?.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)" />
-        </div>
-
-        @if (Model.SetPoint != null)
-        {
-            <small class="text-muted">
-                SetPoint actual: <strong>@Model.SetPoint.Value.ToString("0.0") °C</strong>
-            </small>
-        }
-
-        <div class="col-md-4">
-            <label class="form-label">Fecha / Hora Despacho</label>
-            <input type="datetime-local"
-                   name="FechaHoraDespacho"
-                   class="form-control"
-                   value="@Model.FechaHoraDespacho?.ToString("yyyy-MM-ddTHH:mm")" />
-        </div>
-
-        <div class="col-md-4">
-            <label class="form-label">Fecha / Hora Desconexión</label>
-            <input type="datetime-local"
-                   name="FechaHoraDesconexion"
-                   class="form-control"
-                   value="@Model.FechaHoraDesconexion?.ToString("yyyy-MM-ddTHH:mm")" />
-        </div>
-
-    </div>
-
-    <div class="mt-3 d-flex gap-2">
-        <button type="submit" class="btn btn-primary">
-            Guardar cambios
-        </button>
-
-        <a asp-action="Index" class="btn btn-secondary">
-            Volver
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            ← Volver
         </a>
+
     </div>
-</form>
 
-<div class="d-flex gap-2 mb-3">
-    <h2>Exportar temperaturas</h2>
-
-    <a asp-action="ExportarPdf" asp-route-id="@Model.Id" class="btn btn-danger">
-        PDF
-    </a>
-    <a asp-action="ExportarExcel" asp-route-id="@Model.Id" class="btn btn-success">
-        Excel
-    </a>
-    <a asp-action="ExportarCsv" asp-route-id="@Model.Id" class="btn btn-secondary">
-        CSV
-    </a>
-</div>
-
-<div class="card p-3 mb-3">
-    <h5>Nuevo registro de temperatura</h5>
-
-    <form asp-action="AgregarRegistro" method="post">
-        <input type="hidden" name="contenedorId" value="@Model.Id" />
-
-        <div class="row g-2">
-            <div class="col-md-3">
-                <input name="fechaHora" type="datetime-local" class="form-control" required />
-            </div>
-            <div class="col-md-2">
-                <input name="temperatura" class="form-control" placeholder="°C" type="number" step="0.1" required />
-            </div>
-            <div class="col-md-5">
-                <input name="observacion" class="form-control" placeholder="Observación" />
-            </div>
-            <div class="col-md-2">
-                <button class="btn btn-success w-100">Agregar</button>
-            </div>
+    <!-- ALERTS -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success shadow-sm">
+            @TempData["Success"]
         </div>
-    </form>
-</div>
+    }
 
-<table class="table table-sm table-bordered">
-    <thead class="table-light">
-        <tr>
-            <th>Fecha / Hora</th>
-            <th>Temperatura</th>
-            <th>Observación</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var r in Model.RegistrosTemperatura.OrderByDescending(r => r.FechaHora))
-        {
-            <tr>
-                <td>@r.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
-                <td>@r.Temperatura.ToString("0.0") °C</td>
-                <td>@r.Observacion</td>
-                <td class="text-center">
-                    <div class="d-flex justify-content-center gap-2">
+    <!-- ENCABEZADO / EDIT -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white">
+            <strong>📦 Información del contenedor</strong>
+        </div>
 
-                        <form asp-action="EliminarRegistro" method="post" class="m-0">
-                            <input type="hidden" name="id" value="@r.Id" />
-                            <input type="hidden" name="contenedorId" value="@Model.Id" />
-                            <button type="submit"
-                                    class="btn btn-danger btn-sm"
-                                    onclick="return confirm('¿Eliminar este registro de temperatura?')">
-                                <i class="bi bi-x">✖️</i>
-                            </button>
-                        </form>
+        <div class="card-body">
 
-                        <button type="button"
-                                class="btn btn-warning btn-sm btnEditarRegistro"
-                                data-id="@r.Id"
-                                data-fecha="@r.FechaHora.ToString("yyyy-MM-ddTHH:mm")"
-                                data-temperatura="@r.Temperatura"
-                                data-observacion="@r.Observacion">
-                            <i class="bi bi-pencil">✏️</i>
+            <form asp-action="ActualizarEncabezado" method="post">
+
+                <input type="hidden" name="Id" value="@Model.Id" />
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label">Contenedor</label>
+                        <input type="text"
+                               name="Contenedor"
+                               class="form-control"
+                               value="@Model.Contenedor"
+                               required />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Ingreso</label>
+                        <input type="datetime-local"
+                               name="FechaHoraIngreso"
+                               class="form-control"
+                               value="@Model.FechaHoraIngreso?.ToString("yyyy-MM-ddTHH:mm")" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Conexión</label>
+                        <input type="datetime-local"
+                               name="FechaHoraConexion"
+                               class="form-control"
+                               value="@Model.FechaHoraConexion?.ToString("yyyy-MM-ddTHH:mm")" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Set Point (°C)</label>
+                        <input type="number"
+                               step="0.1"
+                               name="SetPoint"
+                               class="form-control"
+                               value="@Model.SetPoint?.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Despacho</label>
+                        <input type="datetime-local"
+                               name="FechaHoraDespacho"
+                               class="form-control"
+                               value="@Model.FechaHoraDespacho?.ToString("yyyy-MM-ddTHH:mm")" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Desconexión</label>
+                        <input type="datetime-local"
+                               name="FechaHoraDesconexion"
+                               class="form-control"
+                               value="@Model.FechaHoraDesconexion?.ToString("yyyy-MM-ddTHH:mm")" />
+                    </div>
+
+                </div>
+
+                <div>
+                    @if (Model.SetPoint != null)
+                    {
+                        <small class="text-muted">
+                            SetPoint actual: <strong>@Model.SetPoint.Value.ToString("0.0") °C</strong>
+                        </small>
+                    }
+                </div>
+
+                <div class="mt-3 d-flex gap-2">
+                    <button class="btn btn-primary">
+                        💾 Guardar cambios
+                    </button>
+
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        Cancelar
+                    </a>
+                </div>
+                
+            </form>
+
+        </div>
+    </div>
+
+    <!-- EXPORT -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body d-flex flex-wrap gap-2">
+
+            <strong class="me-2">📤 Exportar:</strong>
+
+            <a asp-action="ExportarPdf" asp-route-id="@Model.Id" class="btn btn-danger btn-sm">
+                PDF
+            </a>
+
+            <a asp-action="ExportarExcel" asp-route-id="@Model.Id" class="btn btn-success btn-sm">
+                Excel
+            </a>
+
+            <a asp-action="ExportarCsv" asp-route-id="@Model.Id" class="btn btn-secondary btn-sm">
+                CSV
+            </a>
+
+        </div>
+    </div>
+
+    <!-- NUEVO REGISTRO -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-header bg-white">
+            <strong>🌡️ Registro de temperatura</strong>
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="AgregarRegistro" method="post">
+
+                <input type="hidden" name="contenedorId" value="@Model.Id" />
+
+                <div class="row g-2 align-items-end">
+
+                    <div class="col-md-3">
+                        <label class="form-label">Fecha</label>
+                        <input name="fechaHora"
+                               type="datetime-local"
+                               class="form-control"
+                               required />
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label">Temp (°C)</label>
+                        <input name="temperatura"
+                               class="form-control"
+                               type="number"
+                               step="0.1"
+                               required />
+                    </div>
+
+                    <div class="col-md-5">
+                        <label class="form-label">Observación</label>
+                        <input name="observacion"
+                               class="form-control"
+                               placeholder="Opcional" />
+                    </div>
+
+                    <div class="col-md-2 d-grid">
+                        <label class="form-label invisible">add</label>
+                        <button class="btn btn-success">
+                            ➕ Agregar
                         </button>
-
-                    </div>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<div class="modal fade" id="modalEditarRegistro" tabindex="-1">
-    <div class="modal-dialog modal-md modal-dialog-centered">
-        <div class="modal-content">
-
-            <form asp-action="EditarRegistro" method="post">
-                @Html.AntiForgeryToken()
-
-                <div class="modal-header bg-warning">
-                    <h5 class="modal-title">Editar registro</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-
-                    <input type="hidden" id="editIdRegistro" name="id" />
-
-                    <div class="mb-3">
-                        <label>Fecha y hora</label>
-                        <input type="datetime-local" id="editFechaRegistro" name="fechaHora" class="form-control" required />
                     </div>
 
-                    <div class="mb-3">
-                        <label>Temperatura (°C)</label>
-                        <input type="number" step="0.1" id="editTempRegistro" name="temperatura" class="form-control" required />
-                    </div>
-
-                    <div class="mb-3">
-                        <label>Observación (opcional)</label>
-                        <textarea id="editObsRegistro" name="observacion" class="form-control"></textarea>
-                    </div>
-
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-warning">Guardar cambios</button>
                 </div>
 
             </form>
 
         </div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-white">
+            <strong>📊 Historial de temperaturas</strong>
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+                <table class="table table-hover table-striped table-sm align-middle mb-0">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Temp</th>
+                            <th>Obs</th>
+                            <th style="width:120px;"></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var r in Model.RegistrosTemperatura.OrderByDescending(r => r.FechaHora))
+                        {
+                            <tr>
+                                <td>@r.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="fw-semibold">
+                                    @r.Temperatura.ToString("0.0") °C
+                                </td>
+                                <td>@r.Observacion</td>
+                                <td>
+                                    <div class="d-flex gap-2 justify-content-end">
+
+                                        <form asp-action="EliminarRegistro" method="post"
+                                            onsubmit="return confirm('¿Eliminar temperatura?')">
+
+                                            <input type="hidden" name="id" value="@r.Id" />
+                                            <input type="hidden" name="contenedorId" value="@Model.Id" />
+
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                ✖
+                                            </button>
+                                        </form>
+
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-warning btnEditarRegistro"
+                                                data-id="@r.Id"
+                                                data-fecha="@r.FechaHora.ToString("yyyy-MM-ddTHH:mm")"
+                                                data-temperatura="@r.Temperatura"
+                                                data-observacion="@r.Observacion">
+                                            ✏️
+                                        </button>
+
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="modalEditarRegistro" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content shadow">
+
+            <form asp-action="EditarRegistro" method="post">
+                @Html.AntiForgeryToken()
+
+                <!-- HEADER -->
+                <div class="modal-header bg-warning-subtle">
+                    <div>
+                        <h5 class="modal-title mb-0">✏️ Editar registro</h5>
+                        <small class="text-muted">Modificar datos de temperatura</small>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- BODY -->
+                <div class="modal-body">
+
+                    <input type="hidden" id="editIdRegistro" name="id" />
+
+                    <div class="row g-3">
+
+                        <div class="col-12">
+                            <label class="form-label">Fecha y hora</label>
+                            <input type="datetime-local"
+                                   id="editFechaRegistro"
+                                   name="fechaHora"
+                                   class="form-control"
+                                   required />
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Temperatura (°C)</label>
+                            <input type="number"
+                                   step="0.1"
+                                   id="editTempRegistro"
+                                   name="temperatura"
+                                   class="form-control"
+                                   required />
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Observación</label>
+                            <textarea id="editObsRegistro"
+                                      name="observacion"
+                                      class="form-control"
+                                      rows="3"
+                                      placeholder="Opcional"></textarea>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- FOOTER -->
+                <div class="modal-footer d-flex justify-content-between">
+
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <button class="btn btn-warning">
+                        💾 Guardar cambios
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
     </div>
 </div>
 

@@ -2,22 +2,30 @@
 @using BitacoraAlfipac.Models.ViewModels
 @model List<InventarioItemVM>
 
+@{
+    ViewData["Title"] = "Contenedores Vacíos";
+}
+
 <div class="container mt-4">
 
-    <h3 class="mb-3 text-success">Contenedores Vacíos</h3>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
 
-    <h5></h5>
+        <div>
+            <h3 class="text-success mb-0">📦 Contenedores Vacíos</h3>
+            <small class="text-muted">Gestión de inventario sin carga</small>
+        </div>
 
-    <div>
         <a asp-controller="Vacios"
                asp-action="Historial"
-               class="btn btn-dark mb-3">
+               class="btn btn-dark">
             📚 Historial Reportes
         </a>
+
     </div>
 
-    <!-- 🔎 FILTROS -->
-    <form method="get" class="card p-3 mb-3 shadow-sm">
+    <!-- ================= FILTROS ================= -->
+    <form method="get" class="card shadow-sm p-3 mb-3">
 
         <div class="row g-2">
 
@@ -64,67 +72,78 @@
 
     </form>
 
-    <!-- 📊 TABLA -->
-    <div class="card p-3 shadow-sm">
+    <!-- ================= TABLA ================= -->
+    <div class="card shadow-sm">
 
-        <table class="table table-bordered table-sm align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Contenedor</th>
-                    <th>Marchamos</th>
-                    <th>Tamaño</th>
-                    <th>Chasis</th>
-                    <th>Transportista</th>
-                    <th>Cliente</th>
-                    <th class="text-center">Ubicación</th>
-                    <th>Reportar</th>
-                </tr>
-            </thead>
+        <div class="card-header bg-light">
+            <strong>Listado de contenedores</strong>
+        </div>
 
-            <tbody>
-                @if (!Model.Any())
-                {
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-4">
-                            No hay contenedores vacíos con los filtros aplicados
-                        </td>
+                        <th>Contenedor</th>
+                        <th>Marchamos</th>
+                        <th>Tamaño</th>
+                        <th>Chasis</th>
+                        <th>Transportista</th>
+                        <th>Cliente</th>
+                        <th class="text-center">Ubicación</th>
+                        <th class="text-center">Acción</th>
                     </tr>
-                }
-                else
-                {
-                    foreach (var v in Model)
+                </thead>
+
+                <tbody>
+
+                    @if (!Model.Any())
                     {
                         <tr>
-                            <td class="fw-semibold">@v.Contenedor</td>
-                            <td>@v.Marchamos</td>
-                            <td>@v.Tamano</td>
-                            <td>@v.Chasis</td>
-                            <td>@v.Transportista</td>
-                            <td>@v.Cliente</td>
-
-                            <td class="text-center">
-                                <span class="badge bg-secondary">@v.Patio</span>
-                            </td>
-
-                            <td>
-                                <button class="btn btn-sm btn-primary btnReportarVacio"
-                                        data-contenedor="@v.Contenedor"
-                                        data-cliente="@v.Cliente"
-                                        data-transportista="@v.Transportista">
-                                    📄 Reporte
-                                </button>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                No hay contenedores vacíos con los filtros aplicados
                             </td>
                         </tr>
                     }
-                }
-            </tbody>
+                    else
+                    {
+                        foreach (var v in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@v.Contenedor</td>
+                                <td>@v.Marchamos</td>
+                                <td>@v.Tamano</td>
+                                <td>@v.Chasis</td>
+                                <td>@v.Transportista</td>
+                                <td>@v.Cliente</td>
 
-        </table>
+                                <td class="text-center">
+                                    <span class="badge bg-secondary">@v.Patio</span>
+                                </td>
 
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-primary btnReportarVacio"
+                                            data-contenedor="@v.Contenedor"
+                                            data-cliente="@v.Cliente"
+                                            data-transportista="@v.Transportista">
+                                        📄 Reporte
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
     </div>
 
 </div>
 
+<!-- ================= MODAL REPORTE ================= -->
 <div class="modal fade" id="modalReporteVacio" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -133,23 +152,20 @@
                   method="post"
                   target="_blank"
                   id="formReporte">
+
                 @Html.AntiForgeryToken()
 
-                <!-- HEADER -->
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">Generar reporte de vacío</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
-                <!-- BODY -->
                 <div class="modal-body">
 
-                    <!-- hidden -->
                     <input type="hidden" id="repContenedor" name="contenedor" />
                     <input type="hidden" id="repCliente" name="cliente" />
                     <input type="hidden" id="repTransportista" name="transportista" />
 
-                    <!-- consecutivo -->
                     <div class="mb-3">
                         <label class="form-label">Consecutivo</label>
                         <input id="txtConsecutivo"
@@ -158,7 +174,6 @@
                                required />
                     </div>
 
-                    <!-- activar multi -->
                     <div class="form-check mb-3">
                         <input type="checkbox" id="chkMulti" class="form-check-input" />
                         <label class="form-check-label">
@@ -166,7 +181,6 @@
                         </label>
                     </div>
 
-                    <!-- lista -->
                     <div id="multiContainer"
                          class="border rounded p-2"
                          style="display:none; max-height:200px; overflow-y:auto;">
@@ -193,7 +207,6 @@
 
                 </div>
 
-                <!-- FOOTER -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         Cancelar
@@ -208,6 +221,174 @@
         </div>
     </div>
 </div>
+
+<!-- ================= HISTORIAL ================= -->
+<hr />
+
+<h4 class="mt-4 text-primary">📊 Reportes emitidos hoy</h4>
+
+<div class="table-responsive">
+
+    <table class="table table-sm table-bordered align-middle">
+
+        <thead class="table-light">
+            <tr>
+                <th>Hora</th>
+                <th>Contenedor</th>
+                <th>Cliente</th>
+                <th>Transportista</th>
+                <th>Consecutivo</th>
+                <th>Usuario</th>
+                <th>PDF</th>
+                <th>Editar</th>
+                <th>Eliminar</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var r in (List<Vacio>)ViewBag.HistorialHoy)
+            {
+                <tr>
+                    <td>@r.Fecha.ToString("HH:mm")</td>
+                    <td>@r.Contenedor</td>
+                    <td>@r.Cliente</td>
+                    <td>@r.Transportista</td>
+                    <td>@r.Consecutivo</td>
+                    <td>@r.Usuario</td>
+
+                    <td>
+                        <a asp-action="Reimprimir"
+                               asp-route-id="@r.Id"
+                               target="_blank"
+                               class="btn btn-sm btn-outline-primary">
+                            PDF
+                        </a>
+                    </td>
+
+                    <td>
+                        <button type="button"
+                                class="btn btn-warning btn-sm btnEditarVacio"
+                                data-id="@r.Id"
+                                data-fecha="@r.Fecha.ToString("yyyy-MM-ddTHH:mm")"
+                                data-contenedor="@r.Contenedor"
+                                data-cliente="@r.Cliente"
+                                data-transportista="@r.Transportista"
+                                data-consecutivo="@r.Consecutivo"
+                                data-usuario="@r.Usuario">
+                            ✏️
+                        </button>
+                    </td>
+
+                    <td>
+                        <form asp-action="EliminarRegistroVacio" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@r.Id" />
+                            <button class="btn btn-sm btn-danger">🗑</button>
+                        </form>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+
+    </table>
+
+</div>
+
+<!-- ================= MODAL EDITAR ================= -->
+<div class="modal fade" id="modalEditarVacio" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <form asp-action="EditarHistorial" method="post">
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" id="editOrigen" name="origen" />
+
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">Editar reporte de vacío</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden" id="editId" name="Id" />
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label>Fecha</label>
+                            <input type="datetime-local" id="editFecha" name="Fecha" class="form-control" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Consecutivo</label>
+                            <input type="text" id="editConsecutivo" name="Consecutivo" class="form-control" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Contenedor</label>
+                            <input type="text" id="editContenedor" name="Contenedor" class="form-control" readonly />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Cliente</label>
+                            <input type="text" id="editCliente" name="Cliente" class="form-control" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Transportista</label>
+                            <input type="text" id="editTransportista" name="Transportista" class="form-control" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label>Usuario</label>
+                            <input type="text" id="editUsuario" name="Usuario" class="form-control" />
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-success">Guardar</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        document.querySelectorAll(".btnEditarVacio").forEach(btn => {
+
+            btn.addEventListener("click", function () {
+
+                document.getElementById("editOrigen").value = "Index";
+
+                document.getElementById("editId").value = this.dataset.id;
+                document.getElementById("editFecha").value = this.dataset.fecha;
+                document.getElementById("editConsecutivo").value = this.dataset.consecutivo;
+                document.getElementById("editContenedor").value = this.dataset.contenedor;
+                document.getElementById("editCliente").value = this.dataset.cliente;
+                document.getElementById("editTransportista").value = this.dataset.transportista;
+                document.getElementById("editUsuario").value = this.dataset.usuario;
+
+                var modal = new bootstrap.Modal(
+                    document.getElementById("modalEditarVacio")
+                );
+
+                modal.show();
+            });
+
+        });
+
+    });
+</script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -292,205 +473,6 @@
         setTimeout(() => {
             window.location.reload();
         }, 1000);
-
-    });
-</script>
-
-<hr />
-
-<h4 class="mt-4 text-primary">Reportes emitidos hoy</h4>
-
-<table class="table table-sm table-bordered">
-    <thead class="table-light">
-        <tr>
-            <th>Hora</th>
-            <th>Contenedor</th>
-            <th>Cliente</th>
-            <th>Transportista</th>
-            <th>Consecutivo</th>
-            <th>Usuario</th>
-            <th>Reimprimir</th>
-            <th>Editar</th>
-            <th>Eliminar</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var r in (List<Vacio>)ViewBag.HistorialHoy)
-        {
-            <tr>
-                <td>@r.Fecha.ToString("HH:mm")</td>
-                <td>@r.Contenedor</td>
-                <td>@r.Cliente</td>
-                <td>@r.Transportista</td>
-                <td>@r.Consecutivo</td>
-                <td>@r.Usuario</td>
-                <td>
-                    <a asp-action="Reimprimir"
-                           asp-route-id="@r.Id"
-                           target="_blank"
-                           class="btn btn-sm btn-outline-primary">
-                        PDF
-                    </a>
-                </td>
-                <td>
-                    <button type="button"
-                            class="btn btn-warning btn-sm btnEditarVacio"
-                            data-id="@r.Id"
-                            data-fecha="@r.Fecha.ToString("yyyy-MM-ddTHH:mm")"
-                            data-contenedor="@r.Contenedor"
-                            data-cliente="@r.Cliente"
-                            data-transportista="@r.Transportista"
-                            data-consecutivo="@r.Consecutivo"
-                            data-usuario="@r.Usuario">
-                        ✏️ Editar
-                    </button>
-                </td>
-                <td>
-                    <form asp-action="EliminarRegistroVacio" method="post">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="id" value="@r.Id" />
-                        <button class="btn btn-sm btn-danger">
-                            Eliminar
-                        </button>
-                    </form>
-                </td>                
-            </tr>
-        }
-    </tbody>
-</table>
-
-<!-- MODAL EDITAR HISTORIAL VACÍOS -->
-<div class="modal fade" id="modalEditarVacio" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-
-            <form asp-action="EditarHistorial" method="post">
-                @Html.AntiForgeryToken()
-
-                <input type="hidden" id="editOrigen" name="origen" />
-
-                <!-- HEADER -->
-                <div class="modal-header bg-warning">
-                    <h5 class="modal-title text-dark">
-                        Editar reporte de vacío
-                    </h5>
-
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal">
-                    </button>
-                </div>
-
-                <!-- BODY -->
-                <div class="modal-body">
-
-                    <input type="hidden" id="editId" name="Id" />
-
-                    <div class="row g-3">
-
-                        <div class="col-md-6">
-                            <label class="form-label">Fecha</label>
-                            <input type="datetime-local"
-                                   id="editFecha"
-                                   name="Fecha"
-                                   class="form-control"
-                                   required />
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Consecutivo</label>
-                            <input type="text"
-                                   id="editConsecutivo"
-                                   name="Consecutivo"
-                                   class="form-control"
-                                   required />
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Contenedor</label>
-                            <input type="text"
-                                   id="editContenedor"
-                                   name="Contenedor"
-                                   class="form-control"
-                                   readonly />
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Cliente</label>
-                            <input type="text"
-                                   id="editCliente"
-                                   name="Cliente"
-                                   class="form-control" />
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Transportista</label>
-                            <input type="text"
-                                   id="editTransportista"
-                                   name="Transportista"
-                                   class="form-control" />
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Usuario</label>
-                            <input type="text"
-                                   id="editUsuario"
-                                   name="Usuario"
-                                   class="form-control" />
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <!-- FOOTER -->
-                <div class="modal-footer">
-
-                    <button type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
-
-                    <button type="submit"
-                            class="btn btn-success">
-                        Guardar cambios
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-    </div>
-</div>
-
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-
-        document.querySelectorAll(".btnEditarVacio").forEach(btn => {
-
-            btn.addEventListener("click", function () {
-
-                document.getElementById("editOrigen").value = "Index";
-
-                document.getElementById("editId").value = this.dataset.id;
-                document.getElementById("editFecha").value = this.dataset.fecha;
-                document.getElementById("editConsecutivo").value = this.dataset.consecutivo;
-                document.getElementById("editContenedor").value = this.dataset.contenedor;
-                document.getElementById("editCliente").value = this.dataset.cliente;
-                document.getElementById("editTransportista").value = this.dataset.transportista;
-                document.getElementById("editUsuario").value = this.dataset.usuario;
-
-                var modal = new bootstrap.Modal(
-                    document.getElementById("modalEditarVacio")
-                );
-
-                modal.show();
-            });
-
-        });
 
     });
 </script>

@@ -144,8 +144,25 @@ namespace BitacoraAlfipac.Controllers
                 }
                 else if (tipo == "VEHICULO")
                 {
-                    var vehiculo = (Vehiculo)entidad;
-                    _context.Vehiculos.Remove(vehiculo);
+                    var vehiculo = entidad as Vehiculo;
+
+                    if (vehiculo == null)
+                    {
+                        TempData["Error"] = "Error interno: entidad vehículo inválida.";
+                        return RedirectToAction("Index", new { fecha = vm.FechaHoraDespacho.Date });
+                    }
+
+                    var vehiculoDb = await _context.Vehiculos
+                        .FirstOrDefaultAsync(v =>
+                            v.Marchamos == vehiculo.Marchamos &&
+                            v.Chasis == vehiculo.Chasis);
+
+                    if (vehiculoDb != null)
+                    {
+                        _context.Vehiculos.Remove(vehiculoDb);
+                        await _context.SaveChangesAsync();
+                    }
+                    // else: no existe
                 }
 
                 // 🔎 HISTORIAL
@@ -683,6 +700,31 @@ namespace BitacoraAlfipac.Controllers
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Index", new { fecha = vm.FechaHoraDespacho.Date });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EliminarBackupsAntiguos()
+        {
+            var fechaLimite = DateTime.Now.AddDays(-7);
+
+            var antiguos = await _context.ContenedoresBackupDespacho
+                .Where(x => x.FechaRespaldo < fechaLimite)
+                .ToListAsync();
+
+            if (antiguos.Any())
+            {
+                _context.ContenedoresBackupDespacho.RemoveRange(antiguos);
+                await _context.SaveChangesAsync();
+
+                TempData["Ok"] = $"Se eliminaron {antiguos.Count} backups antiguos.";
+            }
+            else
+            {
+                TempData["Error"] = "No hay backups con más de 7 días.";
+            }
+
+            return RedirectToAction(nameof(Backups));
         }
     }
 }

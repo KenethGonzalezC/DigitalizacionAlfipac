@@ -4,235 +4,291 @@
     ViewData["Title"] = "Datos de Ingresos por Viaje";
 }
 
-@if (TempData["Warning"] != null)
+@if (TempData["Ok"] != null)
 {
-    <div class="alert alert-warning">
-        @TempData["Warning"]
-    </div>
+    <div class="alert alert-success">@TempData["Ok"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
 }
 
 <div class="container mt-4">
 
-    <h2 class="mb-3">Datos Anticipados de Ingresos</h2>
+    <!-- ================= HEADER ================= -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
 
-    <div>
-        <span class="badge bg-primary">
-            Contenedores por ingresar: @ViewBag.TotalContenedores
-        </span>
+        <h2 class="mb-0">📦 Datos Anticipados de Ingresos</h2>
+
+        <div class="d-flex gap-2">
+            <span class="badge bg-primary fs-6 px-3 py-2">
+                Contenedores por ingresar: @ViewBag.TotalContenedores
+            </span>
+        </div>
 
     </div>
 
-    <div>
-        <h5></h5>
+    <!-- ================= ALERT ================= -->
+    @if (TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning shadow-sm">
+            @TempData["Warning"]
+        </div>
+    }
+
+    <!-- ================= IMPORTACIÓN ================= -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+
+            <h5 class="mb-3">📥 Importación de datos</h5>
+
+            <form asp-action="ImportarExcel" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-6">
+                        <input type="file" name="archivoExcel" class="form-control" accept=".xlsx" required />
+                    </div>
+
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-success w-100">
+                            Importar Excel
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
     </div>
 
-    <form asp-action="ImportarExcel" method="post" enctype="multipart/form-data" class="card p-3 mb-4 shadow-sm">
-        @Html.AntiForgeryToken()
+    <!-- ================= BORRADO ================= -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
 
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <input type="file" name="archivoExcel" class="form-control" accept=".xlsx" required />
-            </div>
-            <div class="col-md-3">
-                <button type="submit" class="btn btn-success w-100">
-                    Importar Excel
-                </button>
-            </div>
+            <h5 class="mb-3">🗑 Limpieza de datos</h5>
+
+            <form asp-action="BorrarPorFecha" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="row g-2 align-items-end">
+
+                    <div class="col-md-4">
+                        <label class="form-label">Borrar registros cargados el:</label>
+                        <input type="date" name="fechaRegistro" class="form-control" required />
+                    </div>
+
+                    <div class="col-md-3">
+                        <button type="submit"
+                                class="btn btn-danger w-100"
+                                onclick="return confirm('¿Seguro que deseas eliminar todos los registros de esa fecha?');">
+                            🗑 Borrar por fecha
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+
         </div>
-    </form>
-
-    <form asp-action="BorrarPorFecha" method="post" class="mb-3">
-        @Html.AntiForgeryToken()
-
-        <div class="row g-2 align-items-end">
-            <div class="col-auto">
-                <label class="form-label">Borrar registros cargados el:</label>
-                <input type="date" name="fechaRegistro" class="form-control" required />
-            </div>
-
-            <div class="col-auto">
-                <button type="submit" class="btn btn-danger"
-                        onclick="return confirm('¿Seguro que deseas eliminar todos los registros de esa fecha?');">
-                    🗑 Borrar por fecha
-                </button>
-            </div>
-        </div>
-    </form>
+    </div>
 
     <!-- ================= FORMULARIO ================= -->
-    <form asp-action="CrearIngreso" method="post" class="card p-4 shadow-sm mb-4">
-        @Html.AntiForgeryToken()
+    <div class="card shadow-sm mb-4 border-primary">
+        <div class="card-body">
 
-        <div class="row g-3">
+            <h5 class="mb-3 text-primary">➕ Registrar ingreso</h5>
 
-            <div class="col-md-4">
-                <label class="form-label">Viaje</label>
-                <input name="Viaje" class="form-control" required />
-            </div>
+            <form asp-action="CrearIngreso" method="post">
+                @Html.AntiForgeryToken()
 
-            <div class="col-md-4">
-                <label class="form-label">Contenedor</label>
-                <input name="Contenedor" class="form-control" required />
-            </div>
+                <div class="row g-3">
 
-            <div class="col-md-4">
-                <label class="form-label">Marchamo</label>
-                <input name="Marchamo" class="form-control" required />
-            </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Viaje</label>
+                        <input name="Viaje" class="form-control" required />
+                    </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Recinto Origen</label>
-                <input name="RecintoOrigen" class="form-control" />
-            </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Contenedor</label>
+                        <input name="Contenedor" class="form-control" required />
+                    </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Fecha de Creación (del viaje)</label>
-                <input type="date" name="FechaCreacionViaje" class="form-control" />
-            </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Marchamo</label>
+                        <input name="Marchamo" class="form-control" required />
+                    </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Declarante</label>
-                <input name="Declarante" class="form-control" />
-            </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Recinto Origen</label>
+                        <input name="RecintoOrigen" class="form-control" />
+                    </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Transportista</label>
-                <input name="Transportista" class="form-control" />
-            </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Fecha de Creación</label>
+                        <input type="date" name="FechaCreacionViaje" class="form-control" />
+                    </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Mercancía</label>
-                <input name="Mercancia" class="form-control" />
-            </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Declarante</label>
+                        <input name="Declarante" class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Transportista</label>
+                        <input name="Transportista" class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Mercancía</label>
+                        <input name="Mercancia" class="form-control" />
+                    </div>
+
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">
+                    Guardar información
+                </button>
+
+            </form>
 
         </div>
-
-        <button type="submit" class="btn btn-primary mt-3">
-            Guardar información
-        </button>
-    </form>
+    </div>
 
     <!-- ================= FILTROS ================= -->
-    <form method="get" class="card p-3 mb-3 shadow-sm">
-        <div class="row g-2 align-items-center">
-            <div class="col-12 col-sm-6 col-md">
-                <input name="viaje"
-                       value="@ViewBag.Viaje"
-                       class="form-control"
-                       placeholder="Viaje" />
-            </div>
-            <div>
-                <input name="contenedor"
-                       value="@ViewBag.Contenedor"
-                       class="form-control"
-                       placeholder="Contenedor" />
-            </div>
-            <div class="col-12 col-sm-6 col-md">
-                <input name="recinto"
-                       value="@ViewBag.Recinto"
-                       class="form-control"
-                       placeholder="Recinto" />
-            </div>
-            <div class="col-12 col-sm-6 col-md">
-                <input type="date"
-                       name="fechaCreacion"
-                       value="@ViewBag.FechaCreacion"
-                       class="form-control" />
-            </div>
-            <div class="col-12 col-sm-6 col-md">
-                <input name="declarante"
-                       value="@ViewBag.Declarante"
-                       class="form-control"
-                       placeholder="Declarante" />
-            </div>
-            <div class="col-12 col-sm-6 col-md">
-                <input name="transportista"
-                       value="@ViewBag.Transportista"
-                       class="form-control"
-                       placeholder="Transportista" />
-            </div>
-            <div class="col-12 col-sm-6 col-md">
-                <input name="mercancia"
-                       value="@ViewBag.Mercancia"
-                       class="form-control"
-                       placeholder="Mercancía" />
-            </div>
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
 
-            <!-- Botones -->
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex gap-2">
-                <button type="submit" class="btn btn-outline-primary flex-grow-1">
-                    Filtrar
-                </button>
-                <button type="button" onclick="limpiarFiltros()" class="btn btn-outline-secondary flex-grow-1">
-                    Limpiar
-                </button>
-            </div>
-            <div class="col">
-                <input type="date" name="fechaRegistro" class="form-control"
-                       value="@ViewBag.FechaRegistro" />
-            </div>
+            <h5 class="mb-3">🔎 Filtros</h5>
+
+            <form method="get">
+
+                <div class="row g-2 align-items-center">
+
+                    <div class="col-md">
+                        <input name="viaje" value="@ViewBag.Viaje" class="form-control" placeholder="Viaje" />
+                    </div>
+
+                    <div class="col-md">
+                        <input name="contenedor" value="@ViewBag.Contenedor" class="form-control" placeholder="Contenedor" />
+                    </div>
+
+                    <div class="col-md">
+                        <input name="recinto" value="@ViewBag.Recinto" class="form-control" placeholder="Recinto" />
+                    </div>
+
+                    <div class="col-md">
+                        <input type="date" name="fechaCreacion" value="@ViewBag.FechaCreacion" class="form-control" />
+                    </div>
+
+                    <div class="col-md">
+                        <input name="declarante" value="@ViewBag.Declarante" class="form-control" placeholder="Declarante" />
+                    </div>
+
+                    <div class="col-md">
+                        <input name="transportista" value="@ViewBag.Transportista" class="form-control" placeholder="Transportista" />
+                    </div>
+
+                    <div class="col-md">
+                        <input name="mercancia" value="@ViewBag.Mercancia" class="form-control" placeholder="Mercancía" />
+                    </div>
+
+                    <div class="col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-outline-primary flex-grow-1">
+                            Filtrar
+                        </button>
+
+                        <button type="button" onclick="limpiarFiltros()" class="btn btn-outline-secondary flex-grow-1">
+                            Limpiar
+                        </button>
+                    </div>
+
+                </div>
+
+            </form>
+
         </div>
-    </form>
+    </div>
 
     <!-- ================= TABLA ================= -->
-    <div class="table-responsive">
-        <table class="table table-striped align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Viaje</th>
-                    <th>Contenedor</th>
-                    <th>Marchamo</th>
-                    <th>Recinto</th>
-                    <th>Fecha Creación</th>
-                    <th>Declarante</th>
-                    <th>Transportista</th>
-                    <th>Mercancía</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (!Model.Any())
-                {
-                    <tr>
-                        <td colspan="9" class="text-center text-muted py-4">
-                            No hay registros
-                        </td>
-                    </tr>
-                }
-                else
-                {
-                    foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>@item.Viaje</td>
-                            <td>@item.Contenedor</td>
-                            <td>@item.Marchamo</td>
-                            <td>@item.RecintoOrigen</td>
-                            <td>@item.FechaCreacionViaje?.ToString("dd/MM/yyyy")</td>
-                            <td>@item.Declarante</td>
-                            <td>@item.Transportista</td>
-                            <td>@item.Mercancia</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editarModal"
-                                        onclick="cargarEditar(@item.Id)">
-                                    Editar
-                                </button>
+    <div class="card shadow-sm">
 
-                                <button class="btn btn-sm btn-danger"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#deleteModal"
-                                        data-id="@item.Id"
-                                        data-viaje="@item.Viaje">
-                                    Eliminar
-                                </button>
-                            </td>
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-striped align-middle mb-0">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Viaje</th>
+                            <th>Contenedor</th>
+                            <th>Marchamo</th>
+                            <th>Recinto</th>
+                            <th>Fecha</th>
+                            <th>Declarante</th>
+                            <th>Transportista</th>
+                            <th>Mercancía</th>
+                            <th>Acciones</th>
                         </tr>
-                    }
-                }
-            </tbody>
-        </table>
+                    </thead>
+
+                    <tbody>
+
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-4">
+                                    No hay registros
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.Viaje</td>
+                                    <td>@item.Contenedor</td>
+                                    <td>@item.Marchamo</td>
+                                    <td>@item.RecintoOrigen</td>
+                                    <td>@item.FechaCreacionViaje?.ToString("dd/MM/yyyy")</td>
+                                    <td>@item.Declarante</td>
+                                    <td>@item.Transportista</td>
+                                    <td>@item.Mercancia</td>
+                                    <td>
+
+                                        <button class="btn btn-sm btn-outline-primary"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editarModal"
+                                                onclick="cargarEditar(@item.Id)">
+                                            Editar
+                                        </button>
+
+                                        <button class="btn btn-sm btn-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal"
+                                                data-id="@item.Id"
+                                                data-viaje="@item.Viaje">
+                                            Eliminar
+                                        </button>
+
+                                    </td>
+                                </tr>
+                            }
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
     </div>
 
 </div>
@@ -259,89 +315,124 @@
 }
 
 <div class="modal fade" id="editarModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow">
+
             <form method="post" asp-action="EditarIngreso">
                 @Html.AntiForgeryToken()
-                <div class="modal-header">
-                    <h5 class="modal-title">Editar información de viaje</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+                <!-- HEADER -->
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">✏️ Editar información de viaje</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
+                <!-- BODY -->
                 <div class="modal-body">
+
                     <input type="hidden" name="Id" id="editId" />
 
                     <div class="row g-3">
+
                         <div class="col-md-4">
-                            <label>Viaje</label>
+                            <label class="form-label">Viaje</label>
                             <input name="Viaje" id="editViaje" class="form-control" />
                         </div>
 
-                        <div class="col-md.4">
-                            <label>Contenedor</label>
+                        <div class="col-md-4">
+                            <label class="form-label">Contenedor</label>
                             <input name="Contenedor" id="editContenedor" class="form-control" />
                         </div>
 
-                        <div class="col-md.4">
-                            <label>Marchamo</label>
+                        <div class="col-md-4">
+                            <label class="form-label">Marchamo</label>
                             <input name="Marchamo" id="editMarchamo" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Recinto</label>
+                            <label class="form-label">Recinto</label>
                             <input name="RecintoOrigen" id="editRecinto" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Fecha creación</label>
+                            <label class="form-label">Fecha creación</label>
                             <input type="date" name="FechaCreacionViaje" id="editFecha" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Declarante</label>
+                            <label class="form-label">Declarante</label>
                             <input name="Declarante" id="editDeclarante" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Transportista</label>
+                            <label class="form-label">Transportista</label>
                             <input name="Transportista" id="editTransportista" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Mercancía</label>
+                            <label class="form-label">Mercancía</label>
                             <input name="Mercancia" id="editMercancia" class="form-control" />
                         </div>
+
                     </div>
+
                 </div>
 
+                <!-- FOOTER -->
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button class="btn btn-primary">Guardar cambios</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <button class="btn btn-primary">
+                        💾 Guardar cambios
+                    </button>
                 </div>
+
             </form>
+
         </div>
     </div>
 </div>
 
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content shadow">
+
             <form method="post" asp-action="EliminarIngreso">
                 @Html.AntiForgeryToken()
+
+                <!-- HEADER -->
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">Confirmar eliminación</h5>
+                    <h5 class="modal-title">⚠ Confirmar eliminación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
+                <!-- BODY -->
                 <div class="modal-body">
+
                     <input type="hidden" name="id" id="deleteId" />
-                    <p>¿Eliminar el viaje <strong id="deleteViaje"></strong>?</p>
+
+                    <div class="alert alert-warning mb-0">
+                        ¿Seguro que deseas eliminar el viaje:
+                        <strong id="deleteViaje"></strong>?
+                    </div>
+
                 </div>
 
+                <!-- FOOTER -->
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button class="btn btn-danger">Eliminar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+
+                    <button class="btn btn-danger">
+                        🗑 Eliminar
+                    </button>
                 </div>
+
             </form>
+
         </div>
     </div>
 </div>

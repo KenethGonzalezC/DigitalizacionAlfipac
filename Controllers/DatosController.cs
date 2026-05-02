@@ -121,6 +121,16 @@ public class DatosController : Controller
     public IActionResult CrearIngreso(DatosIngresoViaje model)
     {
         model.FechaRegistroSistema = DateTime.Now;
+
+        var existe = _context.DatosIngresosViajes
+            .Any(x => x.Contenedor == model.Contenedor);
+
+        if (existe)
+        {
+            ModelState.AddModelError("Contenedor", "Ya existe un ingreso con este contenedor.");
+            return RedirectToAction(nameof(Ingresos));
+        }
+
         _context.Add(model);
         _context.SaveChanges();
 
@@ -490,6 +500,8 @@ public class DatosController : Controller
             query = query.Where(x => x.FechaCreacion.Date == fechaRegistroDate.Value.Date);
 
         var totalRegistros = query.Count();
+
+        ViewBag.TotalContenedores = totalRegistros; //CUENTA
 
         var datos = query
             .OrderByDescending(x => x.FechaCreacion)

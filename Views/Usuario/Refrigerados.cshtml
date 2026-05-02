@@ -1,83 +1,150 @@
 ﻿@model dynamic
 
-<h2 class="mb-4">Contenedores Refrigerados</h2>
+<div class="container mt-4">
 
-<form method="get" class="row g-2 mb-4">
-    <div class="col-md-4">
-        <input name="contenedor"
-               value="@ViewBag.Busqueda"
-               class="form-control"
-               placeholder="Buscar contenedor..." />
+    <!-- HEADER -->
+    <div class="mb-3">
+
+        <h3 class="mb-0">
+            ❄️ Contenedores Refrigerados
+        </h3>
+
+        <small class="text-muted">
+            Control de activos y despachados
+        </small>
+
     </div>
 
-    <div class="col-md-2">
-        <button class="btn btn-primary w-100">
-            Buscar
-        </button>
-    </div>
+    <!-- FILTRO -->
+    <div class="card shadow-sm mb-4">
 
-    <div class="col-md-2">
-        <a asp-action="Refrigerados"
-               class="btn btn-secondary w-100">
-            Limpiar
-        </a>
-    </div>
-</form>
+        <div class="card-body">
 
-<h4 class="text-success">🟢 Activos</h4>
+            <form method="get" class="row g-2 align-items-end">
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Contenedor</th>
-            <th>Ingreso</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var c in ViewBag.Activos)
-        {
-            <tr>
-                <td>
-                    <a asp-action="DetalleRefrigerado"
-                           asp-route-id="@c.Id">
-                        @c.Contenedor
+                <div class="col-md-6">
+                    <label class="form-label">Buscar contenedor</label>
+                    <input name="contenedor"
+                           value="@ViewBag.Busqueda"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-2 d-grid">
+                    <label class="form-label invisible">buscar</label>
+                    <button class="btn btn-primary">
+                        🔎 Buscar
+                    </button>
+                </div>
+
+                <div class="col-md-2 d-grid">
+                    <label class="form-label invisible">limpiar</label>
+                    <a asp-action="Refrigerados"
+                           class="btn btn-outline-secondary">
+                        Limpiar
                     </a>
-                </td>
-                <td>
-                    @(c.FechaHoraIngreso?.ToString("dd/MM/yyyy HH:mm") ?? "-")
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                </div>
 
-<h4 class="text-danger mt-5">🔴 Despachados</h4>
+            </form>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Contenedor</th>
-            <th>Ingreso</th>
-            <th>Despacho</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var c in ViewBag.Despachados)
-        {
-            <tr>
-                <td>
-                    <a asp-action="DetalleRefrigerado"
-                           asp-route-id="@c.Id">
-                        @c.Contenedor
-                    </a>
-                </td>
-                <td>
-                    @(c.FechaHoraIngreso?.ToString("dd/MM/yyyy HH:mm") ?? "-")
-                </td>
-                <td>
-                    @(c.FechaHoraDespacho?.ToString("dd/MM/yyyy HH:mm") ?? "-")
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+        </div>
+
+    </div>
+
+    <!-- ACTIVOS -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-header bg-white">
+            <h5 class="mb-0 text-success">🟢 Activos</h5>
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Contenedor</th>
+                            <th>Ingreso</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var c in ViewBag.Activos)
+                        {
+                            <tr>
+
+                                <td class="fw-semibold">
+                                    <a asp-action="DetalleRefrigerado"
+                                           asp-route-id="@c.Id">
+                                        @c.Contenedor
+                                    </a>
+                                </td>
+
+                                <td>
+                                    @(c.FechaHoraIngreso?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+                                </td>
+
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- DESPACHADOS -->
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-white">
+            <h5 class="mb-0 text-danger">🔴 Despachados</h5>
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Contenedor</th>
+                            <th>Ingreso</th>
+                            <th>Despacho</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach (var c in ViewBag.Despachados)
+                        {
+                            <tr>
+
+                                <td class="fw-semibold">
+                                    <a asp-action="DetalleRefrigerado"
+                                           asp-route-id="@c.Id">
+                                        @c.Contenedor
+                                    </a>
+                                </td>
+
+                                <td>
+                                    @(c.FechaHoraIngreso?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+                                </td>
+
+                                <td>
+                                    @(c.FechaHoraDespacho?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+                                </td>
+
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

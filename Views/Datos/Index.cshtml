@@ -2,54 +2,142 @@
     ViewData["Title"] = "Módulo Datos";
 }
 
-<div class="container mt-4">
+<div class="container-fluid py-4">
 
-    <h2 class="mb-4">Módulo de Datos</h2>
+    <!-- HEADER -->
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">📊 Módulo de Datos</h2>
+        <small class="text-muted">
+            Gestión centralizada de ingresos, despachos y configuraciones operativas
+        </small>
+    </div>
 
+    <!-- GRID -->
     <div class="row g-4">
 
-        <div class="col-md-6">
+        <!-- INGRESOS -->
+        <div class="col-md-6 col-xl-3">
             <a asp-controller="Datos" asp-action="Ingresos" class="text-decoration-none">
-                <div class="card shadow-sm h-100 border-primary">
-                    <div class="card-body text-center">
-                        <h4 class="text-primary">Ingresos por Viaje</h4>
-                        <p class="text-muted">Registro anticipado de información de viajes de ingreso</p>
+                <div class="card shadow-sm h-100 border-0 card-hover">
+
+                    <div class="card-body text-center p-4">
+
+                        <div class="icon-box bg-primary-subtle text-primary mb-3">
+                            <i class="bi bi-box-arrow-in-down fs-3"></i>
+                        </div>
+
+                        <h5 class="fw-bold text-primary mb-2">
+                            Ingresos por Viaje
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            Registro anticipado de información de viajes de ingreso
+                        </p>
+
                     </div>
+
                 </div>
             </a>
         </div>
 
-        <div class="col-md-6">
+        <!-- DESPACHOS -->
+        <div class="col-md-6 col-xl-3">
             <a asp-controller="Datos" asp-action="Despachos" class="text-decoration-none">
-                <div class="card shadow-sm h-100 border-primary">
-                    <div class="card-body text-center">
-                        <h4 class="text-primary">Despachos</h4>
-                        <p class="text-muted">Registro anticipado de información de viajes de despacho</p>
+                <div class="card shadow-sm h-100 border-0 card-hover">
+
+                    <div class="card-body text-center p-4">
+
+                        <div class="icon-box bg-danger-subtle text-danger mb-3">
+                            <i class="bi bi-box-arrow-up fs-3"></i>
+                        </div>
+
+                        <h5 class="fw-bold text-danger mb-2">
+                            Despachos
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            Registro anticipado de información de viajes de despacho
+                        </p>
+
                     </div>
+
                 </div>
             </a>
         </div>
 
-        <div class="col-md-6">
+        <!-- TRANSPORTISTAS -->
+        <div class="col-md-6 col-xl-3">
             <a asp-controller="Transportistas" asp-action="Index" class="text-decoration-none">
-                <div class="card shadow-sm h-100 border-success">
-                    <div class="card-body text-center">
-                        <h4 class="text-success">Transportistas Autorizados</h4>
-                        <p class="text-muted">Administración de transportistas habilitados</p>
+                <div class="card shadow-sm h-100 border-0 card-hover">
+
+                    <div class="card-body text-center p-4">
+
+                        <div class="icon-box bg-success-subtle text-success mb-3">
+                            <i class="bi bi-truck fs-3"></i>
+                        </div>
+
+                        <h5 class="fw-bold text-success mb-2">
+                            Transportistas
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            Administración de transportistas autorizados
+                        </p>
+
                     </div>
+
                 </div>
             </a>
         </div>
 
-        <div class="col-md-6">
+        <!-- VACÍOS -->
+        <div class="col-md-6 col-xl-3">
             <a asp-controller="Vacios" asp-action="Index" class="text-decoration-none">
-                <div class="card shadow-sm h-100 border-success">
-                    <div class="card-body text-center">
-                        <h4 class="text-success">Vacíos</h4>
-                        <p class="text-muted">Reporte de contenedores vacíos en el almacén</p>
+                <div class="card shadow-sm h-100 border-0 card-hover">
+
+                    <div class="card-body text-center p-4">
+
+                        <div class="icon-box bg-warning-subtle text-warning mb-3">
+                            <i class="bi bi-inbox fs-3"></i>
+                        </div>
+
+                        <h5 class="fw-bold text-warning mb-2">
+                            Vacíos
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            Control de contenedores vacíos en almacén
+                        </p>
+
                     </div>
+
                 </div>
             </a>
         </div>
+
     </div>
+
 </div>
+
+<!-- 🎨 ESTILOS -->
+<style>
+    .card-hover {
+        border-radius: 16px;
+        transition: all 0.25s ease;
+    }
+
+        .card-hover:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+    .icon-box {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>

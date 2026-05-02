@@ -5,173 +5,259 @@
     var pabs = Model.Where(x => x.Tipo == "PAB").ToList();
 }
 
-<div class="container mt-4">
+<div class="container-fluid py-4">
 
-    <h2 class="mb-3">Historial de Contenedores Ingresados</h2>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h2 class="fw-bold mb-0">📊 Historial de Contenedores</h2>
+            <small class="text-muted">Registros procesados (ACTA y PAB)</small>
+        </div>
 
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <form method="get" asp-action="HistorialFiltro">
-                <label>Filtrar por fecha de ingreso</label>
-                <input type="date" name="fechaFiltro" class="form-control" value="@ViewBag.FechaFiltro" />
-                <button type="submit" class="btn btn-primary mt-2 w-100">Filtrar</button>
+        <div class="d-flex gap-2">
+            <a asp-action="Index" class="btn btn-outline-dark">
+                ← Volver
+            </a>
+
+            <form method="post" asp-action="ExportarHistorialPDF" class="m-0">
+                <input type="hidden" name="nombre" value="@User.Identity.Name" />
+                <button class="btn btn-success">
+                    📄 Exportar PDF
+                </button>
+            </form>
+
+            <form asp-action="LimpiarHistorialIngresados" method="post" class="m-0">
+                @Html.AntiForgeryToken()
+                <button class="btn btn-danger"
+                        onclick="return confirm('¿Seguro que deseas eliminar todo el historial?');">
+                    🗑 Limpiar
+                </button>
             </form>
         </div>
     </div>
 
+    <!-- FILTRO -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
 
-    <!-- BUSCAR + VOLVER -->
-    <div class="row g-2 align-items-end mb-3">
+            <form method="get" asp-action="HistorialFiltro" class="row g-3 align-items-end">
 
-        <div class="col-md-4">
-            <label class="form-label">Buscar contenedor</label>
-            <input id="buscarContenedorHist" class="form-control" placeholder="Buscar contenedor" />
-        </div>
+                <div class="col-md-3">
+                    <label class="form-label">Filtrar por fecha</label>
+                    <input type="date" name="fechaFiltro"
+                           class="form-control"
+                           value="@ViewBag.FechaFiltro" />
+                </div>
 
-        <div class="col-md-2 d-grid">
-            <button id="btnBuscarHist" class="btn btn-warning">
-                Buscar
-            </button>
-        </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100">
+                        Filtrar
+                    </button>
+                </div>
 
-        <div class="col-md-2 d-grid">
-            <a asp-action="Index" class="btn btn-dark">
-                Volver
-            </a>
-        </div>
+                <div>
+                    <a asp-action="Historial" class="btn btn-secondary">
+                        Hoy
+                    </a>
+                </div>
 
-        <div class="col-md-2 d-grid">
-            <form method="post" asp-action="ExportarHistorialPDF">
-                <input type="hidden" name="nombre" value="@User.Identity.Name" />
-                <button type="submit" class="btn btn-success">
-                    Exportar PDF
-                </button>
+                <div class="col-md-4">
+                    <label class="form-label">Buscar contenedor</label>
+                    <input id="buscarContenedorHist"
+                           class="form-control"/>
+                </div>
+
+                <div class="col-md-2">
+                    <button type="button" id="btnBuscarHist" class="btn btn-warning w-100">
+                        🔍 Buscar
+                    </button>
+                </div>
+
             </form>
-        </div>
 
-        <div class="col-md-2 d-grid">
-            <form asp-action="LimpiarHistorialIngresados" method="post">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-danger"
-                        onclick="return confirm('¿Seguro que deseas eliminar todo el historial?');">
-                    Limpiar
-                </button>
-            </form>
         </div>
-
     </div>
 
     <!-- ================= ACTAS ================= -->
-    <h4>ACTAS</h4>
-    <table class="table table-bordered table-sm">
-        <thead class="table-danger">
-            <tr>
-                <th>Contenedor</th>
-                <th>Número</th>
-                <th>Viaje</th>
-                <th>Detalle</th>
-                <th>Cliente</th>
-                <th>Fecha Ingreso</th>
-                <th>Resultado</th>
-                <th>Acción</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in actas)
-            {
-                <tr>
-                    <td>@item.Contenedor</td>
-                    <td>@item.Numero</td>
-                    <td>@item.Viaje</td>
-                    <td>@item.Detalle</td>
-                    <td>@item.Cliente</td>
-                    <td>@item.FechaHoraIngresoContenedor?.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td>
-                        @if (item.AplicadoCorrectamente)
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+
+            <h5 class="fw-bold text-danger mb-3">ACTAS</h5>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light text-center">
+                        <tr>
+                            <th>Contenedor</th>
+                            <th>Número</th>
+                            <th>Viaje</th>
+                            <th>Detalle</th>
+                            <th>Cliente</th>
+                            <th>Fecha</th>
+                            <th>Resultado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (!actas.Any())
                         {
-                            <span class="text-success fw-bold">Correcta</span>
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    Sin registros
+                                </td>
+                            </tr>
                         }
                         else
                         {
-                            <span class="text-danger fw-bold">Incorrecta</span>
+                            foreach (var item in actas)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@item.Contenedor</td>
+                                    <td>@item.Numero</td>
+                                    <td>@item.Viaje</td>
+                                    <td>@item.Detalle</td>
+                                    <td>@item.Cliente</td>
+
+                                    <td>
+                                        @item.FechaHoraIngresoContenedor?.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+
+                                    <td>
+                                        @if (item.AplicadoCorrectamente)
+                                        {
+                                            <span class="badge bg-success">Correcta</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Incorrecta</span>
+                                        }
+                                    </td>
+
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+
+                                            <button class="btn btn-sm btn-outline-primary btnEditarHist">
+                                                ✏️
+                                            </button>
+
+                                            <form asp-action="QuitarIngreso"
+                                                  method="post"
+                                                  onsubmit="return confirmarVolverPendiente();"
+                                                  class="m-0">
+
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@item.Id" />
+
+                                                <button class="btn btn-sm btn-warning">
+                                                    ↩
+                                                </button>
+                                            </form>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
                         }
-                    </td>
-                    <td class="d-flex gap-2">
+                    </tbody>
+                </table>
+            </div>
 
-                        <button class="btn btn-info btn-sm btnEditarHist" data-id="@item.Id">
-                            Editar
-                        </button>
-
-                        <form asp-action="QuitarIngreso" method="post" onsubmit="return confirmarVolverPendiente();" style="display:inline;">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@item.Id" />
-                            <button class="btn btn-warning btn-sm">
-                                Volver a Pendiente
-                            </button>
-                        </form>
-
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+        </div>
+    </div>
 
     <!-- ================= PAB ================= -->
-    <h4 class="mt-5">Permanencias a Bordo (PAB)</h4>
-    <table class="table table-bordered table-sm">
-        <thead class="table-primary">
-            <tr>
-                <th>Contenedor</th>
-                <th>Número</th>
-                <th>Viaje</th>
-                <th>Detalle</th>
-                <th>Cliente</th>
-                <th>Fecha Ingreso</th>
-                <th>Resultado</th>
-                <th>Acción</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in pabs)
-            {
-                <tr>
-                    <td>@item.Contenedor</td>
-                    <td>@item.Numero</td>
-                    <td>@item.Viaje</td>
-                    <td>@item.Detalle</td>
-                    <td>@item.Cliente</td>
-                    <td>@item.FechaHoraIngresoContenedor?.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td class="fw-bold @(item.AplicadoCorrectamente ? "text-success" : "text-danger")">
-                        @(item.AplicadoCorrectamente ? "Correcta" : "Incorrecta")
-                    </td>
-                    <td class="d-flex gap-2">
+    <div class="card shadow-sm">
+        <div class="card-body">
 
-                        <button class="btn btn-info btn-sm btnEditarHist" data-id="@item.Id">
-                            Editar
-                        </button>
+            <h5 class="fw-bold text-primary mb-3">Permanencias a Bordo (PAB)</h5>
 
-                        <form asp-action="QuitarIngreso" method="post" onsubmit="return confirmarVolverPendiente();" style="display:inline;">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@item.Id" />
-                            <button class="btn btn-warning btn-sm">
-                                Volver a Pendiente
-                            </button>
-                        </form>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light text-center">
+                        <tr>
+                            <th>Contenedor</th>
+                            <th>Número</th>
+                            <th>Viaje</th>
+                            <th>Detalle</th>
+                            <th>Cliente</th>
+                            <th>Fecha</th>
+                            <th>Resultado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
 
-                    </td>
+                    <tbody>
+                        @if (!pabs.Any())
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    Sin registros
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var item in pabs)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@item.Contenedor</td>
+                                    <td>@item.Numero</td>
+                                    <td>@item.Viaje</td>
+                                    <td>@item.Detalle</td>
+                                    <td>@item.Cliente</td>
 
-                </tr>
-            }
-        </tbody>
-    </table>
+                                    <td>
+                                        @item.FechaHoraIngresoContenedor?.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+
+                                    <td>
+                                        <span class="badge @(item.AplicadoCorrectamente ? "bg-success" : "bg-danger")">
+                                            @(item.AplicadoCorrectamente ? "Correcta" : "Incorrecta")
+                                        </span>
+                                    </td>
+
+                                    <td class="text-center">
+                                        <div class="d-flex justify-content-center gap-2">
+
+                                            <button class="btn btn-sm btn-outline-primary btnEditarHist">
+                                                ✏️
+                                            </button>
+
+                                            <form asp-action="QuitarIngreso"
+                                                  method="post"
+                                                  onsubmit="return confirmarVolverPendiente();"
+                                                  class="m-0">
+
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@item.Id" />
+
+                                                <button class="btn btn-sm btn-warning">
+                                                    ↩
+                                                </button>
+                                            </form>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
 
 </div>
 
-<div class="modal fade" id="editarModalHist">
+<!-- MODAL EDITAR -->
+<div class="modal fade" id="editarModalHist" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form asp-action="EditarRegistro" method="post">
                 @Html.AntiForgeryToken()
+
                 <input type="hidden" name="Id" id="editIdHist" />
 
                 <div class="modal-header bg-primary text-white">
@@ -211,57 +297,88 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label>Fecha Ingreso (borrar vuelve a pendientes)</label>
+                        <label>Fecha</label>
                         <input type="datetime-local" name="FechaIngreso" id="editFechaIngresoHist" class="form-control" />
                     </div>
 
                     <div class="col-md-6">
-                        <label>¿Aplicada correctamente?</label>
+                        <label>Resultado</label>
                         <select name="AplicadoCorrectamente" id="editAplicadoCorrectamenteHist" class="form-select">
                             <option value="true">Correcta</option>
                             <option value="false">Incorrecta</option>
                         </select>
                     </div>
+
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
                     <button class="btn btn-success">Guardar</button>
                 </div>
+
             </form>
         </div>
     </div>
 </div>
 
 <script>
-    function abrirModalHist(data){
-        document.getElementById("editIdHist").value = data.id;
-        document.getElementById("editTipoHist").value = data.tipo;
-        document.getElementById("editContenedorHist").value = data.contenedor;
-        document.getElementById("editNumeroHist").value = data.numero;
-        document.getElementById("editViajeHist").value = data.viaje;
-        document.getElementById("editClienteHist").value = data.cliente;
-        document.getElementById("editDetalleHist").value = data.detalle;
-        document.getElementById("editFechaIngresoHist").value = data.fechaIngreso ?? "";
-        document.getElementById("editAplicadoCorrectamenteHist").value = data.AplicadoCorrectamente;
-    (data.aplicadoCorrectamente ?? false).toString();
-        
+    document.addEventListener("DOMContentLoaded", function () {
 
-        new bootstrap.Modal(document.getElementById('editarModalHist')).show();
-    }
+        function abrirModalHist(data) {
 
-    document.getElementById("btnBuscarHist").addEventListener("click", () => {
-        const cont = document.getElementById("buscarContenedorHist").value.trim();
-        fetch(`/ActasPermanencias/BuscarContenedor?contenedor=${cont}`)
-            .then(r => r.json())
-            .then(data => data.encontrado ? abrirModalHist(data) : alert("No existe"));
-    });
+            if (!data || !data.encontrado) {
+                alert("No existe");
+                return;
+            }
 
-    document.querySelectorAll(".btnEditarHist").forEach(btn => {
-        btn.addEventListener("click", () => {
-            fetch(`/ActasPermanencias/BuscarContenedor?contenedor=${btn.closest("tr").children[0].innerText}`)
+            document.getElementById("editIdHist").value = data.id;
+            document.getElementById("editTipoHist").value = data.tipo;
+            document.getElementById("editContenedorHist").value = data.contenedor;
+            document.getElementById("editNumeroHist").value = data.numero;
+            document.getElementById("editViajeHist").value = data.viaje;
+            document.getElementById("editClienteHist").value = data.cliente;
+            document.getElementById("editDetalleHist").value = data.detalle;
+            document.getElementById("editFechaIngresoHist").value = data.fechaIngreso ?? "";
+
+            document.getElementById("editAplicadoCorrectamenteHist").value =
+                (data.aplicadoCorrectamente ?? false).toString();
+
+            const modal = new bootstrap.Modal(document.getElementById('editarModalHist'));
+            modal.show();
+        }
+
+        // 🔍 BUSCAR
+        document.getElementById("btnBuscarHist")?.addEventListener("click", function (e) {
+
+            e.preventDefault();
+
+            const cont = document.getElementById("buscarContenedorHist").value.trim();
+
+            if (!cont) return;
+
+            fetch(`/ActasPermanencias/BuscarContenedor?contenedor=${cont}`)
                 .then(r => r.json())
-                .then(data => abrirModalHist(data));
+                .then(data => abrirModalHist(data))
+                .catch(() => alert("Error en la búsqueda"));
         });
+
+        // ✏️ EDITAR
+        document.addEventListener("click", function (e) {
+
+            const btn = e.target.closest(".btnEditarHist");
+
+            if (!btn) return;
+
+            const fila = btn.closest("tr");
+            const contenedor = fila.children[0].innerText.trim();
+
+            fetch(`/ActasPermanencias/BuscarContenedor?contenedor=${contenedor}`)
+                .then(r => r.json())
+                .then(data => abrirModalHist(data))
+                .catch(() => alert("Error al abrir registro"));
+        });
+
     });
 </script>

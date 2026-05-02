@@ -2,21 +2,51 @@
     ViewData["Title"] = "Usuario creado";
 }
 
-<div class="alert alert-success mt-4">
-    <h4>Usuario creado correctamente</h4>
+<div class="container mt-4">
 
-    <p><strong>Usuario:</strong> @TempData["UsuarioCreado"]</p>
-    <p><strong>Contraseña:</strong></p>
+    <!-- CARD PRINCIPAL -->
+    <div class="card shadow-sm border-success">
 
-    <div class="alert alert-warning">
-        <strong>@TempData["PasswordCreada"]</strong>
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">✅ Usuario creado correctamente</h5>
+        </div>
+
+        <div class="card-body">
+
+            <div class="mb-3">
+                <label class="form-label text-muted">Usuario</label>
+                <div class="fw-semibold">
+                    @TempData["UsuarioCreado"]
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-muted">Contraseña generada</label>
+
+                <div class="alert alert-warning d-flex justify-content-between align-items-center">
+
+                    <span class="fw-bold">
+                        @TempData["PasswordCreada"]
+                    </span>
+
+                </div>
+            </div>
+
+            <div class="alert alert-danger small">
+                ⚠️ Copie esta contraseña ahora. No volverá a mostrarse.
+            </div>
+
+            <div class="d-flex justify-content-end">
+
+                <a asp-action="Index"
+                       class="btn btn-primary">
+                    ← Volver al listado
+                </a>
+
+            </div>
+
+        </div>
+
     </div>
 
-    <p class="text-danger">
-        ⚠️ Copie esta contraseña ahora. No volverá a mostrarse.
-    </p>
-
-    <a asp-action="Index" class="btn btn-primary">
-        Volver al listado
-    </a>
 </div>

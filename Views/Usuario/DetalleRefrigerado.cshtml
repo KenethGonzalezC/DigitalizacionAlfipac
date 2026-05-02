@@ -1,124 +1,168 @@
 ﻿@model BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado
 
-<h3 class="mb-4">
-    Contenedor Refrigerado
-</h3>
+<div class="container mt-4">
 
-<div class="card p-4 mb-4 shadow-sm">
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
 
-    <div class="row g-3">
-
-        <div class="col-md-4">
-            <label class="form-label fw-bold">Contenedor</label>
-            <div class="form-control bg-light">
-                @Model.Contenedor
-            </div>
+        <div>
+            <h3 class="mb-0">
+                ❄️ Contenedor Refrigerado
+            </h3>
+            <small class="text-muted">
+                Detalle operativo y control de temperatura
+            </small>
         </div>
 
-        <div class="col-md-4">
-            <label class="form-label fw-bold">Fecha / Hora Ingreso</label>
-            <div class="form-control bg-light">
-                @(Model.FechaHoraIngreso?.ToString("dd/MM/yyyy HH:mm") ?? "-")
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <label class="form-label fw-bold">Fecha / Hora Conexión</label>
-            <div class="form-control bg-light">
-                @(Model.FechaHoraConexion?.ToString("dd/MM/yyyy HH:mm") ?? "-")
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <label class="form-label fw-bold">Set Point (°C)</label>
-            <div class="form-control bg-light">
-                @(Model.SetPoint?.ToString("0.0") ?? "-")
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <label class="form-label fw-bold">Fecha / Hora Despacho</label>
-            <div class="form-control bg-light">
-                @(Model.FechaHoraDespacho?.ToString("dd/MM/yyyy HH:mm") ?? "-")
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <label class="form-label fw-bold">Fecha / Hora Desconexión</label>
-            <div class="form-control bg-light">
-                @(Model.FechaHoraDesconexion?.ToString("dd/MM/yyyy HH:mm") ?? "-")
-            </div>
-        </div>
-
-    </div>
-
-    <div class="mt-4">
-        <a asp-action="Refrigerados" class="btn btn-secondary">
-            Volver
+        <a asp-action="Refrigerados" class="btn btn-outline-secondary">
+            ← Volver
         </a>
+
     </div>
 
-</div>
+    <!-- INFO PANEL -->
+    <div class="card shadow-sm mb-4">
 
-<div class="d-flex flex-wrap gap-2 align-items-center mb-4">
-    <h4 class="mb-0 me-2">Exportar temperaturas</h4>
+        <div class="card-body">
 
-    <a asp-action="ExportarPdf"
-           asp-route-id="@Model.Id"
-           class="btn btn-danger">
-        PDF
-    </a>
+            <div class="row g-3">
 
-    <a asp-action="ExportarExcel"
-           asp-route-id="@Model.Id"
-           class="btn btn-success">
-        Excel
-    </a>
+                <div class="col-md-4">
+                    <label class="text-muted">Contenedor</label>
+                    <div class="fw-semibold fs-5">
+                        @Model.Contenedor
+                    </div>
+                </div>
 
-    <a asp-action="ExportarCsv"
-           asp-route-id="@Model.Id"
-           class="btn btn-secondary">
-        CSV
-    </a>
-</div>
+                <div class="col-md-4">
+                    <label class="text-muted">Ingreso</label>
+                    <div>
+                        @(Model.FechaHoraIngreso?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+                    </div>
+                </div>
 
-<div class="card p-3 shadow-sm">
+                <div class="col-md-4">
+                    <label class="text-muted">Conexión</label>
+                    <div>
+                        @(Model.FechaHoraConexion?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+                    </div>
+                </div>
 
-    <h5 class="mb-3">Historial de Temperaturas</h5>
+                <div class="col-md-4">
+                    <label class="text-muted">Set Point</label>
+                    <div class="fw-semibold">
+                        @(Model.SetPoint?.ToString("0.0") ?? "—") °C
+                    </div>
+                </div>
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-sm align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Fecha / Hora</th>
-                    <th>Temperatura</th>
-                    <th>Observación</th>
-                </tr>
-            </thead>
+                <div class="col-md-4">
+                    <label class="text-muted">Despacho</label>
+                    <div>
+                        @(Model.FechaHoraDespacho?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+                    </div>
+                </div>
 
-            <tbody>
-                @if (Model.RegistrosTemperatura != null && Model.RegistrosTemperatura.Any())
-                {
-                    @foreach (var r in Model.RegistrosTemperatura.OrderByDescending(x => x.FechaHora))
-                    {
+                <div class="col-md-4">
+                    <label class="text-muted">Desconexión</label>
+                    <div>
+                        @(Model.FechaHoraDesconexion?.ToString("dd/MM/yyyy HH:mm") ?? "—")
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- EXPORT -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body d-flex flex-wrap gap-2 align-items-center">
+
+            <strong class="me-2">📤 Exportar:</strong>
+
+            <a asp-action="ExportarPdf"
+                   asp-route-id="@Model.Id"
+                   class="btn btn-danger btn-sm">
+                PDF
+            </a>
+
+            <a asp-action="ExportarExcel"
+                   asp-route-id="@Model.Id"
+                   class="btn btn-success btn-sm">
+                Excel
+            </a>
+
+            <a asp-action="ExportarCsv"
+                   asp-route-id="@Model.Id"
+                   class="btn btn-secondary btn-sm">
+                CSV
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-white">
+            <h5 class="mb-0">📊 Historial de Temperaturas</h5>
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover table-sm mb-0 align-middle">
+
+                    <thead class="table-light">
                         <tr>
-                            <td>@r.FechaHora.ToString("dd/MM/yyyy HH:mm")</td>
-                            <td>@r.Temperatura.ToString("0.0") °C</td>
-                            <td>@r.Observacion</td>
+                            <th>Fecha</th>
+                            <th>Temperatura</th>
+                            <th>Observación</th>
                         </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="3" class="text-center text-muted py-3">
-                            Sin registros de temperatura
-                        </td>
-                    </tr>
-                }
-            </tbody>
+                    </thead>
 
-        </table>
+                    <tbody>
+                        @if (Model.RegistrosTemperatura != null && Model.RegistrosTemperatura.Any())
+                        {
+                            foreach (var r in Model.RegistrosTemperatura.OrderByDescending(x => x.FechaHora))
+                            {
+                                <tr>
+
+                                    <td>
+                                        @r.FechaHora.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+
+                                    <td class="fw-semibold">
+                                        @r.Temperatura.ToString("0.0") °C
+                                    </td>
+
+                                    <td>
+                                        @r.Observacion
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">
+                                    Sin registros de temperatura
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
     </div>
 
 </div>

@@ -13,195 +13,241 @@
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
 
-<div class="container mt-4">
+<div class="container-fluid">
 
-    <!-- FORMULARIO INGRESO -->
-    <h2>Formulario de Ingresos</h2>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Registro de ingresos</h2>
+            <small class="text-muted">Ingreso de contenedores al almacén</small>
+        </div>
+    </div>
 
-    <form method="post" class="card p-4 mb-4 shadow-sm">
-        @Html.AntiForgeryToken()
+    <!-- =========================
+         FORMULARIO
+    ========================= -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
 
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label">Contenedor</label>
-                <div class="input-group">
-                    <input asp-for="Contenedor" id="inputContenedor" class="form-control" required />
-                    <button type="button" id="btnBuscarActa" class="btn btn-secondary">Buscar</button>
+            <h5 class="fw-bold mb-3">Registrar ingreso</h5>
+
+            <form method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Contenedor</label>
+                        <div class="input-group">
+                            <input asp-for="Contenedor" id="inputContenedor" class="form-control" required />
+                            <button type="button" id="btnBuscarActa" class="btn btn-outline-secondary">
+                                Buscar
+                            </button>
+                        </div>
+                        <small id="resultadoBusqueda" class="text-muted fw-semibold"></small>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Fecha y hora</label>
+                        <input asp-for="FechaHoraIngreso"
+                               type="datetime-local"
+                               step="60"
+                               class="form-control"
+                               value="@Model.FechaHoraIngreso.ToString("yyyy-MM-ddTHH:mm")"
+                               required />
+                    </div>
+
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="form-check">
+                            <input asp-for="EsRefrigerado" class="form-check-input" type="checkbox" />
+                            <label asp-for="EsRefrigerado" class="form-check-label fw-semibold">
+                                Refrigerado
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Marchamos</label>
+                        <input asp-for="Marchamos" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Transportista</label>
+                        <input asp-for="Transportista" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Cliente</label>
+                        <input asp-for="Cliente" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Tamaño</label>
+                        <input asp-for="Tamano" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Chofer</label>
+                        <input asp-for="Chofer" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Placa cabezal</label>
+                        <input asp-for="PlacaCabezal" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Chasis</label>
+                        <input asp-for="Chasis" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Viaje / DUA</label>
+                        <input asp-for="ViajeDua" class="form-control" />
+                    </div>
+
                 </div>
-                <small id="resultadoBusqueda" class="text-muted fw-bold"></small>
-            </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Marchamos</label>
-                <input asp-for="Marchamos" class="form-control" />
-            </div>
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-primary px-4">
+                        Registrar ingreso
+                    </button>
+                </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Fecha y hora</label>
-                <input asp-for="FechaHoraIngreso"
-                       type="datetime-local"
-                       step="60"
+            </form>
+        </div>
+    </div>
+
+    <!-- =========================
+         HEADER TABLA
+    ========================= -->
+    <div class="card mb-3">
+        <div class="card-body d-flex flex-wrap align-items-center gap-3">
+
+            <h5 class="fw-bold mb-0">
+                Ingresos del día – @Model.FechaSeleccionada.ToString("dd/MM/yyyy")
+            </h5>
+
+            <form method="get" class="d-flex align-items-center gap-2 ms-auto">
+                <input type="date"
+                       name="fecha"
                        class="form-control"
-                       value="@Model.FechaHoraIngreso.ToString("yyyy-MM-ddTHH:mm")"
-                       required />
+                       value="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" />
+
+                <button type="submit" class="btn btn-outline-primary">
+                    Filtrar
+                </button>
+            </form>
+
+            <div>
+                <a asp-action="Index"
+                       class="btn btn-secondary flex-fill">
+                    Hoy
+                </a>
             </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Transportista</label>
-                <input asp-for="Transportista" class="form-control" />
+            <div class="d-flex gap-2">
+                <a asp-action="ExportarPdf"
+                   asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")"
+                   class="btn btn-danger btn-sm">PDF</a>
+
+                <a asp-action="ExportarExcel"
+                   asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")"
+                   class="btn btn-success btn-sm">Excel</a>
+
+                <a asp-action="ExportarCsv"
+                   asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")"
+                   class="btn btn-outline-secondary btn-sm">CSV</a>
             </div>
 
-            <div class="col-md-4">
-                <label class="form-label">Cliente</label>
-                <input asp-for="Cliente" class="form-control" />
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Tamaño</label>
-                <input asp-for="Tamano" class="form-control" />
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Chofer</label>
-                <input asp-for="Chofer" class="form-control" />
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Placa cabezal</label>
-                <input asp-for="PlacaCabezal" class="form-control" />
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Chasis</label>
-                <input asp-for="Chasis" class="form-control" />
-            </div>
-
-            <div class="col-md-4">
-                <label class="form-label">Viaje / DUA</label>
-                <input asp-for="ViajeDua" class="form-control" />
-            </div>
         </div>
+    </div>
 
-        <div class="form-check mt-2">
-            <input asp-for="EsRefrigerado" class="form-check-input" type="checkbox" />
-            <label asp-for="EsRefrigerado" class="form-check-label">
-                Contenedor Refrigerado
-            </label>
-        </div>
-
-        <button type="submit" class="btn btn-primary mt-3">
-            Registrar ingreso
-        </button>
-    </form>
-
-    <!-- TÍTULO + CALENDARIO -->
-    <form method="get" class="d-flex align-items-center gap-3 mb-4">
-        <h2 class="fw-semibold mb-0">
-            Ingresos del día – @Model.FechaSeleccionada.ToString("dd/MM/yyyy")
-        </h2>
-
-        <input type="date"
-               name="fecha"
-               class="form-control w-auto"
-               value="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" />
-
-        <button type="submit" class="btn btn-outline-primary">
-            Confirmar
-        </button>
-
-        <a asp-action="ExportarPdf"
-           asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")"
-           class="btn btn-danger">
-            Exportar PDF
-        </a>
-
-        <a asp-action="ExportarExcel"
-           asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")"
-           class="btn btn-success">
-            Exportar Excel
-        </a>
-
-        <a asp-action="ExportarCsv"
-           asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")"
-           class="btn btn-outline-secondary">
-            Exportar CSV
-        </a>
-    </form>
-
-    <!-- TABLA -->
-    <div class="table-responsive">
-        <table class="table table-striped align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Hora</th>
-                    <th>Contenedor</th>
-                    <th>Marchamos</th>
-                    <th>Transportista</th>
-                    <th>Cliente</th>
-                    <th>Tamaño</th>
-                    <th>Chasis</th>
-                    <th>Viaje / DUA</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (!Model.Ingresos.Any())
-                {
+    <!-- =========================
+         TABLA
+    ========================= -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead class="table-light">
                     <tr>
-                        <td colspan="9" class="text-center text-muted py-4">
-                            No existen ingresos para esta fecha
-                        </td>
+                        <th>Hora</th>
+                        <th>Contenedor</th>
+                        <th>Marchamos</th>
+                        <th>Transportista</th>
+                        <th>Cliente</th>
+                        <th>Tamaño</th>
+                        <th>Chasis</th>
+                        <th>Viaje / DUA</th>
+                        <th></th>
+                        <th></th>
                     </tr>
-                }
-                else
-                {
-                    foreach (var item in Model.Ingresos)
+                </thead>
+                <tbody>
+                    @if (!Model.Ingresos.Any())
                     {
                         <tr>
-                            <td>@item.FechaHoraIngreso.ToString("HH:mm")</td>
-                            <td>@item.Contenedor</td>
-                            <td>@item.Marchamos</td>
-                            <td>@item.Transportista</td>
-                            <td>@item.Cliente</td>
-                            <td>@item.Tamaño</td>
-                            <td>@item.Chasis</td>
-                            <td>@item.ViajeDua</td>                            
-                            <td>
-                                <button class="btn btn-sm btn-danger"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#deleteModal"
-                                        data-id="@item.Id"
-                                        data-contenedor="@item.Contenedor"
-                                        data-marchamos="@item.Marchamos"
-                                        data-fecha="@item.FechaHoraIngreso.ToString("yyyy-MM-dd HH:mm")"
-                                        data-transportista="@item.Transportista"
-                                        data-cliente="@item.Cliente"
-                                        data-tamano="@item.Tamaño"
-                                        data-chasis="@item.Chasis"
-                                        data-viaje="@item.ViajeDua">
-                                    Eliminar
-                                </button>
-                            </td>
-                            <td>
-                                @if (User.IsInRole("Administrador"))
-                                {
-                                    <button class="btn btn-sm btn-outline-secondary"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#editarModal"
-                                            onclick="cargarEditar(@item.Id)">
-                                        Editar
-                                    </button>
-                                }
+                            <td colspan="10" class="text-center text-muted py-4">
+                                No existen ingresos para esta fecha
                             </td>
                         </tr>
                     }
-                }
-            </tbody>
-        </table>
+                    else
+                    {
+                        foreach (var item in Model.Ingresos)
+                        {
+                            <tr>
+                                <td>@item.FechaHoraIngreso.ToString("HH:mm")</td>
+                                <td class="fw-semibold">@item.Contenedor</td>
+                                <td>@item.Marchamos</td>
+                                <td>@item.Transportista</td>
+                                <td>@item.Cliente</td>
+                                <td>@item.Tamaño</td>
+                                <td>@item.Chasis</td>
+                                <td>@item.ViajeDua</td>
+
+                                <td>
+                                    <button class="btn btn-sm btn-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteModal"
+                                            data-id="@item.Id"
+                                            data-contenedor="@item.Contenedor"
+                                            data-marchamos="@item.Marchamos"
+                                            data-fecha="@item.FechaHoraIngreso.ToString("yyyy-MM-dd HH:mm")"
+                                            data-transportista="@item.Transportista"
+                                            data-cliente="@item.Cliente"
+                                            data-tamano="@item.Tamaño"
+                                            data-chasis="@item.Chasis"
+                                            data-viaje="@item.ViajeDua">
+                                        Eliminar
+                                    </button>
+                                </td>
+
+                                <td>
+                                    @if (User.IsInRole("Administrador"))
+                                    {
+                                        <button class="btn btn-sm btn-outline-secondary"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editarModal"
+                                                onclick="cargarEditar(@item.Id)">
+                                            Editar
+                                        </button>
+                                    }
+                                </td>
+
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
+
 </div>
 
-<!-- MODAL ELIMINAR -->
+<!-- =========================
+     MODAL ELIMINAR
+========================= -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
@@ -215,63 +261,29 @@
                 </div>
 
                 <div class="modal-body">
+
                     <input type="hidden" name="id" id="deleteId" />
                     <input type="hidden" name="fecha" value="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" />
 
                     <p class="text-danger fw-semibold">
-                        ⚠️ Esta acción eliminará completamente el ingreso y toda su información asociada.
+                        ⚠️ Esta acción eliminará completamente el ingreso.
                     </p>
 
                     <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Contenedor</label>
-                            <input class="form-control" id="deleteContenedor" readonly />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Marchamos</label>
-                            <input class="form-control" id="deleteMarchamos" readonly />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Fecha / Hora</label>
-                            <input class="form-control" id="deleteFecha" readonly />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Transportista</label>
-                            <input class="form-control" id="deleteTransportista" readonly />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Cliente</label>
-                            <input class="form-control" id="deleteCliente" readonly />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Tamaño</label>
-                            <input class="form-control" id="deleteTamano" readonly />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Chasis</label>
-                            <input class="form-control" id="deleteChasis" readonly />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label class="form-label">Viaje / DUA</label>
-                            <input class="form-control" id="deleteViaje" readonly />
-                        </div>
+                        <input class="form-control" id="deleteContenedor" readonly />
+                        <input class="form-control" id="deleteMarchamos" readonly />
+                        <input class="form-control" id="deleteFecha" readonly />
+                        <input class="form-control" id="deleteTransportista" readonly />
+                        <input class="form-control" id="deleteCliente" readonly />
+                        <input class="form-control" id="deleteTamano" readonly />
+                        <input class="form-control" id="deleteChasis" readonly />
+                        <input class="form-control" id="deleteViaje" readonly />
                     </div>
+
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-danger">
-                        Eliminar definitivamente
-                    </button>
+                    <button class="btn btn-danger">Eliminar</button>
                 </div>
 
             </form>
@@ -280,28 +292,13 @@
     </div>
 </div>
 
-<script>
-    const deleteModal = document.getElementById('deleteModal');
-
-    deleteModal.addEventListener('show.bs.modal', event => {
-        const button = event.relatedTarget;
-
-        document.getElementById('deleteId').value = button.dataset.id;
-        document.getElementById('deleteContenedor').value = button.dataset.contenedor;
-        document.getElementById('deleteMarchamos').value = button.dataset.marchamos;
-        document.getElementById('deleteFecha').value = button.dataset.fecha;
-        document.getElementById('deleteTransportista').value = button.dataset.transportista;
-        document.getElementById('deleteCliente').value = button.dataset.cliente;
-        document.getElementById('deleteTamano').value = button.dataset.tamano;
-        document.getElementById('deleteChasis').value = button.dataset.chasis;
-        document.getElementById('deleteViaje').value = button.dataset.viaje;
-    });
-</script>
-
-<!-- MODAL EDITAR -->
+<!-- =========================
+     MODAL EDITAR
+========================= -->
 <div class="modal fade" id="editarModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
+
             <form method="post" asp-action="Editar">
                 @Html.AntiForgeryToken()
 
@@ -311,78 +308,69 @@
                 </div>
 
                 <div class="modal-body">
+
                     <input type="hidden" name="Id" id="editId" />
 
                     <div class="row g-3">
-                        <div class="col-md-4">
-                            <label>Contenedor</label>
-                            <input name="Contenedor" id="editContenedor" class="form-control" readonly />
-                        </div>
 
-                        <div class="col-md-4">
-                            <label>Marchamos</label>
-                            <input name="Marchamos" id="editMarchamos" class="form-control" />
-                        </div>
+                        <input id="editContenedor" class="form-control" readonly />
+                        <input id="editMarchamos" name="Marchamos" class="form-control" />
+                        <input id="editFechaHora" name="FechaHoraIngreso" type="datetime-local" class="form-control" />
+                        <input id="editTransportista" name="Transportista" class="form-control" />
+                        <input id="editCliente" name="Cliente" class="form-control" />
+                        <input id="editTamano" name="Tamano" class="form-control" />
+                        <input id="editChofer" name="Chofer" class="form-control" />
+                        <input id="editPlacaCabezal" name="PlacaCabezal" class="form-control" />
+                        <input id="editChasis" name="Chasis" class="form-control" />
+                        <input id="editViaje" name="ViajeDua" class="form-control" />
 
-                        <div class="col-md-4">
-                            <label>Fecha y hora</label>
-                            <input type="datetime-local" step="60" name="FechaHoraIngreso" id="editFechaHora" class="form-control" />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label>Transportista</label>
-                            <input name="Transportista" id="editTransportista" class="form-control" />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label>Cliente</label>
-                            <input name="Cliente" id="editCliente" class="form-control" />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label>Tamaño</label>
-                            <input name="Tamano" id="editTamano" class="form-control" />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label>Chofer</label>
-                            <input name="Chofer" id="editChofer" class="form-control" />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label>Placa</label>
-                            <input name="PlacaCabezal" id="editPlacaCabezal" class="form-control" />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label>Chasis</label>
-                            <input name="Chasis" id="editChasis" class="form-control" />
-                        </div>
-
-                        <div class="col-md-4">
-                            <label>Viaje / DUA</label>
-                            <input name="ViajeDua" id="editViaje" class="form-control" />
-                        </div>
                     </div>
+
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        Actualizar datos
-                    </button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button class="btn btn-primary">Actualizar</button>
                 </div>
+
             </form>
+
         </div>
     </div>
 </div>
+
+<!-- =========================
+     SCRIPTS
+========================= -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // DELETE MODAL
+        const deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', event => {
+                const b = event.relatedTarget;
+
+                document.getElementById('deleteId').value = b.dataset.id;
+                document.getElementById('deleteContenedor').value = b.dataset.contenedor;
+                document.getElementById('deleteMarchamos').value = b.dataset.marchamos;
+                document.getElementById('deleteFecha').value = b.dataset.fecha;
+                document.getElementById('deleteTransportista').value = b.dataset.transportista;
+                document.getElementById('deleteCliente').value = b.dataset.cliente;
+                document.getElementById('deleteTamano').value = b.dataset.tamano;
+                document.getElementById('deleteChasis').value = b.dataset.chasis;
+                document.getElementById('deleteViaje').value = b.dataset.viaje;
+            });
+        }
+
+    });
+</script>
 
 <script>
     const ingresos = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Ingresos));
 
     function cargarEditar(id) {
+
         const item = ingresos.find(x => x.Id === id);
         if (!item) return;
 
@@ -401,47 +389,46 @@
 </script>
 
 <script>
-    document.getElementById("btnBuscarActa").addEventListener("click", async () => {
+    document.addEventListener("DOMContentLoaded", function () {
 
-        const contenedor = document.getElementById("inputContenedor").value.trim();
-        const resultado = document.getElementById("resultadoBusqueda");
+        const btnBuscar = document.getElementById("btnBuscarActa");
 
-        if (!contenedor) {
-            resultado.textContent = "";
-            return;
-        }
+        btnBuscar?.addEventListener("click", async () => {
 
-        try {
+            const contenedor = document.getElementById("inputContenedor").value.trim();
+            const resultado = document.getElementById("resultadoBusqueda");
 
-            // Ejecutar ambas consultas en paralelo (más eficiente)
-            const [actaRes, ingresoRes] = await Promise.all([
-                fetch(`/ActasPermanencias/BuscarContenedorEnPendientes?contenedor=${contenedor}`),
-                fetch(`/BitacoraIngresos/ObtenerDatosPorContenedor?contenedor=${contenedor}`)
-            ]);
-
-            const actaData = await actaRes.json();
-            const ingresoData = await ingresoRes.json();
-
-            // Resultado búsqueda Actas/PAB
-            if (actaData.encontrado) {
-                resultado.textContent = `Contenedor con ${actaData.tipo} #${actaData.numero}`;
-            } else {
-                resultado.textContent = "No se encontró contenedor en Actas/PAB";
+            if (!contenedor) {
+                resultado.textContent = "";
+                return;
             }
 
-            // Autocompletar datos ingreso
-            if (ingresoData) {
-                document.getElementById("Marchamos").value = ingresoData.marchamo ?? "";
-                document.getElementById("Cliente").value = ingresoData.cliente ?? "";
-                document.getElementById("Transportista").value = ingresoData.transportista ?? "";
-                document.getElementById("ViajeDua").value = ingresoData.viaje ?? "";
+            try {
+
+                const [actaRes, ingresoRes] = await Promise.all([
+                    fetch(`/ActasPermanencias/BuscarContenedorEnPendientes?contenedor=${contenedor}`),
+                    fetch(`/BitacoraIngresos/ObtenerDatosPorContenedor?contenedor=${contenedor}`)
+                ]);
+
+                const actaData = await actaRes.json();
+                const ingresoData = await ingresoRes.json();
+
+                resultado.textContent = actaData.encontrado
+                    ? `Contenedor con ${actaData.tipo} #${actaData.numero}`
+                    : "No se encontró contenedor en Actas/PAB";
+
+                if (ingresoData) {
+                    document.getElementById("Marchamos").value = ingresoData.marchamo ?? "";
+                    document.getElementById("Cliente").value = ingresoData.cliente ?? "";
+                    document.getElementById("Transportista").value = ingresoData.transportista ?? "";
+                    document.getElementById("ViajeDua").value = ingresoData.viaje ?? "";
+                }
+
+            } catch {
+                resultado.textContent = "Error al buscar información";
             }
 
-        } catch (error) {
-            console.error(error);
-            resultado.textContent = "Error al buscar información";
-        }
+        });
 
     });
 </script>
-

@@ -6,197 +6,230 @@
 
 <div class="container mt-4">
 
-    <h2 class="mb-3">Datos Anticipados de Despachos</h2>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+            <h3 class="mb-0">📦 Datos Anticipados de Despachos</h3>
+            <small class="text-muted">Gestión de información previa a salida de contenedores</small>
+        </div>
+
+        <a asp-action="Index" class="btn btn-outline-dark">
+            ← Volver
+        </a>
+    </div>
+
+    <div class="mb-3">
+        <span class="badge bg-primary fs-6 px-3 py-2">
+            📦 Despachos pendientes: @ViewBag.TotalContenedores
+        </span>
+    </div>
 
     <!-- ================= FORMULARIO ================= -->
-    <form asp-action="CrearDespacho" method="post" class="card p-4 mb-4 shadow-sm">
-        @Html.AntiForgeryToken()
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            Registrar despacho anticipado
+        </div>
 
-        <div class="row g-3">
+        <div class="card-body">
 
-            <div class="col-md-3">
+            <form asp-action="CrearDespacho" method="post">
+                @Html.AntiForgeryToken()
 
-                <label class="form-label fw-semibold">
-                    Contenedor
-                </label>
+                <div class="row g-3">
 
-                <div class="input-group">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Contenedor</label>
+                        <div class="input-group">
+                            <input name="Contenedor"
+                                   id="contenedorInput"
+                                   class="form-control"
+                                   required />
 
-                    <input name="Contenedor"
-                           id="contenedorInput"
-                           class="form-control"
-                           required />
+                            <button type="button"
+                                    id="btnBuscarContenedor"
+                                    class="btn btn-outline-primary">
+                                🔍
+                            </button>
+                        </div>
+                        <small id="infoPatio" class="text-muted fw-bold d-block mt-1"></small>
+                    </div>
 
-                    <button type="button"
-                            id="btnBuscarContenedor"
-                            class="btn btn-outline-primary">
-                        Buscar
-                    </button>
+                    <div class="col-md-3">
+                        <label class="form-label">Marchamos</label>
+                        <input name="Marchamos" id="marchamosInput" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Transportista</label>
+                        <input name="Transportista" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Cliente</label>
+                        <input name="Cliente" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Chasis</label>
+                        <input name="Chasis" id="chasisInput" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Chofer</label>
+                        <input name="Chofer" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Placa Cabezal</label>
+                        <input name="PlacaCabezal" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Viaje / DUA</label>
+                        <input name="ViajeDua" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Boleta</label>
+                        <input name="Boleta" class="form-control" />
+                    </div>
 
                 </div>
 
-                <small id="infoPatio" class="text-muted fw-bold mt-1 d-block"></small>
+                <div class="mt-3 text-end">
+                    <button class="btn btn-primary">
+                        💾 Guardar
+                    </button>
+                </div>
 
-            </div>
-
-            <div class="col-md-3">
-                <label>Marchamos</label>
-                <input name="Marchamos" id="marchamosInput" class="form-control" />
-            </div>
-
-            <div class="col-md-3">
-                <label>Transportista</label>
-                <input name="Transportista" class="form-control" />
-            </div>
-
-            <div class="col-md-3">
-                <label>Cliente</label>
-                <input name="Cliente" class="form-control" />
-            </div>
-
-            <div class="col-md-3">
-                <label>Chasis</label>
-                <input name="Chasis" id="chasisInput" class="form-control" />
-            </div>
-
-            <div class="col-md-3">
-                <label>Chofer</label>
-                <input name="Chofer" class="form-control" />
-            </div>
-
-            <div class="col-md-3">
-                <label>Placa Cabezal</label>
-                <input name="PlacaCabezal" class="form-control" />
-            </div>
-
-            <div class="col-md-3">
-                <label>Viaje / DUA</label>
-                <input name="ViajeDua" class="form-control" />
-            </div>
-
-            <div class="col-md-3">
-                <label>Boleta</label>
-                <input name="Boleta" class="form-control" />
-            </div>
+            </form>
 
         </div>
-
-        <button class="btn btn-primary mt-3">
-            Guardar
-        </button>
-    </form>
-
+    </div>
 
     <!-- ================= FILTROS ================= -->
-    <form method="get" class="card p-3 mb-3 shadow-sm">
-        <div class="row g-2 align-items-center">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
 
-            <div class="col-12 col-sm-6 col-md">
-                <input name="contenedor" value="@ViewBag.Contenedor" class="form-control" placeholder="Contenedor" />
-            </div>
+            <form method="get">
+                <div class="row g-2">
 
-            <div class="col-12 col-sm-6 col-md">
-                <input name="transportista" value="@ViewBag.Transportista" class="form-control" placeholder="Transportista" />
-            </div>
+                    <div class="col-md">
+                        <input name="contenedor" value="@ViewBag.Contenedor" class="form-control" placeholder="Contenedor" />
+                    </div>
 
-            <div class="col-12 col-sm-6 col-md">
-                <input name="cliente" value="@ViewBag.Cliente" class="form-control" placeholder="Cliente" />
-            </div>
+                    <div class="col-md">
+                        <input name="transportista" value="@ViewBag.Transportista" class="form-control" placeholder="Transportista" />
+                    </div>
 
-            <div class="col-12 col-sm-6 col-md">
-                <input name="viajeDua" value="@ViewBag.ViajeDua" class="form-control" placeholder="Viaje / DUA" />
-            </div>
+                    <div class="col-md">
+                        <input name="cliente" value="@ViewBag.Cliente" class="form-control" placeholder="Cliente" />
+                    </div>
 
-            <div class="col-12 col-sm-6 col-md">
-                <input name="Boleta" value="@ViewBag.Boleta" class="form-control" placeholder="Boleta" />
-            </div>
+                    <div class="col-md">
+                        <input name="viajeDua" value="@ViewBag.ViajeDua" class="form-control" placeholder="Viaje / DUA" />
+                    </div>
 
-            <div class="col">
-                <input type="date" name="fechaRegistro" value="@ViewBag.FechaRegistro" class="form-control" />
-            </div>
+                    <div class="col-md">
+                        <input name="Boleta" value="@ViewBag.Boleta" class="form-control" placeholder="Boleta" />
+                    </div>
 
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3 d-flex gap-2">
-                <button type="submit" class="btn btn-outline-primary flex-grow-1">
-                    Filtrar
-                </button>
+                    <div class="col-md">
+                        <input type="date" name="fechaRegistro" value="@ViewBag.FechaRegistro" class="form-control" />
+                    </div>
 
-                <button type="button" onclick="limpiarFiltros()" class="btn btn-outline-secondary flex-grow-1">
-                    Limpiar
-                </button>
-            </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button class="btn btn-outline-primary w-100">Filtrar</button>
+                        <button type="button" onclick="limpiarFiltros()" class="btn btn-outline-secondary w-100">Limpiar</button>
+                    </div>
+
+                </div>
+            </form>
 
         </div>
-    </form>
-
+    </div>
 
     <!-- ================= TABLA ================= -->
-    <div class="table-responsive">
+    <div class="card shadow-sm">
 
-        <table class="table table-striped">
+        <div class="card-header bg-light">
+            <strong>Listado de despachos</strong>
+        </div>
 
-            <thead class="table-light">
-                <tr>
-                    <th>Contenedor</th>
-                    <th>Marchamos</th>
-                    <th>Transportista</th>
-                    <th>Cliente</th>
-                    <th>Chasis</th>
-                    <th>Chofer</th>
-                    <th>Placa</th>
-                    <th>Viaje/DUA</th>
-                    <th>Boleta</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
+        <div class="table-responsive">
 
-            <tbody>
+            <table class="table table-hover align-middle mb-0">
 
-                @if (!Model.Any())
-                {
+                <thead class="table-dark text-center">
                     <tr>
-                        <td colspan="9" class="text-center">No hay registros</td>
+                        <th>Contenedor</th>
+                        <th>Marchamos</th>
+                        <th>Transportista</th>
+                        <th>Cliente</th>
+                        <th>Chasis</th>
+                        <th>Chofer</th>
+                        <th>Placa</th>
+                        <th>Viaje/DUA</th>
+                        <th>Boleta</th>
+                        <th>Acciones</th>
                     </tr>
-                }
-                else
-                {
-                    foreach (var item in Model)
+                </thead>
+
+                <tbody>
+
+                    @if (!Model.Any())
                     {
                         <tr>
-                            <td>@item.Contenedor</td>
-                            <td>@item.Marchamos</td>
-                            <td>@item.Transportista</td>
-                            <td>@item.Cliente</td>
-                            <td>@item.Chasis</td>
-                            <td>@item.Chofer</td>
-                            <td>@item.PlacaCabezal</td>
-                            <td>@item.ViajeDua</td>
-                            <td>@item.Boleta</td>
-
-                            <td>
-
-                                <button class="btn btn-sm btn-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editarModal"
-                                        onclick="cargarEditar(@item.Id)">
-                                    Editar
-                                </button>
-
-                                <button class="btn btn-sm btn-danger"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#deleteModal"
-                                        data-id="@item.Id"
-                                        data-contenedor="@item.Contenedor">
-                                    Eliminar
-                                </button>
-
+                            <td colspan="10" class="text-center text-muted py-4">
+                                Sin registros
                             </td>
                         </tr>
                     }
-                }
+                    else
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@item.Contenedor</td>
+                                <td>@item.Marchamos</td>
+                                <td>@item.Transportista</td>
+                                <td>@item.Cliente</td>
+                                <td>@item.Chasis</td>
+                                <td>@item.Chofer</td>
+                                <td>@item.PlacaCabezal</td>
+                                <td>@item.ViajeDua</td>
+                                <td>@item.Boleta</td>
 
-            </tbody>
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-2">
 
-        </table>
+                                        <button class="btn btn-sm btn-outline-primary"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editarModal"
+                                                onclick="cargarEditar(@item.Id)">
+                                            ✏️
+                                        </button>
+
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal"
+                                                data-id="@item.Id"
+                                                data-contenedor="@item.Contenedor">
+                                            🗑
+                                        </button>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
 
     </div>
 
@@ -205,17 +238,19 @@
 
 <!-- ================= MODAL EDITAR ================= -->
 <div class="modal fade" id="editarModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow">
 
             <form method="post" asp-action="EditarDespacho">
                 @Html.AntiForgeryToken()
 
-                <div class="modal-header">
-                    <h5 class="modal-title">Editar despacho</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <!-- HEADER -->
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">✏️ Editar despacho</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
+                <!-- BODY -->
                 <div class="modal-body">
 
                     <input type="hidden" name="Id" id="editId" />
@@ -223,47 +258,47 @@
                     <div class="row g-3">
 
                         <div class="col-md-4">
-                            <label>Contenedor</label>
+                            <label class="form-label">Contenedor</label>
                             <input name="Contenedor" id="editContenedor" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Marchamos</label>
+                            <label class="form-label">Marchamos</label>
                             <input name="Marchamos" id="editMarchamos" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Transportista</label>
+                            <label class="form-label">Transportista</label>
                             <input name="Transportista" id="editTransportista" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Cliente</label>
+                            <label class="form-label">Cliente</label>
                             <input name="Cliente" id="editCliente" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Chofer</label>
+                            <label class="form-label">Chofer</label>
                             <input name="Chofer" id="editChofer" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Placa Cabezal</label>
+                            <label class="form-label">Placa Cabezal</label>
                             <input name="PlacaCabezal" id="editPlaca" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Chasis</label>
+                            <label class="form-label">Chasis</label>
                             <input name="Chasis" id="editChasis" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Viaje / DUA</label>
+                            <label class="form-label">Viaje / DUA</label>
                             <input name="ViajeDua" id="editViajeDua" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
-                            <label>Boleta</label>
+                            <label class="form-label">Boleta</label>
                             <input name="Boleta" id="editBoleta" class="form-control" />
                         </div>
 
@@ -271,13 +306,14 @@
 
                 </div>
 
+                <!-- FOOTER -->
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         Cancelar
                     </button>
 
                     <button class="btn btn-primary">
-                        Guardar cambios
+                        💾 Guardar cambios
                     </button>
                 </div>
 
@@ -287,37 +323,47 @@
     </div>
 </div>
 
-
 <!-- ================= MODAL ELIMINAR ================= -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content shadow">
 
             <form method="post" asp-action="EliminarDespacho">
                 @Html.AntiForgeryToken()
 
+                <!-- HEADER -->
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">Confirmar eliminación</h5>
+                    <h5 class="modal-title">🗑 Eliminar despacho</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="modal-body">
+                <!-- BODY -->
+                <div class="modal-body text-center">
 
                     <input type="hidden" name="id" id="deleteId" />
 
-                    <p>
-                        ¿Eliminar el despacho del contenedor
-                        <strong id="deleteContenedor"></strong>?
+                    <div class="mb-2">
+                        <span class="badge bg-secondary">Contenedor</span>
+                    </div>
+
+                    <h5 class="fw-bold text-danger">
+                        <span id="deleteContenedor"></span>
+                    </h5>
+
+                    <p class="text-muted mt-3">
+                        Esta acción no se puede deshacer.
                     </p>
 
                 </div>
 
+                <!-- FOOTER -->
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         Cancelar
                     </button>
 
                     <button class="btn btn-danger">
-                        Eliminar
+                        Sí, eliminar
                     </button>
                 </div>
 

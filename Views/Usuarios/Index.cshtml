@@ -1,46 +1,112 @@
 ﻿@using BitacoraAlfipac.Models.Entidades
 @model IEnumerable<Usuario>
 
-<h2 class="mb-4">Gestión de Usuarios</h2>
+<div class="container mt-4">
 
-<a asp-action="Create" class="btn btn-primary mb-3">
-    Nuevo usuario
-</a>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Usuario</th>
-            <th>Rol</th>
-            <th>Activo</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var u in Model)
-        {
-            <tr>
-                <td>@u.NombreUsuario</td>
-                <td>@u.Rol</td>
-                <td>
-                    @if (u.Activo)
-                    {
-                        <span class="badge bg-success">Activo</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-secondary">Inactivo</span>
-                    }
-                </td>
-                <td>
-                    <form asp-action="ToggleActivo" method="post">
-                        <input type="hidden" name="id" value="@u.Id" />
-                        <button class="btn btn-sm btn-outline-warning">
-                            Cambiar estado
-                        </button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+        <div>
+            <h3 class="mb-0">👥 Gestión de Usuarios</h3>
+            <small class="text-muted">Administración de acceso al sistema</small>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary">
+            ➕ Nuevo usuario
+        </a>
+
+    </div>
+
+    <!-- CARD -->
+    <div class="card shadow-sm">
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th style="width:160px;">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var u in Model)
+                        {
+                            <tr>
+
+                                <td class="fw-semibold">
+                                    @u.NombreUsuario
+                                </td>
+
+                                <td>
+                                    @switch (u.Rol)
+                                    {
+                                        case "Administrador":
+                                            <span class="badge bg-danger"> @u.Rol </span>
+                                            break;
+
+                                        case "Patio":
+                                            <span class="badge bg-primary"> @u.Rol </span>
+                                            break;
+
+                                        case "Digitador":
+                                            <span class="badge bg-success"> @u.Rol </span>
+                                            break;
+
+                                        default:
+                                            <span class="badge bg-secondary"> @u.Rol </span>
+                                            break;
+                                    }
+                                </td>
+
+                                <td>
+                                    @if (u.Activo)
+                                    {
+                                        <span class="badge bg-success">
+                                            ● Activo
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">
+                                            ● Inactivo
+                                        </span>
+                                    }
+                                </td>
+
+                                <td>
+
+                                    <form asp-action="ToggleActivo" method="post"
+                                          class="d-inline">
+
+                                        <input type="hidden" name="id" value="@u.Id" />
+
+                                        <button class="btn btn-sm btn-outline-warning">
+                                            🔁 Cambiar estado
+                                        </button>
+
+                                    </form>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

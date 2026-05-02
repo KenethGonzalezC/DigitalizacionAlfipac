@@ -1,198 +1,243 @@
 ﻿@model BitacoraAlfipac.Models.ViewModels.InventarioGeneralVM
 
-<h2 class="mb-4">📦 Inventario General de Contenedores</h2>
+<div class="container mt-4">
 
-<div class="mb-3">
-    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalAgregarManual">
-        ➕ Agregar Contenedor Manual
-    </button>
-</div>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">📦 Inventario General de Contenedores</h3>
 
-<h5></h5>
-
-<div class="row mb-4">
-    <div class="col">
-        <a asp-controller="Patio1" asp-action="Index"
-           class="btn btn-outline-primary w-100">Patio 1</a>
+        <button class="btn btn-success"
+                data-bs-toggle="modal"
+                data-bs-target="#modalAgregarManual">
+            ➕ Agregar Contenedor Manual
+        </button>
     </div>
 
-    <div class="col">
-        <a asp-controller="Patio2" asp-action="Index"
-           class="btn btn-outline-success w-100">Patio 2</a>
+    <!-- NAVEGACIÓN POR PATIOS -->
+    <div class="row g-2 mb-4">
+
+        <div class="col">
+            <a asp-controller="Patio1" asp-action="Index"
+               class="btn btn-outline-primary w-100">Patio 1</a>
+        </div>
+
+        <div class="col">
+            <a asp-controller="Patio2" asp-action="Index"
+               class="btn btn-outline-success w-100">Patio 2</a>
+        </div>
+
+        <div class="col">
+            <a asp-controller="Anden2000" asp-action="Index"
+               class="btn btn-outline-warning w-100">Andén 2000</a>
+        </div>
+
+        <div class="col">
+            <a asp-controller="PatioQuimicos" asp-action="Index"
+               class="btn btn-outline-danger w-100">Químicos</a>
+        </div>
+
     </div>
 
-    <div class="col">
-        <a asp-controller="Anden2000" asp-action="Index"
-           class="btn btn-outline-warning w-100">Andén 2000</a>
-    </div>
+    <!-- KPIs -->
+    <div class="row g-3 mb-4">
 
-    <div class="col">
-        <a asp-controller="PatioQuimicos" asp-action="Index"
-           class="btn btn-outline-danger w-100">Patio Químicos</a>
-    </div>
-</div>
-
-<div class="row mb-4">
-
-    <div class="col-md-3">
-        <div class="card bg-dark text-white shadow">
-            <div class="card-body">
-                <h5>Total</h5>
-                <h2>@Model.Total</h2>
+        <div class="col-md-3">
+            <div class="card bg-dark text-white shadow-sm">
+                <div class="card-body text-center">
+                    <h6>Total</h6>
+                    <h2 class="mb-0">@Model.Total</h2>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-md-3">
-        <div class="card bg-success text-white shadow">
-            <div class="card-body">
-                <h5>Cargados</h5>
-                <h2>@Model.Cargados</h2>
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body text-center">
+                    <h6>Cargados</h6>
+                    <h2 class="mb-0">@Model.Cargados</h2>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-md-3">
-        <div class="card bg-warning text-dark shadow">
-            <div class="card-body">
-                <h5>Vacíos</h5>
-                <h2>@Model.Vacios</h2>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark shadow-sm">
+                <div class="card-body text-center">
+                    <h6>Vacíos</h6>
+                    <h2 class="mb-0">@Model.Vacios</h2>
+                </div>
             </div>
         </div>
+
+    </div>
+
+    <!-- RESUMEN POR PATIO -->
+    <div class="d-flex gap-3 mb-4 overflow-auto pb-2">
+
+        <div class="card shadow-sm flex-shrink-0 text-center" style="min-width:180px;">
+            <div class="card-body">
+                <h6>Sin Patio</h6>
+                <h3>@Model.SinAsignar</h3>
+            </div>
+        </div>
+
+        <div class="card shadow-sm flex-shrink-0 text-center" style="min-width:180px;">
+            <div class="card-body">
+                <h6>Patio 1</h6>
+                <h3>@Model.Patio1</h3>
+            </div>
+        </div>
+
+        <div class="card shadow-sm flex-shrink-0 text-center" style="min-width:180px;">
+            <div class="card-body">
+                <h6>Patio 2</h6>
+                <h3>@Model.Patio2</h3>
+            </div>
+        </div>
+
+        <div class="card shadow-sm flex-shrink-0 text-center" style="min-width:180px;">
+            <div class="card-body">
+                <h6>Andén 2000</h6>
+                <h3>@Model.Anden2000</h3>
+            </div>
+        </div>
+
+        <div class="card border-danger shadow-sm flex-shrink-0 text-center" style="min-width:180px;">
+            <div class="card-body">
+                <h6>Químicos</h6>
+                <h3>@Model.Quimicos</h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FILTROS -->
+    <form method="get" class="card p-3 mb-4 shadow-sm">
+
+        <div class="row g-2">
+
+            <div class="col-md-2">
+                <input name="contenedor" class="form-control" placeholder="Contenedor" />
+            </div>
+
+            <div class="col-md-2">
+                <input name="transportista" class="form-control" placeholder="Transportista" />
+            </div>
+
+            <div class="col-md-2">
+                <input name="cliente" class="form-control" placeholder="Cliente" />
+            </div>
+
+            <div class="col-md-2">
+                <select name="estado" class="form-select">
+                    <option value="">Estado</option>
+                    <option value="Cargado">Cargado</option>
+                    <option value="Vacio">Vacío</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <input name="tamano" class="form-control" placeholder="Tamaño" />
+            </div>
+
+            <div class="col-md-2">
+                <select name="patio" class="form-select">
+                    <option value="">Patio</option>
+                    <option value="S/Pat">Sin Patio</option>
+                    <option value="P1">Patio 1</option>
+                    <option value="P2">Patio 2</option>
+                    <option value="2000">Andén 2000</option>
+                    <option value="AgroQui">Químicos</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="d-flex gap-2 mt-3">
+
+            <button class="btn btn-primary">
+                🔎 Filtrar
+            </button>
+
+            <a asp-action="InventarioGeneral"
+                   class="btn btn-outline-secondary">
+                Limpiar
+            </a>
+
+        </div>
+
+    </form>
+
+    <!-- TABLA -->
+    <div class="table-responsive">
+
+        <table class="table table-bordered table-striped table-sm align-middle shadow-sm">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>Contenedor</th>
+                    <th>Marchamos</th>
+                    <th>Tamaño</th>
+                    <th>Chasis</th>
+                    <th>Transportista</th>
+                    <th>Cliente</th>
+                    <th>Estado</th>
+                    <th>Ubicación</th>
+                    <th class="text-center">Acción</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (var c in Model.Items)
+                {
+                    <tr>
+                        <td class="fw-semibold">@c.Contenedor</td>
+                        <td>@c.Marchamos</td>
+                        <td>@c.Tamano</td>
+                        <td>@c.Chasis</td>
+                        <td>@c.Transportista</td>
+                        <td>@c.Cliente</td>
+
+                        <td>
+                            <span class="badge
+                                @(c.EstadoCarga == "Cargado" ? "bg-success" :
+                                            c.EstadoCarga == "Vacio" ? "bg-danger" : "bg-secondary")">
+                                @c.EstadoCarga
+                            </span>
+                        </td>
+
+                        <td>@c.Patio</td>
+
+                        <td class="text-center">
+
+                            @if (c.Cliente == "-")
+                            {
+                                <form asp-action="EliminarContenedor"
+                                      method="post"
+                                      onsubmit="return confirm('¿Seguro que deseas eliminar este contenedor?');">
+
+                                    <input type="hidden" name="contenedor" value="@c.Contenedor" />
+
+                                    <button class="btn btn-danger btn-sm">
+                                        🗑
+                                    </button>
+
+                                </form>
+                            }
+
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
     </div>
 
 </div>
 
-<div class="d-flex flex-nowrap gap-3 mb-4 overflow-auto pb-2">
-    <div class="card border-primary shadow flex-shrink-0" style="min-width: 180px; max-width: 220px;">
-        <div class="card-body text-center">
-            <h6>Sin Patio</h6>
-            <h3>@Model.SinAsignar</h3>
-        </div>
-    </div>
-
-    <div class="card border-primary shadow flex-shrink-0" style="min-width: 180px; max-width: 220px;">
-        <div class="card-body text-center">
-            <h6>Patio 1</h6>
-            <h3>@Model.Patio1</h3>
-        </div>
-    </div>
-
-    <div class="card border-primary shadow flex-shrink-0" style="min-width: 180px; max-width: 220px;">
-        <div class="card-body text-center">
-            <h6>Patio 2</h6>
-            <h3>@Model.Patio2</h3>
-        </div>
-    </div>
-
-    <div class="card border-primary shadow flex-shrink-0" style="min-width: 180px; max-width: 220px;">
-        <div class="card-body text-center">
-            <h6>Andén 2000</h6>
-            <h3>@Model.Anden2000</h3>
-        </div>
-    </div>
-
-    <div class="card border-danger shadow flex-shrink-0" style="min-width: 180px; max-width: 220px;">
-        <div class="card-body text-center">
-            <h6>Químicos</h6>
-            <h3>@Model.Quimicos</h3>
-        </div>
-    </div>
-</div>
-
-<form method="get" class="row g-2 mb-4">
-
-    <div class="col-md-2">
-        <input name="contenedor" class="form-control" placeholder="Contenedor" />
-    </div>
-
-    <div class="col-md-2">
-        <input name="transportista" class="form-control" placeholder="Transportista" />
-    </div>
-
-    <div class="col-md-2">
-        <input name="cliente" class="form-control" placeholder="Cliente" />
-    </div>
-
-    <div class="col-md-2">
-        <select name="estado" class="form-select">
-            <option value="">Estado</option>
-            <option>Cargado</option>
-            <option>Vacio</option>
-        </select>
-    </div>
-
-    <div class="col-md-2">
-        <input name="tamano" class="form-control" placeholder="Tamaño" />
-    </div>
-
-    <div class="col-md-2">
-        <select name="patio" class="form-select">
-            <option value="">Patio</option>
-            <option value="S/Pat">Sin Patio</option>
-            <option value="P1">Patio 1</option>
-            <option value="P2">Patio 2</option>
-            <option value="2000">Andén 2000</option>
-            <option value="AgroQui">Químicos</option>
-        </select>
-    </div>
-
-    <div class="col-md-1">
-        <button class="btn btn-primary w-100">Filtrar</button>
-    </div>
-
-    <div class="col-md-1">
-        <a asp-action="InventarioGeneral" class="btn btn-secondary w-100">Limpiar</a>
-    </div>
-
-</form>
-
-
-<table class="table table-bordered table-striped table-sm shadow">
-    <thead class="table-dark">
-        <tr>
-            <th>Contenedor</th>
-            <th>Marchamos</th>
-            <th>Tamaño</th>
-            <th>Chasis</th>
-            <th>Transportista</th>
-            <th>Cliente</th>
-            <th>Estado</th>
-            <th>Ubicacion</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var c in Model.Items)
-        {
-            <tr>
-                <td>@c.Contenedor</td>
-                <td>@c.Marchamos</td>
-                <td>@c.Tamano</td>
-                <td>@c.Chasis</td>
-                <td>@c.Transportista</td>
-                <td>@c.Cliente</td>
-                <td>@c.EstadoCarga</td>
-                <td>@c.Patio</td>
-                <td>
-                    @if (c.Cliente == "-")
-                    {
-                        <form asp-action="EliminarContenedor" method="post"
-                              onsubmit="return confirm('¿Seguro que deseas eliminar este contenedor?');">
-
-                            <input type="hidden" name="contenedor" value="@c.Contenedor" />
-
-                            <button class="btn btn-danger btn-sm">
-                                🗑 
-                            </button>
-                        </form>
-                    }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
+<!-- MODAL AGREGAR -->
 <div class="modal fade" id="modalAgregarManual" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -202,7 +247,8 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <form asp-action="AgregarManual" method="post">
+            <form asp-controller="Inventario" asp-action="AgregarManual" method="post">
+                @Html.AntiForgeryToken()
 
                 <div class="modal-body">
 
@@ -240,9 +286,10 @@
 
                         <div class="col-md-4">
                             <label>Estado</label>
-                            <select name="EstadoCarga" class="form-select">
-                                <option>Cargado</option>
-                                <option>Vacío</option>
+                            <select name="EstadoCarga" class="form-select" required>
+                                <option value="">-- Seleccione --</option>
+                                <option value="Cargado">Cargado</option>
+                                <option value="Vacio">Vacío</option>
                             </select>
                         </div>
 
@@ -251,12 +298,8 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-success">
-                        💾 Guardar
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
+                    <button class="btn btn-success">💾 Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 </div>
 
             </form>
@@ -264,4 +307,3 @@
         </div>
     </div>
 </div>
-

@@ -1,35 +1,93 @@
 ﻿@using BitacoraAlfipac.Models.ViewModels
 @model UsuarioCreateViewModel
 
-<h2>Nuevo Usuario</h2>
+<div class="container mt-4">
 
-<form asp-action="Create" method="post" class="card p-4 shadow-sm">
-
+    <!-- HEADER -->
     <div class="mb-3">
-        <label asp-for="NombreUsuario" class="form-label"></label>
-        <input asp-for="NombreUsuario" class="form-control" />
+        <h3 class="mb-0">➕ Crear usuario</h3>
+        <small class="text-muted">Agregar nuevo acceso al sistema</small>
     </div>
 
-    <div class="mb-3">
-        <label asp-for="Password" class="form-label"></label>
-        <input asp-for="Password" class="form-control" />
+    <!-- CARD FORM -->
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <form asp-action="Create" method="post" autocomplete="off">
+
+                <div class="row g-3">
+
+                    <!-- USUARIO -->
+                    <div class="col-md-6">
+                        <label asp-for="NombreUsuario" class="form-label">
+                            Usuario
+                        </label>
+
+                        <input asp-for="NombreUsuario"
+                               class="form-control"
+                               placeholder=""
+                               autocomplete="new-username" />
+
+                        <span asp-validation-for="NombreUsuario"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <!-- PASSWORD -->
+                    <div class="col-md-6">
+                        <label asp-for="Password" class="form-label">
+                            Contraseña
+                        </label>
+
+                        <input asp-for="Password"
+                               type="password"
+                               class="form-control"
+                               placeholder=""
+                               autocomplete="new-password" />
+
+                        <span asp-validation-for="Password"
+                              class="text-danger small"></span>
+                    </div>
+
+                    <!-- ROL -->
+                    <div class="col-md-6">
+                        <label asp-for="Rol" class="form-label">
+                            Rol del usuario
+                        </label>
+
+                        <select asp-for="Rol"
+                                asp-items="Model.RolesDisponibles"
+                                class="form-select">
+
+                            <option value="">-- Seleccione un rol --</option>
+
+                        </select>
+
+                        <span asp-validation-for="Rol"
+                              class="text-danger small"></span>
+                    </div>
+
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="mt-4 d-flex justify-content-between">
+
+                    <a asp-action="Index"
+                           class="btn btn-outline-secondary">
+                        ← Cancelar
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-success">
+                        💾 Crear usuario
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
     </div>
 
-    <div class="mb-3">
-        <label asp-for="Rol" class="form-label">Rol</label>
-        <select asp-for="Rol"
-                asp-items="Model.RolesDisponibles"
-                class="form-select">
-            <option value="">-- Seleccione un rol --</option>
-        </select>
-        <span asp-validation-for="Rol" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-success">
-        Crear usuario
-    </button>
-
-    <a asp-action="Index" class="btn btn-secondary ms-2">
-        Cancelar
-    </a>
-</form>
+</div>
