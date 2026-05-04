@@ -1,4 +1,18 @@
 ﻿/* =========================
+   FIX GLOBAL LAYOUT
+========================= */
+
+/* Reset base */
+html, body {
+    height: 100%;
+    overflow: hidden; /* todo el scroll pasa al content */
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* =========================
    VARIABLES (DISEÑO BASE)
 ========================= */
 :root {
@@ -11,6 +25,10 @@
     --color-muted: #6b7280;
     --radius: 12px;
     --transition: 0.2s ease;
+    --sidebar-width: 240px;
+    --sidebar-collapsed: 70px;
+    --topbar-height: 70px;
+    --footer-height: 50px;
 }
 
 /* =========================
@@ -27,20 +45,26 @@ body {
 ========================= */
 .app-wrapper {
     display: flex;
-    min-height: 100vh;
+    height: 100vh;
+    width: 100%;
 }
 
 /* =========================
-   SIDEBAR
+   SIDEBAR (FIJO)
 ========================= */
 .sidebar {
-    width: 240px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
     background: var(--color-primary);
     color: white;
     display: flex;
     flex-direction: column;
     padding: 20px;
     transition: width 0.3s ease;
+    z-index: 1000;
 }
 
 .sidebar-header {
@@ -83,7 +107,7 @@ body {
    SIDEBAR COLLAPSED
 ========================= */
 .sidebar-collapsed .sidebar {
-    width: 70px;
+    width: var(--sidebar-collapsed);
 }
 
     .sidebar-collapsed .sidebar span {
@@ -100,31 +124,85 @@ body {
 }
 
 /* =========================
-   MAIN
+   MAIN WRAPPER
 ========================= */
 .main-content {
-    flex: 1;
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
     display: flex;
     flex-direction: column;
+    height: 100vh;
+}
+
+.sidebar-collapsed .main-content {
+    margin-left: var(--sidebar-collapsed);
+    width: calc(100% - var(--sidebar-collapsed));
 }
 
 /* =========================
-   TOPBAR
+   TOPBAR (FIJO)
 ========================= */
 .topbar {
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-width);
+    right: 0;
+    height: var(--topbar-height);
     background: white;
-    padding: 15px 25px;
+    padding: 0 25px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     border-bottom: 1px solid #eee;
+    z-index: 900;
+    transition: var(--transition);
+}
+
+    /* sombra dinámica */
+    .topbar.scrolled {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+.sidebar-collapsed .topbar {
+    left: var(--sidebar-collapsed);
 }
 
 /* =========================
-   CONTENT
+   CONTENT (SCROLL REAL)
 ========================= */
 .content {
+    margin-top: var(--topbar-height);
+    margin-bottom: var(--footer-height);
+    height: calc(100vh - var(--topbar-height) - var(--footer-height));
+    overflow-y: auto;
+    overflow-x: hidden;
     padding: 25px;
+}
+
+/* Bootstrap fix */
+.container-fluid {
+    max-width: 100%;
+}
+
+/* =========================
+   FOOTER (FIJO)
+========================= */
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: var(--sidebar-width);
+    right: 0;
+    height: var(--footer-height);
+    background: white;
+    border-top: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 900;
+}
+
+.sidebar-collapsed .footer {
+    left: var(--sidebar-collapsed);
 }
 
 /* =========================
@@ -143,7 +221,6 @@ body {
     text-decoration: none;
 }
 
-/* CARDS PRINCIPALES */
 .dashboard-main-card {
     padding: 20px;
     text-align: center;
@@ -161,7 +238,6 @@ body {
     color: var(--color-primary);
 }
 
-/* CARDS PEQUEÑAS */
 .dashboard-small-card {
     padding: 15px;
     transition: var(--transition);
@@ -196,15 +272,12 @@ body {
     }
 
 /* =========================
-   UTILIDADES UX (CLAVE)
+   UTILIDADES UX
 ========================= */
-
-/* Hover suave general */
 a, button {
     transition: var(--transition);
 }
 
-/* Inputs más claros */
 .form-control {
     border-radius: 8px;
 }
@@ -214,16 +287,6 @@ a, button {
         border-color: var(--color-accent);
     }
 
-/* Botón toggle */
 #toggleSidebar {
     border-radius: 8px;
-}
-
-/* =========================
-   FOOTER
-========================= */
-.footer {
-    margin-top: auto;
-    background: transparent;
-    font-size: 13px;
 }

@@ -1,0 +1,109 @@
+﻿/* =========================
+   BASE
+========================= */
+html, body {
+    height: 100%;
+    overflow: hidden; /* 🔥 CLAVE: evita scroll global */
+}
+
+body {
+    background: var(--color-bg);
+    font-family: 'Segoe UI', sans-serif;
+    color: var(--color-text);
+}
+
+/* =========================
+   LAYOUT
+========================= */
+.app-wrapper {
+    display: flex;
+    height: 100vh; /* 🔥 en vez de min-height */
+}
+
+/* =========================
+   SIDEBAR (FIJO)
+========================= */
+.sidebar {
+    width: 240px;
+    height: 100vh;
+    background: var(--color-primary);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    position: fixed; /* 🔥 fijo */
+    top: 0;
+    left: 0;
+    overflow-y: auto; /* scroll interno si crece */
+
+    transition: width 0.3s ease;
+}
+
+/* =========================
+   SIDEBAR COLLAPSED
+========================= */
+.sidebar-collapsed .sidebar {
+    width: 70px;
+}
+
+    .sidebar-collapsed .sidebar span {
+        display: none;
+    }
+
+.sidebar-collapsed .sidebar-header span {
+    display: none;
+}
+
+.sidebar-collapsed .sidebar-menu a {
+    justify-content: center;
+    padding: 12px 5px;
+}
+
+/* =========================
+   MAIN (COMPENSA SIDEBAR)
+========================= */
+.main-content {
+    margin-left: 240px; /* 🔥 clave para fixed sidebar */
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+}
+
+/* Ajuste cuando está colapsado */
+.sidebar-collapsed .main-content {
+    margin-left: 70px;
+}
+
+/* =========================
+   TOPBAR (FIJA)
+========================= */
+.topbar {
+    background: white;
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    position: sticky; /* 🔥 queda fija arriba */
+    top: 0;
+    z-index: 1000;
+}
+
+/* =========================
+   CONTENT (SCROLL REAL)
+========================= */
+.content {
+    padding: 25px;
+    flex: 1;
+    overflow-y: auto; /* 🔥 aquí vive el scroll */
+}
+
+/* =========================
+   FOOTER
+========================= */
+.footer {
+    margin-top: auto;
+    background: transparent;
+    font-size: 13px;
+}
