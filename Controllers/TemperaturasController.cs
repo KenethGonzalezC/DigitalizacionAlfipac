@@ -22,7 +22,7 @@ public class TemperaturasController : Controller
     public async Task<IActionResult> Index()
     {
         var contenedores = await _context.ContenedoresRefrigerados
-            .OrderByDescending(c => c.FechaHoraDespacho)
+            .OrderByDescending(c => c.FechaHoraIngreso)
             .ToListAsync();
 
         var activos = contenedores

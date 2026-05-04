@@ -1,6 +1,24 @@
 ﻿@model List<BitacoraAlfipac.Models.Entidades.ActasPermanencias>
 
 @{
+    ViewData["Title"] = "Actas & PAB";
+}
+
+@if (TempData["Ok"] != null)
+{
+    <div class="alert alert-success">@TempData["Ok"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+@{
     var actas = Model.Where(x => x.Tipo == "ACTA").ToList();
     var pabs = Model.Where(x => x.Tipo == "PAB").ToList();
 }

@@ -434,17 +434,42 @@ namespace BitacoraAlfipac.Controllers
         {
             public int Id { get; set; }
             public int Orden { get; set; }
+
+            public string? Marchamos { get; set; }
+            public string? EstadoCarga { get; set; }
+            public string? Chasis { get; set; }
+            public string? Transportista { get; set; }
+            public string? Cliente { get; set; }
         }
 
         [HttpPost]
         public IActionResult GuardarOrden([FromBody] List<OrdenItem> lista)
         {
+            if (lista == null || !lista.Any())
+                return BadRequest();
+
+            var ids = lista.Select(x => x.Id).ToList();
+
+            var contenedores = _context.Anden2000
+                .Where(x => ids.Contains(x.Id))
+                .ToList();
+
             foreach (var item in lista)
             {
-                var registro = _context.Anden2000.FirstOrDefault(x => x.Id == item.Id);
+                var contenedor = contenedores.FirstOrDefault(x => x.Id == item.Id);
 
-                if (registro != null)
-                    registro.Orden = item.Orden;
+                if (contenedor == null)
+                    continue;
+
+                // 🔹 ORDEN
+                contenedor.Orden = item.Orden;
+
+                // 🔹 DATOS (vienen del frontend)
+                contenedor.Marchamos = item.Marchamos;
+                contenedor.EstadoCarga = item.EstadoCarga;
+                contenedor.Chasis = item.Chasis;
+                contenedor.Transportista = item.Transportista;
+                contenedor.Cliente = item.Cliente;
             }
 
             _context.SaveChanges();

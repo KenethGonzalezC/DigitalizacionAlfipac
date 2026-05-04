@@ -461,31 +461,28 @@ namespace BitacoraAlfipac.Controllers
             if (lista == null || !lista.Any())
                 return BadRequest();
 
+            var ids = lista.Select(x => x.Id).ToList();
+
+            var contenedores = _context.Patio1
+                .Where(x => ids.Contains(x.Id))
+                .ToList();
+
             foreach (var item in lista)
             {
-                var cont = _context.Patio1.FirstOrDefault(x => x.Id == item.Id);
+                var cont = contenedores.FirstOrDefault(x => x.Id == item.Id);
 
                 if (cont == null)
                     continue;
 
-                // 🔹 actualización de orden
+                // 🔹 Orden
                 cont.Orden = item.Orden;
 
-                // 🔹 actualización de edición (solo si vienen datos)
-                if (!string.IsNullOrEmpty(item.Marchamos))
-                    cont.Marchamos = item.Marchamos;
-
-                if (!string.IsNullOrEmpty(item.EstadoCarga))
-                    cont.EstadoCarga = item.EstadoCarga;
-
-                if (!string.IsNullOrEmpty(item.Chasis))
-                    cont.Chasis = item.Chasis;
-
-                if (!string.IsNullOrEmpty(item.Transportista))
-                    cont.Transportista = item.Transportista;
-
-                if (!string.IsNullOrEmpty(item.Cliente))
-                    cont.Cliente = item.Cliente;
+                // 🔹 Datos (SIN riesgo de null ahora porque vienen del front)
+                cont.Marchamos = item.Marchamos;
+                cont.EstadoCarga = item.EstadoCarga;
+                cont.Chasis = item.Chasis;
+                cont.Transportista = item.Transportista;
+                cont.Cliente = item.Cliente;
             }
 
             _context.SaveChanges();

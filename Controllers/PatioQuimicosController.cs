@@ -460,17 +460,42 @@ namespace BitacoraAlfipac.Controllers
         {
             public int Id { get; set; }
             public int Orden { get; set; }
+
+            public string? Marchamos { get; set; }
+            public string? EstadoCarga { get; set; }
+            public string? Chasis { get; set; }
+            public string? Transportista { get; set; }
+            public string? Cliente { get; set; }
         }
 
         [HttpPost]
         public IActionResult GuardarOrden([FromBody] List<OrdenItem> lista)
         {
+            if (lista == null || !lista.Any())
+                return BadRequest();
+
+            var ids = lista.Select(x => x.Id).ToList();
+
+            var contenedores = _context.PatioQuimicos
+                .Where(x => ids.Contains(x.Id))
+                .ToList();
+
             foreach (var item in lista)
             {
-                var registro = _context.PatioQuimicos.FirstOrDefault(x => x.Id == item.Id);
+                var cont = contenedores.FirstOrDefault(x => x.Id == item.Id);
 
-                if (registro != null)
-                    registro.Orden = item.Orden;
+                if (cont == null)
+                    continue;
+
+                // 🔹 ORDEN
+                cont.Orden = item.Orden;
+
+                // 🔹 DATOS
+                cont.Marchamos = item.Marchamos;
+                cont.EstadoCarga = item.EstadoCarga;
+                cont.Chasis = item.Chasis;
+                cont.Transportista = item.Transportista;
+                cont.Cliente = item.Cliente;
             }
 
             _context.SaveChanges();

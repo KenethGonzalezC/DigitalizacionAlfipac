@@ -64,14 +64,7 @@
                                step="60"
                                value="@Model.FechaHoraDespacho.ToString("yyyy-MM-ddTHH:mm")"
                                class="form-control" required />
-                    </div>
-
-                    <div class="col-md-4 d-flex align-items-end">
-                        <div class="form-check">
-                            <input asp-for="EsSalidaEnFurgon" id="EsSalidaEnFurgon" class="form-check-input" />
-                            <label class="form-check-label fw-semibold">Salida en furgón</label>
-                        </div>
-                    </div>
+                    </div>                    
 
                     <div class="col-md-3">
                         <label class="form-label">Marchamos</label>
@@ -106,25 +99,39 @@
                     <div class="col-md-3">
                         <label class="form-label">Viaje / DUA</label>
                         <input asp-for="ViajeDua" class="form-control" />
-                    </div>
-
-                    <div class="col-md-3 form-check mt-4">
-                        <input asp-for="GuardarContenedorSalida" id="GuardarContenedorSalida" class="form-check-input" />
-                        <label class="form-check-label">Guardar contenedor salida</label>
-                    </div>
+                    </div>                    
 
                     <div class="col-md-3">
                         <label class="form-label">Contenedor referencia</label>
                         <input asp-for="ContenedorReferencia" class="form-control" />
+                    </div>                    
+
+                    <!-- FILA FINAL -->
+                    <div class="col-12 mt-3">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                            <!-- Checkboxes -->
+                            <div class="d-flex gap-4">
+                                <div class="form-check">
+                                    <input asp-for="GuardarContenedorSalida" id="GuardarContenedorSalida" class="form-check-input" />
+                                    <label class="form-check-label">Guardar contenedor salida</label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input asp-for="EsSalidaEnFurgon" id="EsSalidaEnFurgon" class="form-check-input" />
+                                    <label class="form-check-label fw-semibold">Salida en furgón</label>
+                                </div>
+                            </div>
+
+                            <!-- Botón -->
+                            <div>
+                                <button type="submit" class="btn btn-primary px-4">
+                                    Registrar despacho
+                                </button>
+                            </div>
+
+                        </div>
                     </div>
-
-                </div>
-
-                <div class="mt-4 text-end">
-                    <button type="submit" class="btn btn-primary px-4">
-                        Registrar despacho
-                    </button>
-                </div>
 
             </form>
         </div>

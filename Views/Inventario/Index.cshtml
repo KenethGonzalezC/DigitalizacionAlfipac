@@ -1,12 +1,36 @@
 ﻿@using BitacoraAlfipac.Models.ViewModels
 @model InventarioIndexVM
 
-<div class="container mt-4">
+@{
+    ViewData["Title"] = "Sin Asingar";
+}
+
+@if (TempData["Ok"] != null)
+{
+    <div class="alert alert-success">@TempData["Ok"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<div >
 
     <!-- HEADER -->
     <div class="mb-3">
         <h3 class="mb-0">📦 Inventario de Contenedores</h3>
         <small class="text-muted">Gestión operativa de patios y movimientos</small>
+    </div>
+
+    <h3 class="mb-0">📋 Contenedores sin asignar patio</h3>
+
+    <div>
+        <h5></h5>
     </div>
 
     <!-- ACCIONES PRINCIPALES -->
@@ -28,7 +52,7 @@
                 data-bs-toggle="modal"
                 data-bs-target="#modalExportarGeneral">
             🌎 Exportar
-        </button>        
+        </button>    
 
     </div>
 
@@ -46,28 +70,28 @@
                 <div class="col-md-3">
                     <a asp-controller="Patio1" asp-action="Index"
                            class="btn btn-outline-primary w-100">
-                        🟦 Patio 1
+                        Patio 1
                     </a>
                 </div>
 
                 <div class="col-md-3">
                     <a asp-controller="Patio2" asp-action="Index"
                            class="btn btn-outline-success w-100">
-                        🟩 Patio 2
+                        Patio 2
                     </a>
                 </div>
 
                 <div class="col-md-3">
                     <a asp-controller="Anden2000" asp-action="Index"
                            class="btn btn-outline-warning w-100">
-                        🟨 Andén 2000
+                        Andén 2000
                     </a>
                 </div>
 
                 <div class="col-md-3">
                     <a asp-controller="PatioQuimicos" asp-action="Index"
                            class="btn btn-outline-danger w-100">
-                        ☣️ Químicos
+                        Químicos
                     </a>
                 </div>
 
@@ -145,7 +169,7 @@
                 <div class="col-md-3">
                     <div class="drop-box border rounded p-3 text-center bg-light"
                          data-destino="Anden2000">
-                        🏗️ Andén 2000
+                        📦 Andén 2000
                     </div>
                 </div>
 
@@ -171,7 +195,7 @@
     </div>
 
     <!-- TABLA -->
-    <div class="card shadow-sm">
+    <div class="table-responsive card shadow-sm">
 
         <div class="card-header bg-white">
             <strong>📋 Contenedores sin asignar patio</strong>
@@ -322,14 +346,20 @@
 
                 <div class="modal-body">
                     <input name="nombre" class="form-control mb-2" placeholder="Responsable" required />
-                    <input type="date" name="fecha" class="form-control mb-2" required />
+                    <input type="date" name="fecha" value="@DateTime.Now.ToString("yyyy-MM-dd")" class="form-control mb-2" required />
                     <input name="turno" class="form-control" placeholder="Turno" />
                 </div>
 
                 <div class="modal-footer d-flex gap-2">
-                    <button formaction="/Inventario/ExportarGeneralPDF" class="btn btn-danger flex-fill">PDF</button>
-                    <button formaction="/Inventario/ExportarGeneralExcel" class="btn btn-success flex-fill">Excel</button>
-                    <button formaction="/Inventario/ExportarGeneralCSV" class="btn btn-primary flex-fill">CSV</button>
+                    <button formaction="/Inventario/ExportarGeneralPDF" class="btn btn-danger flex-fill">
+                        📕 PDF
+                    </button>
+                    <button formaction="/Inventario/ExportarGeneralExcel" class="btn btn-success flex-fill">
+                        📗 Excel
+                    </button>
+                    <button formaction="/Inventario/ExportarGeneralCSV" class="btn btn-primary flex-fill">
+                        📘 CSV
+                    </button>
                 </div>
             </form>
         </div>

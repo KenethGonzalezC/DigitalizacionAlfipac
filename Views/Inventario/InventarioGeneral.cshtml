@@ -1,16 +1,45 @@
 ﻿@model BitacoraAlfipac.Models.ViewModels.InventarioGeneralVM
 
-<div class="container mt-4">
+@{
+    ViewData["Title"] = "Inventario General";
+}
+
+@if (TempData["Ok"] != null)
+{
+    <div class="alert alert-success">@TempData["Ok"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<div>
 
     <!-- HEADER -->
+    <div class="mb-3">
+        <h3 class="mb-0">📦 Inventario de Contenedores</h3>
+        <small class="text-muted">Gestión operativa de patios y movimientos</small>
+    </div>
+
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="mb-0">📦 Inventario General de Contenedores</h3>
+        <h3 class="mb-0">📦 Inventario General de Contenedores</h3>        
 
         <button class="btn btn-success"
                 data-bs-toggle="modal"
                 data-bs-target="#modalAgregarManual">
             ➕ Agregar Contenedor Manual
         </button>
+
+        <div>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                ← Volver
+            </a>
+        </div>
     </div>
 
     <!-- NAVEGACIÓN POR PATIOS -->
@@ -163,6 +192,13 @@
                 Limpiar
             </a>
 
+            <button type="button"
+                    class="btn btn-outline-dark"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalExportarGeneral">
+                📄 Exportar
+            </button>
+
         </div>
 
     </form>
@@ -307,3 +343,30 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalExportarGeneral" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">Reporte General de Contenedores</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input name="nombre" class="form-control mb-2" placeholder="Responsable" required />
+                    <input type="date" name="fecha" value="@DateTime.Now.ToString("yyyy-MM-dd")" class="form-control mb-2" required />
+                    <input name="turno" class="form-control" placeholder="Turno" />
+                </div>
+
+                <div class="modal-footer d-flex gap-2">
+                    <button formaction="/Inventario/ExportarGeneralPDF" class="btn btn-danger flex-fill">PDF</button>
+                    <button formaction="/Inventario/ExportarGeneralExcel" class="btn btn-success flex-fill">Excel</button>
+                    <button formaction="/Inventario/ExportarGeneralCSV" class="btn btn-primary flex-fill">CSV</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>

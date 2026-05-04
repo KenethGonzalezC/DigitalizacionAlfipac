@@ -1,6 +1,24 @@
 ﻿@using BitacoraAlfipac.Models.ViewModels
 @model UsuarioCreateViewModel
 
+@{
+    ViewData["Title"] = "Crear Usuario";
+}
+
+@if (TempData["Ok"] != null)
+{
+    <div class="alert alert-success">@TempData["Ok"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
 <div class="container mt-4">
 
     <!-- HEADER -->

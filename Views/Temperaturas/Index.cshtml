@@ -4,7 +4,21 @@
     ViewData["Title"] = "Contenedores Refrigerados";
 }
 
-<div class="container mt-4">
+@if (TempData["Ok"] != null)
+{
+    <div class="alert alert-success">@TempData["Ok"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<div >
 
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -155,7 +169,8 @@
 
                     <tbody>
                         @foreach (var c in (ViewBag.Despachados as IEnumerable<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>
-                            ?? Enumerable.Empty<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>()))
+                            ?? Enumerable.Empty<BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado>())
+                            .OrderByDescending(x => x.FechaHoraDespacho))
                         {
                             <tr>
                                 <td class="fw-semibold">

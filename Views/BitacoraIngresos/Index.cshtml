@@ -55,16 +55,7 @@
                                class="form-control"
                                value="@Model.FechaHoraIngreso.ToString("yyyy-MM-ddTHH:mm")"
                                required />
-                    </div>
-
-                    <div class="col-md-4 d-flex align-items-end">
-                        <div class="form-check">
-                            <input asp-for="EsRefrigerado" class="form-check-input" type="checkbox" />
-                            <label asp-for="EsRefrigerado" class="form-check-label fw-semibold">
-                                Refrigerado
-                            </label>
-                        </div>
-                    </div>
+                    </div>                    
 
                     <div class="col-md-3">
                         <label class="form-label">Marchamos</label>
@@ -106,9 +97,19 @@
                         <input asp-for="ViajeDua" class="form-control" />
                     </div>
 
-                </div>
+                </div>                
 
                 <div class="mt-4 text-end">
+
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="form-check">
+                            <input asp-for="EsRefrigerado" class="form-check-input" type="checkbox" />
+                            <label asp-for="EsRefrigerado" class="form-check-label fw-semibold">
+                                Refrigerado
+                            </label>
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn btn-primary px-4">
                         Registrar ingreso
                     </button>

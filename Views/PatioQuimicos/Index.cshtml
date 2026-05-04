@@ -1,203 +1,339 @@
 ﻿@model IEnumerable<BitacoraAlfipac.Models.Entidades.PatioQuimicos>
 
-<h2>Inventario de Contenedores</h2>
+@{
+    ViewData["Title"] = "Patio Químicos";
+}
+
+@if (TempData["Ok"] != null)
+{
+    <div class="alert alert-success">@TempData["Ok"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
 
 <div>
-    <a asp-controller="Inventario"
-           asp-action="InventarioGeneral"
-           class="btn btn-dark mb-3">
-        📊 Ver Inventario General
-    </a>
-</div>
 
-<div>
-    <a asp-controller="BitacoraIngresos"
-           asp-action="Vehiculos"
-           class="btn btn-outline-primary">
-        🚗 Vehículos en almacén
-    </a>
-</div>
-
-<h5></h5>
-
-<div class="row mb-4">
-    <div class="col">
-        <a asp-controller="Inventario"
-               asp-action="Index"
-               class="btn btn-outline-primary w-100">
-            Inventario
-        </a>
+    <div class="mb-3">
+        <h3 class="mb-0">📦 Inventario de Contenedores</h3>
+        <small class="text-muted">Gestión operativa de patios y movimientos</small>
     </div>
 
-    <div class="col">
-        <a asp-controller="Patio1"
-               asp-action="Index"
-               class="btn btn-outline-info w-100">
-            Patio 1
-        </a>
-    </div>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">☣️ Patio Químicos</h3>
 
-    <div class="col">
-        <a asp-controller="Patio2"
-               asp-action="Index"
-               class="btn btn-outline-success w-100">
-            Patio 2
-        </a>
-    </div>
+        <div class="d-flex gap-2">
+            <a asp-controller="Inventario"
+                   asp-action="InventarioGeneral"
+                   class="btn btn-dark">
+                📊 Inventario General
+            </a>
 
-    <div class="col">
-        <a asp-controller="Anden2000"
-               asp-action="Index"
-               class="btn btn-outline-warning w-100">
-            Andén 2000
-        </a>
-    </div>
-</div>
-
-<form id="formBusquedaGlobal">
-    <div class="row align-items-end">
-        <div class="col-md-4">
-            <input name="contenedor"
-                   class="form-control"
-                   placeholder="Buscar contenedor..." />
-        </div>
-
-        <div class="col-md-4 d-flex gap-2">
-            <button type="submit"
-                    class="btn btn-primary flex-fill">
-                Buscar
-            </button>
-
-            <a asp-action="Index"
-                   class="btn btn-secondary flex-fill">
-                Limpiar
+            <a asp-controller="BitacoraIngresos"
+                   asp-action="Vehiculos"
+                   class="btn btn-outline-primary">
+                🚗 Vehículos
             </a>
         </div>
     </div>
-</form>
 
-<div class="my-3 d-flex gap-2">
+    <div class="card shadow-sm mb-4">
 
-    <form asp-action="LimpiarPatio"
-          method="post"
-          onsubmit="return confirm('¿Seguro que desea limpiar TODO el patio?');">
+        <div class="card-header bg-white">
+            <strong>📍 Accesos por patio</strong>
+        </div>
 
-        <button class="btn btn-danger">
-            🧹 Limpiar patio
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-3">
+                    <a asp-controller="Inventario" asp-action="Index"
+                       class="btn btn-outline-primary w-100">Inventario</a>
+                </div>
+
+                <div class="col-md-3">
+                    <a asp-controller="Patio1" asp-action="Index"
+                       class="btn btn-outline-info w-100">Patio 1</a>
+                </div>
+
+                <div class="col-md-3">
+                    <a asp-controller="Patio2" asp-action="Index"
+                       class="btn btn-outline-success w-100">Patio 2</a>
+                </div>
+
+                <div class="col-md-3">
+                    <a asp-controller="Anden2000" asp-action="Index"
+                       class="btn btn-outline-warning w-100">Andén 2000</a>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- BUSQUEDA GLOBAL -->
+    <div class="card shadow-sm mb-4">
+
+        <div class="card-body">
+
+            <form id="formBusquedaGlobal">
+
+                <div class="row g-2 align-items-end">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Búsqueda global</label>
+                        <input name="contenedor"
+                               class="form-control"
+                               placeholder="Buscar contenedor..." />
+                    </div>
+
+                    <div class="col-md-3 d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            🔎 Buscar
+                        </button>
+                    </div>
+
+                    <div class="col-md-3 d-grid">
+                        <a asp-action="Index"
+                               class="btn btn-outline-secondary">
+                            Limpiar
+                        </a>
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- ACCIONES -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+
+        <form asp-action="LimpiarPatio"
+              method="post"
+              onsubmit="return confirm('¿Seguro que desea limpiar TODO el patio?');">
+
+            <button class="btn btn-danger">
+                🧹 Limpiar
+            </button>
+        </form>
+
+        <button class="btn btn-warning"
+                data-bs-toggle="modal"
+                data-bs-target="#modalExportar">
+            📄 Exportar
         </button>
-    </form>
 
-    <button class="btn btn-warning"
-            data-bs-toggle="modal"
-            data-bs-target="#modalExportar">
-        📄 Exportar Inventario
-    </button>
+    </div>
+
+    <!-- PANEL TRASLADO -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-dark text-white">
+            🚚 Traslado rápido de contenedores
+            <small class="d-block text-white-50">
+                Arrastre ☰ hacia el patio destino
+            </small>
+        </div>
+
+        <div class="card-body">
+            <div class="row g-3 text-center">
+
+                <div class="col-md-3">
+                    <div class="drop-box border rounded p-4 text-center bg-light"
+                         data-destino="SinAsignar">
+                        📋 Sin asignar
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="drop-box border rounded p-4 text-center bg-light"
+                         data-destino="Patio1">
+                        📦 Patio 1
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="drop-box border rounded p-4 text-center bg-light"
+                         data-destino="Patio2">
+                        📦 Patio 2
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="drop-box border rounded p-4 text-center bg-light"
+                         data-destino="Anden2000">
+                        📦 Andén 2000
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <button id="btnGuardarOrden"
             class="btn btn-success">
         💾 Guardar orden
     </button>
 
-</div>
+    <div><h5></h5></div>
 
-<!-- PANEL TRASLADO QUÍMICOS -->
-<div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-danger text-dark">
-        <h5 class="mb-0">🚚 Traslado rápido de contenedores</h5>
-        <small>Arrastre el ☰ hacia el destino</small>
-    </div>
+    <!-- TABLA -->
+    <div class="table-responsive card shadow-sm">
 
-    <div class="card-body">
-        <div class="row g-3">
-
-            <div class="col-md-3">
-                <div class="drop-box border rounded p-4 text-center bg-light"
-                     data-destino="SinAsignar">
-                    📦 Sin asignar
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="drop-box border rounded p-4 text-center bg-light"
-                     data-destino="Patio1">
-                    📍 Patio 1
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="drop-box border rounded p-4 text-center bg-light"
-                     data-destino="Patio2">
-                    🚛 Patio 2
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="drop-box border rounded p-4 text-center bg-light"
-                     data-destino="Anden2000">
-                    🏗️ Andén 2000
-                </div>
-            </div>
-
+        <div class="card-header bg-white">
+            <strong>☣️ Patio Químicos</strong>
         </div>
-    </div>
-</div>
 
-<h4 class="mt-4">Patio Químicos</h4>
+        <table class="table table-hover table-striped table-sm align-middle mb-0">
+
+            <thead class="table-light">
+                <tr>
+                    <th style="width:50px;">Mover</th>
+                    <th>Contenedor</th>
+                    <th>Marchamos</th>
+                    <th>Tamaño</th>
+                    <th>Chasis</th>
+                    <th>Transportista</th>
+                    <th>Cliente</th>
+                    <th>Estado</th>
+                    <th>✔</th>
+                    <th>Ubicación</th>
+                    <th>Mover</th>
+                </tr>
+            </thead>
+
+            <tbody id="tablaOrden">
+                @foreach (var c in Model)
+                {
+                    <tr data-id="@c.Id">
+                        <form method="post">
+
+                            <input type="hidden" name="id" value="@c.Id" />
+
+                            <td class="text-center">
+                                <span class="handle fw-bold fs-5"
+                                      style="cursor:grab;">☰</span>
+                            </td>
+
+                            <td class="fw-semibold contenedor-nombre">@c.Contenedor</td>
+
+                            <td>
+                                <input name="marchamos" value="@c.Marchamos"
+                                       class="form-control form-control-sm" />
+                            </td>
+
+                            <td>@c.Tamano</td>
+
+                            <td>
+                                <input name="chasis" value="@c.Chasis"
+                                       class="form-control form-control-sm" />
+                            </td>
+
+                            <td>
+                                <input name="transportista" value="@c.Transportista"
+                                       class="form-control form-control-sm" />
+                            </td>
+
+                            <td>
+                                <input name="cliente" value="@c.Cliente"
+                                       class="form-control form-control-sm" />
+                            </td>
+
+                            <td>
+                                <select name="estadoCarga"
+                                        class="form-select form-select-sm">
+                                    <option value="Vacio" selected="@(c.EstadoCarga == "Vacio")">Vacío</option>
+                                    <option value="Cargado" selected="@(c.EstadoCarga == "Cargado")">Cargado</option>
+                                </select>
+                            </td>
+
+                            <td class="text-center">
+                                <button type="submit"
+                                        formaction="@Url.Action("ConfirmarEdicion", "PatioQuimicos")"
+                                        class="btn btn-sm btn-primary">
+                                    ✔
+                                </button>
+                            </td>
+
+                            <td>
+                                <select name="destino"
+                                        class="form-select form-select-sm">
+                                    <option value="">No mover</option>
+                                    <option value="SinAsignar">Sin asignar</option>
+                                    <option value="Patio1">Patio 1</option>
+                                    <option value="Patio2">Patio 2</option>
+                                    <option value="Anden2000">Andén 2000</option>
+                                </select>
+                            </td>
+
+                            <td>
+                                <button type="submit"
+                                        formaction="@Url.Action("MoverDesdePatioQuimicos", "PatioQuimicos")"
+                                        class="btn btn-sm btn-success">
+                                    Mover
+                                </button>
+                            </td>
+
+                        </form>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
 
 <!-- MODAL EXPORTAR -->
 <div class="modal fade" id="modalExportar" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow">
 
             <form method="post">
 
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">
-                        Datos de exportación
-                    </h5>
-
-                    <button type="button"
-                            class="btn-close btn-close-white"
-                            data-bs-dismiss="modal">
-                    </button>
+                    <h5 class="modal-title">📄 Exportar - Químicos</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
+                    <div class="row g-3">
 
-                    <input name="nombre"
-                           class="form-control mb-2"
-                           placeholder="Responsable"
-                           required />
+                        <div class="col-12">
+                            <label>Responsable</label>
+                            <input name="nombre" class="form-control" required />
+                        </div>
 
-                    <input type="date"
-                           name="fecha"
-                           class="form-control mb-2"
-                           required />
+                        <div class="col-md-6">
+                            <label>Fecha</label>
+                            <input type="date" name="fecha"
+                                   value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                                   class="form-control" required />
+                        </div>
 
-                    <input name="turno"
-                           class="form-control"
-                           placeholder="Turno"
-                           required />
+                        <div class="col-md-6">
+                            <label>Turno</label>
+                            <input name="turno" class="form-control" required />
+                        </div>
 
+                    </div>
                 </div>
 
                 <div class="modal-footer d-flex gap-2">
-
-                    <button formaction="/PatioQuimicos/ExportarPDF"
-                            class="btn btn-danger flex-fill">
-                        PDF
-                    </button>
-
-                    <button formaction="/PatioQuimicos/ExportarExcel"
-                            class="btn btn-success flex-fill">
-                        Excel
-                    </button>
-
-                    <button formaction="/PatioQuimicos/ExportarCSV"
-                            class="btn btn-primary flex-fill">
-                        CSV
-                    </button>
-
+                    <button formaction="/PatioQuimicos/ExportarPDF" class="btn btn-danger flex-fill">📕 PDF</button>
+                    <button formaction="/PatioQuimicos/ExportarExcel" class="btn btn-success flex-fill">📗 Excel</button>
+                    <button formaction="/PatioQuimicos/ExportarCSV" class="btn btn-primary flex-fill">📘 CSV</button>
                 </div>
 
             </form>
@@ -206,135 +342,24 @@
     </div>
 </div>
 
-<table class="table table-striped align-middle">
-    <thead>
-        <tr>
-            <th style="width:50px;">Mover</th>
-            <th>Contenedor</th>
-            <th>Marchamos</th>
-            <th>Tamaño</th>
-            <th>Chasis</th>
-            <th>Transportista</th>
-            <th>Cliente</th>
-            <th>Estado</th>
-            <th>Confirmar</th>
-            <th>Ubicación</th>
-            <th>Acción Mover</th>
-        </tr>
-    </thead>
-
-    <tbody id="tablaOrden">
-        @foreach (var c in Model)
-        {
-            <tr data-id="@c.Id">
-                <form method="post">
-
-                    <input type="hidden" name="id" value="@c.Id" />
-
-                    <td class="text-center align-middle">
-                        <span class="handle fw-bold fs-5"
-                              style="cursor:grab; user-select:none;">
-                            ☰
-                        </span>
-                    </td>
-
-                    <td class="contenedor-nombre">@c.Contenedor</td>
-
-                    <td>
-                        <input name="marchamos"
-                               value="@c.Marchamos"
-                               class="form-control form-control-sm" />
-                    </td>
-
-                    <td>@c.Tamano</td>
-
-                    <td>
-                        <input name="chasis"
-                               value="@c.Chasis"
-                               class="form-control form-control-sm" />
-                    </td>
-
-                    <td>
-                        <input name="transportista"
-                               value="@c.Transportista"
-                               class="form-control form-control-sm" />
-                    </td>
-
-                    <td>
-                        <input name="cliente"
-                               value="@c.Cliente"
-                               class="form-control form-control-sm" />
-                    </td>
-
-                    <td>
-                        <select name="estadoCarga"
-                                class="form-select form-select-sm">
-
-                            <option value="Vacio"
-                                    selected="@(c.EstadoCarga == "Vacio")">
-                                Vacío
-                            </option>
-
-                            <option value="Cargado"
-                                    selected="@(c.EstadoCarga == "Cargado")">
-                                Cargado
-                            </option>
-
-                        </select>
-                    </td>
-
-                    <td class="text-center">
-                        <button type="submit"
-                                formaction="@Url.Action("ConfirmarEdicion", "PatioQuimicos")"
-                                class="btn btn-sm btn-primary">
-                            ✔
-                        </button>
-                    </td>
-
-                    <td>
-                        <select name="destino"
-                                class="form-select form-select-sm">
-                            <option value="">No mover</option>
-                            <option value="SinAsignar">Sin asignar</option>
-                            <option value="Patio1">Patio 1</option>
-                            <option value="Patio2">Patio 2</option>
-                            <option value="Anden2000">Andén 2000</option>
-                            <option value="PatioQuimicos">Patio Químicos</option>
-                        </select>
-                    </td>
-
-                    <td>
-                        <button type="submit"
-                                formaction="@Url.Action("MoverDesdePatioQuimicos", "PatioQuimicos")"
-                                class="btn btn-sm btn-success">
-                            Mover
-                        </button>
-                    </td>
-
-                </form>
-            </tr>
-        }
-    </tbody>
-</table>
-
 <!-- MODAL BUSQUEDA -->
 <div class="modal fade" id="modalBusquedaGlobal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content shadow">
 
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">
-                    Resultado de búsqueda
-                </h5>
-
-                <button type="button"
-                        class="btn-close btn-close-white"
-                        data-bs-dismiss="modal">
-                </button>
+                <h5 class="modal-title">🔍 Resultado de búsqueda</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="modal-body"
-                 id="contenidoModalBusqueda">
+            <div class="modal-body">
+                <div id="contenidoModalBusqueda"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Cerrar
+                </button>
             </div>
 
         </div>
@@ -412,7 +437,7 @@
 
         });
 
-        // GUARDAR ORDEN
+        // GUARDAR ORDEN + DATOS
         document.getElementById("btnGuardarOrden")
         .addEventListener("click", function () {
 
@@ -423,7 +448,13 @@
 
         lista.push({
         id: parseInt(fila.dataset.id),
-        orden: index + 1
+        orden: index + 1,
+
+        marchamos: fila.querySelector("input[name='marchamos']")?.value || "",
+        estadoCarga: fila.querySelector("select[name='estadoCarga']")?.value || "",
+        chasis: fila.querySelector("input[name='chasis']")?.value || "",
+        transportista: fila.querySelector("input[name='transportista']")?.value || "",
+        cliente: fila.querySelector("input[name='cliente']")?.value || ""
         });
 
         });
@@ -439,7 +470,7 @@
         .then(res => {
 
         if (res.success) {
-        alert("Orden guardado correctamente");
+        alert("Orden y datos guardados correctamente");
         location.reload();
         }
 
