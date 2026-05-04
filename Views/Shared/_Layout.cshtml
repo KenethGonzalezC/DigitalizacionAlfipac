@@ -19,8 +19,10 @@
 
     <div class="app-wrapper">
 
+        <div class="sidebar-overlay"></div>
+
         <!-- SIDEBAR -->
-        <aside class="sidebar">
+        <aside class="sidebar">            
 
             <!-- HEADER -->
             <div class="sidebar-header">
@@ -195,15 +197,26 @@
     <script>
             const toggleBtn = document.getElementById("toggleSidebar");
 
-            if (localStorage.getItem("sidebar") === "collapsed") {
-                document.body.classList.add("sidebar-collapsed");
-            }
-
             toggleBtn.addEventListener("click", () => {
-                document.body.classList.toggle("sidebar-collapsed");
 
-                const isCollapsed = document.body.classList.contains("sidebar-collapsed");
-                localStorage.setItem("sidebar", isCollapsed ? "collapsed" : "expanded");
+                // MOBILE
+                if (window.innerWidth <= 768) {
+                    document.body.classList.toggle("sidebar-open");
+                }
+                // DESKTOP
+                else {
+                    document.body.classList.toggle("sidebar-collapsed");
+
+                    const isCollapsed = document.body.classList.contains("sidebar-collapsed");
+                    localStorage.setItem("sidebar", isCollapsed ? "collapsed" : "expanded");
+                }
+            });
+
+            // cerrar sidebar al tocar overlay
+            document.addEventListener("click", function (e) {
+                if (e.target.classList.contains("sidebar-overlay")) {
+                    document.body.classList.remove("sidebar-open");
+                }
             });
     </script>
 

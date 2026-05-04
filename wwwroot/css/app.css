@@ -290,3 +290,92 @@ a, button {
 #toggleSidebar {
     border-radius: 8px;
 }
+
+/* =========================
+   📱 RESPONSIVE (MOBILE FIX REAL)
+========================= */
+
+@media (max-width: 768px) {
+
+    /* =========================
+       SIDEBAR COMO PANEL DESLIZANTE
+    ========================= */
+    .sidebar {
+        left: -240px;
+        width: 240px;
+        transition: left 0.3s ease;
+        z-index: 1001; /* sobre overlay */
+    }
+
+    .sidebar-open .sidebar {
+        left: 0;
+    }
+
+    /* =========================
+       OVERLAY GLOBAL (FUERA DEL SIDEBAR)
+    ========================= */
+    .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.4);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition);
+    }
+
+    .sidebar-open .sidebar-overlay {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* =========================
+       BLOQUEAR SCROLL CUANDO ABIERTO
+    ========================= */
+    .sidebar-open {
+        overflow: hidden;
+    }
+
+    /* =========================
+       MAIN FULL WIDTH
+    ========================= */
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    /* =========================
+       TOPBAR FULL
+    ========================= */
+    .topbar {
+        left: 0 !important;
+        width: 100%;
+        padding: 0 15px;
+    }
+
+    /* =========================
+       FOOTER FULL
+    ========================= */
+    .footer {
+        left: 0 !important;
+        width: 100%;
+    }
+
+    /* =========================
+       CONTENT
+    ========================= */
+    .content {
+        padding: 15px;
+    }
+
+    /* =========================
+       BOTÓN MÁS GRANDE
+    ========================= */
+    #toggleSidebar {
+        font-size: 18px;
+        padding: 6px 10px;
+    }
+}
