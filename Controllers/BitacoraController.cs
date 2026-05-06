@@ -147,9 +147,9 @@ public class BitacoraController : Controller
                         col.Item().AlignCenter().Text($"Fecha operativa: {fecha:dd/MM/yyyy}")
                             .FontSize(11);
 
-                        //col.Item().AlignCenter().Text($"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}")
-                        //    .FontSize(10)
-                        //    .FontColor(Colors.Grey.Darken1);
+                        col.Item().AlignCenter().Text($"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}")
+                            .FontSize(10)
+                            .FontColor(Colors.Grey.Darken1);
 
                         // NUEVO: RANGO
                         //if (horaInicio.HasValue && horaFin.HasValue)
@@ -166,9 +166,9 @@ public class BitacoraController : Controller
                         //}
 
                         // NUEVO: TOTAL
-                        col.Item().AlignCenter().Text($"Total registros: {movimientos.Count}")
-                            .FontSize(10)
-                            .FontColor(Colors.Grey.Darken1);
+                        //col.Item().AlignCenter().Text($"Total registros: {movimientos.Count}")
+                        //    .FontSize(10)
+                        //    .FontColor(Colors.Grey.Darken1);
 
                         col.Item().PaddingTop(5).LineHorizontal(1);
 
