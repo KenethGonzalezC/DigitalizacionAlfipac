@@ -115,13 +115,13 @@ public class ContenedorTemperaturasPdf : IDocument
                     {
                         var bg = i % 2 == 0 ? Colors.Grey.Lighten4 : Colors.White;
 
-                        table.Cell().Background(bg).Padding(5)
+                        table.Cell().ShowEntire().Background(bg).Padding(5)
                             .Text(r.FechaHora.ToString("dd/MM/yyyy HH:mm"));
 
-                        table.Cell().Background(bg).Padding(5)
+                        table.Cell().ShowEntire().Background(bg).Padding(5)
                             .Text(r.Temperatura.ToString("F1"));
 
-                        table.Cell().Background(bg).Padding(5)
+                        table.Cell().ShowEntire().Background(bg).Padding(5)
                             .Text(r.Observacion);
 
                         i++;

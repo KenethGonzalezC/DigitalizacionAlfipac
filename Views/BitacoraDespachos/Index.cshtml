@@ -163,7 +163,11 @@
             </a>
 
             <div class="d-flex gap-2">
-                <a asp-action="ExportarPdf" asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" class="btn btn-danger btn-sm">PDF</a>
+                    <button class="btn btn-danger btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalExportarDespachosPdf">
+                        📄 PDF
+                    </button>
                 <a asp-action="ExportarExcel" asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" class="btn btn-success btn-sm">Excel</a>
                 <a asp-action="ExportarCsv" asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" class="btn btn-outline-secondary btn-sm">CSV</a>
             </div>
@@ -435,6 +439,56 @@
     </div>
 </div>
 
+<!--MODAL EXPORTAR PDF CON HORAS-->
+    <div class="modal fade" id="modalExportarDespachosPdf" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <form asp-action="ExportarPdf" method="get">
+
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">📄 Exportar Despachos</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+
+                        <!-- FECHA DINÁMICA -->
+                        <input type="hidden" name="fecha"
+                               value="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" />
+
+                        <!-- CHECK -->
+                        <div class="form-check mb-3">
+                            <input type="checkbox" id="todoDiaDespachos" class="form-check-input" checked />
+                            <label class="form-check-label fw-semibold">Todo el día</label>
+                        </div>
+
+                        <!-- RANGO -->
+                        <div id="rangoHorasDespachos" class="row g-2" style="display:none;">
+                            <div class="col">
+                                <label class="form-label">Hora inicio</label>
+                                <input type="time" name="horaInicio" class="form-control" />
+                            </div>
+                            <div class="col">
+                                <label class="form-label">Hora fin</label>
+                                <input type="time" name="horaFin" class="form-control" />
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-danger w-100">
+                            Exportar PDF
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
 <!-- SCRIPTS -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -586,6 +640,19 @@
 
             });
         }
+
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const checkbox = document.getElementById("todoDiaDespachos");
+        const rango = document.getElementById("rangoHorasDespachos");
+
+        checkbox.addEventListener("change", function () {
+            rango.style.display = this.checked ? "none" : "flex";
+        });
 
     });
 </script>

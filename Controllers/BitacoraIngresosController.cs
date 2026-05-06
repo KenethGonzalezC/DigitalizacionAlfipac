@@ -376,24 +376,24 @@ public class BitacoraIngresosController : Controller
         );
     }
 
-    public async Task<IActionResult> ExportarPdf(DateTime? fecha)
+    public IActionResult ExportarPdf(DateTime fecha, TimeSpan? horaInicio, TimeSpan? horaFin)
     {
-        DateTime fechaSeleccionada = fecha?.Date ?? DateTime.Today;
-        var ingresos = await _context.BitacoraIngresos
-            .Where(i => i.FechaHoraIngreso.Date == fechaSeleccionada)
-            .OrderBy(i => i.FechaHoraIngreso)
-            .ToListAsync();
+        var ingresos = _context.BitacoraIngresos
+            .Where(x => x.FechaHoraIngreso.Date == fecha.Date)
+            .ToList();
 
-        var document = new BitacoraIngresosPdf(fechaSeleccionada, ingresos);
+        var pdf = new BitacoraIngresosPdf(fecha, ingresos, horaInicio, horaFin);
 
-        byte[] pdf = document.GeneratePdf();
+        var file = pdf.GeneratePdf();
 
-        return File(
-            pdf,
-            "application/pdf",
-            $"Ingresos_{fechaSeleccionada:yyyy/MM/dd}.pdf"
-        );
+        string nombre;
 
+        if (!horaInicio.HasValue || !horaFin.HasValue)
+            nombre = $"Ingresos_{fecha:dd-MM-yyyy}.pdf";
+        else
+            nombre = $"Ingresos_{fecha:dd-MM-yyyy}_{horaInicio:hh\\-mm}_{horaFin:hh\\-mm}.pdf";
+
+        return File(file, "application/pdf", nombre);
     }
 
     [HttpGet]

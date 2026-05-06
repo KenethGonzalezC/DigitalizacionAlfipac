@@ -369,6 +369,7 @@ a, button {
     ========================= */
     .content {
         padding: 15px;
+        padding-bottom: calc(var(--footer-height) + 15px);
     }
 
     /* =========================

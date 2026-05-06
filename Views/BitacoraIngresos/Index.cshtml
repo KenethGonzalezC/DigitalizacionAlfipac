@@ -148,9 +148,11 @@
             </div>
 
             <div class="d-flex gap-2">
-                <a asp-action="ExportarPdf"
-                   asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")"
-                   class="btn btn-danger btn-sm">PDF</a>
+                <button class="btn btn-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalExportarIngresosPdf">
+                    📄 PDF
+                </button>
 
                 <a asp-action="ExportarExcel"
                    asp-route-fecha="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")"
@@ -340,6 +342,56 @@
     </div>
 </div>
 
+<!--EXPORTAR INGRESOS POR HORA-->
+<!-- MODAL EXPORTAR INGRESOS -->
+<div class="modal fade" id="modalExportarIngresosPdf" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <form asp-action="ExportarPdf" method="get">
+
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">📄 Exportar Ingresos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- FECHA -->
+                    <input type="hidden" name="fecha" value="@Model.FechaSeleccionada.ToString("yyyy-MM-dd")" />
+
+                    <!-- CHECK -->
+                    <div class="form-check mb-3">
+                        <input type="checkbox" id="todoDiaIngresos" class="form-check-input" checked />
+                        <label class="form-check-label fw-semibold">Todo el día</label>
+                    </div>
+
+                    <!-- RANGO -->
+                    <div id="rangoHorasIngresos" class="row g-2" style="display:none;">
+                        <div class="col">
+                            <label class="form-label">Hora inicio</label>
+                            <input type="time" name="horaInicio" class="form-control" />
+                        </div>
+                        <div class="col">
+                            <label class="form-label">Hora fin</label>
+                            <input type="time" name="horaFin" class="form-control" />
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-danger w-100">
+                        Exportar PDF
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
 <!-- =========================
      SCRIPTS
 ========================= -->
@@ -429,6 +481,23 @@
                 resultado.textContent = "Error al buscar información";
             }
 
+        });
+
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const checkbox = document.getElementById("todoDiaIngresos");
+        const rango = document.getElementById("rangoHorasIngresos");
+
+        checkbox.addEventListener("change", function () {
+            if (this.checked) {
+                rango.style.display = "none";
+            } else {
+                rango.style.display = "flex";
+            }
         });
 
     });

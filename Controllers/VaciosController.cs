@@ -415,15 +415,30 @@ namespace BitacoraAlfipac.Controllers
         {
             var query = _context.Vacios.AsQueryable();
 
-            // filtro por fecha (solo si viene)
-            if (fecha.HasValue)
+            // 🔹 Detectar si viene algún filtro
+            bool hayFecha = fecha.HasValue;
+            bool hayContenedor = !string.IsNullOrWhiteSpace(contenedor);
+
+            // 🔹 Si NO viene ningún filtro → usar HOY
+            if (!hayFecha && !hayContenedor)
+            {
+                DateTime hoy = DateTime.Today;
+                query = query.Where(x => x.Fecha.Date == hoy);
+
+                ViewBag.Fecha = hoy.ToString("yyyy-MM-dd");
+            }
+
+            // 🔹 Si viene fecha → aplicar
+            if (hayFecha)
             {
                 DateTime fechaFiltro = fecha.Value.Date;
                 query = query.Where(x => x.Fecha.Date == fechaFiltro);
+
+                ViewBag.Fecha = fechaFiltro.ToString("yyyy-MM-dd");
             }
 
-            // filtro por contenedor (solo si viene)
-            if (!string.IsNullOrWhiteSpace(contenedor))
+            // 🔹 Si viene contenedor → aplicar (independiente)
+            if (hayContenedor)
             {
                 query = query.Where(x => x.Contenedor.Contains(contenedor));
             }
@@ -431,8 +446,6 @@ namespace BitacoraAlfipac.Controllers
             var historial = query
                 .OrderByDescending(x => x.Fecha)
                 .ToList();
-
-            ViewBag.Fecha = fecha?.ToString("yyyy-MM-dd");
 
             return View(historial);
         }

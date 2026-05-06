@@ -441,11 +441,14 @@ public class DatosController : Controller
         string chasis,
         string viajeDua,
         string fechaRegistro,
+        string boleta,
         int pagina = 1)
     {
         int registrosPorPagina = 50;
 
-        var query = _context.DatosDespachosViajes.AsQueryable();
+        var baseQuery = _context.DatosDespachosViajes.AsQueryable();
+        var query = baseQuery;
+        var queryContador = baseQuery;
 
         DateTime? fechaRegistroDate = null;
 
@@ -466,42 +469,47 @@ public class DatosController : Controller
             string.IsNullOrEmpty(placa) &&
             string.IsNullOrEmpty(chasis) &&
             string.IsNullOrEmpty(viajeDua) &&
+            string.IsNullOrEmpty(boleta) &&
             !fechaRegistroDate.HasValue;
 
-        if (sinFiltros)
-            fechaRegistroDate = DateTime.Today;
+        //if (sinFiltros)
+            //fechaRegistroDate = DateTime.Today;
 
         // 🔎 FILTROS
         if (!string.IsNullOrEmpty(contenedor))
-            query = query.Where(x => x.Contenedor.Contains(contenedor));
+            queryContador = queryContador.Where(x => x.Contenedor.Contains(contenedor));
 
         if (!string.IsNullOrEmpty(marchamos))
-            query = query.Where(x => x.Marchamos.Contains(marchamos));
+            queryContador = queryContador.Where(x => x.Marchamos.Contains(marchamos));
 
         if (!string.IsNullOrEmpty(transportista))
-            query = query.Where(x => x.Transportista.Contains(transportista));
+            queryContador = queryContador.Where(x => x.Transportista.Contains(transportista));
 
         if (!string.IsNullOrEmpty(cliente))
-            query = query.Where(x => x.Cliente.Contains(cliente));
+            queryContador = queryContador.Where(x => x.Cliente.Contains(cliente));
 
         if (!string.IsNullOrEmpty(chofer))
-            query = query.Where(x => x.Chofer.Contains(chofer));
+            queryContador = queryContador.Where(x => x.Chofer.Contains(chofer));
 
         if (!string.IsNullOrEmpty(placa))
-            query = query.Where(x => x.PlacaCabezal.Contains(placa));
+            queryContador = queryContador.Where(x => x.PlacaCabezal.Contains(placa));
 
         if (!string.IsNullOrEmpty(chasis))
-            query = query.Where(x => x.Chasis.Contains(chasis));
+            queryContador = queryContador.Where(x => x.Chasis.Contains(chasis));
 
         if (!string.IsNullOrEmpty(viajeDua))
-            query = query.Where(x => x.ViajeDua.Contains(viajeDua));
+            queryContador = queryContador.Where(x => x.ViajeDua.Contains(viajeDua));
+
+        if (!string.IsNullOrEmpty(boleta))
+            queryContador = queryContador.Where(x => x.Boleta.Contains(boleta));
 
         if (fechaRegistroDate.HasValue)
             query = query.Where(x => x.FechaCreacion.Date == fechaRegistroDate.Value.Date);
 
-        var totalRegistros = query.Count();
+        var totalRegistros = query.Count(); // tabla (paginación)
 
-        ViewBag.TotalContenedores = totalRegistros; //CUENTA
+        var totalContenedores = queryContador.Count(); // independiente
+        ViewBag.TotalContenedores = totalContenedores;
 
         var datos = query
             .OrderByDescending(x => x.FechaCreacion)

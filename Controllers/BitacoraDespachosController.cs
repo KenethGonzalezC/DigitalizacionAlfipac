@@ -433,23 +433,42 @@ namespace BitacoraAlfipac.Controllers
         }
 
         //Exportar a pdf
-        public async Task<IActionResult> ExportarPdf(DateTime? fecha)
+        public async Task<IActionResult> ExportarPdf(DateTime? fecha, TimeSpan? horaInicio, TimeSpan? horaFin)
         {
             var fechaSeleccionada = fecha ?? DateTime.Today;
-            var despachos = await _context.BitacoraDespachos
-                .Where(d => d.FechaHoraDespacho.Date == fechaSeleccionada)
+
+            var query = _context.BitacoraDespachos
+                .Where(d => d.FechaHoraDespacho.Date == fechaSeleccionada);
+
+            // 🔥 FILTRO POR HORAS
+            if (horaInicio.HasValue && horaFin.HasValue)
+            {
+                query = query.Where(d =>
+                    d.FechaHoraDespacho.TimeOfDay >= horaInicio.Value &&
+                    d.FechaHoraDespacho.TimeOfDay <= horaFin.Value);
+            }
+
+            var despachos = await query
                 .OrderBy(d => d.FechaHoraDespacho)
                 .ToListAsync();
 
-            var document = new BitacoraDespachosPdf(fechaSeleccionada, despachos);
+            var document = new BitacoraDespachosPdf(
+                fechaSeleccionada,
+                despachos,
+                horaInicio,
+                horaFin
+            );
 
             byte[] pdf = document.GeneratePdf();
 
-            return File(
-                pdf,
-                "application/pdf",
-                $"Despachos_{fechaSeleccionada:yyyy/MM/dd}.pdf"
-            );
+            string nombre;
+
+            if (!horaInicio.HasValue || !horaFin.HasValue)
+                nombre = $"Despachos_{fecha:dd-MM-yyyy}.pdf";
+            else
+                nombre = $"Despachos_{fecha:dd-MM-yyyy}_{horaInicio:hh\\-mm}_{horaFin:hh\\-mm}.pdf";
+
+            return File(pdf, "application/pdf", nombre);
         }
 
         [HttpPost]

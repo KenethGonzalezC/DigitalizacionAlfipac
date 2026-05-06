@@ -9,11 +9,16 @@ public class BitacoraDespachosPdf : IDocument
 {
     private readonly DateTime _fecha;
     private readonly List<BitacoraDespacho> _despachos;
+    private readonly TimeSpan? _horaInicio;
+    private readonly TimeSpan? _horaFin;
 
-    public BitacoraDespachosPdf(DateTime fecha, List<BitacoraDespacho> despachos)
+    public BitacoraDespachosPdf(DateTime fecha, List<BitacoraDespacho> despachos,
+        TimeSpan? horaInicio = null, TimeSpan? horaFin = null)
     {
         _fecha = fecha;
         _despachos = despachos;
+        _horaInicio = horaInicio;
+        _horaFin = horaFin;
     }
 
     public DocumentMetadata GetMetadata() => DocumentMetadata.Default;
@@ -46,6 +51,23 @@ public class BitacoraDespachosPdf : IDocument
 
             col.Item().Text($"Fecha: {_fecha:dd/MM/yyyy}")
                 .FontSize(12);
+
+            if (_horaInicio.HasValue && _horaFin.HasValue)
+            {
+                col.Item().Text($"Rango: {_horaInicio:hh\\:mm} - {_horaFin:hh\\:mm}")
+                    .FontSize(11)
+                    .FontColor(Colors.Grey.Darken1);
+            }
+            else
+            {
+                col.Item().Text("Rango: Todo el día")
+                    .FontSize(11)
+                    .FontColor(Colors.Grey.Darken1);
+            }
+
+            col.Item().Text($"Total registros: {_despachos.Count}")
+                .FontSize(10)
+                .FontColor(Colors.Grey.Darken1);
 
             col.Item().LineHorizontal(1);
         });
@@ -85,18 +107,24 @@ public class BitacoraDespachosPdf : IDocument
             });
 
             // BODY
+            int index = 0;
+
             foreach (var d in _despachos)
             {
-                BodyCell(table, d.FechaHoraDespacho.ToString("HH:mm"));
-                BodyCell(table, d.Contenedor);
-                BodyCell(table, d.Marchamos);
-                BodyCell(table, d.Transportista);
-                BodyCell(table, d.Informacion);
-                BodyCell(table, d.Chofer);
-                BodyCell(table, d.PlacaCabezal);
-                BodyCell(table, d.Chasis);
-                BodyCell(table, d.ViajeDua);                
-                BodyCell(table, d.ContenedorReferencia);
+                var bg = index % 2 == 0 ? Colors.White : Colors.Grey.Lighten4;
+
+                BodyCell(table, d.FechaHoraDespacho.ToString("HH:mm"), bg);
+                BodyCell(table, d.Contenedor, bg);
+                BodyCell(table, d.Marchamos, bg);
+                BodyCell(table, d.Transportista, bg);
+                BodyCell(table, d.Informacion, bg);
+                BodyCell(table, d.Chofer, bg);
+                BodyCell(table, d.PlacaCabezal, bg);
+                BodyCell(table, d.Chasis, bg);
+                BodyCell(table, d.ViajeDua, bg);
+                BodyCell(table, d.ContenedorReferencia, bg);
+
+                index++;
             }
         });
     }
@@ -114,9 +142,11 @@ public class BitacoraDespachosPdf : IDocument
             .SemiBold();
     }
 
-    static void BodyCell(TableDescriptor table, string text)
+    static void BodyCell(TableDescriptor table, string text, string bg)
     {
         table.Cell()
+            .ShowEntire()
+            .Background(bg)
             .BorderBottom(1)
             .BorderColor(Colors.Grey.Lighten3)
             .PaddingVertical(4)

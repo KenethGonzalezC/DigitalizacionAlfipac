@@ -9,11 +9,32 @@ public class BitacoraIngresosPdf : IDocument
 {
     private readonly DateTime _fecha;
     private readonly List<BitacoraIngreso> _ingresos;
+    private readonly TimeSpan? _horaInicio;
+    private readonly TimeSpan? _horaFin;
 
-    public BitacoraIngresosPdf(DateTime fecha, List<BitacoraIngreso> ingresos)
+    public BitacoraIngresosPdf(
+    DateTime fecha,
+    List<BitacoraIngreso> ingresos,
+    TimeSpan? horaInicio,
+    TimeSpan? horaFin)
     {
         _fecha = fecha;
-        _ingresos = ingresos;
+        _horaInicio = horaInicio;
+        _horaFin = horaFin;
+
+        // FILTRO AQUÍ (CLAVE)
+        if (horaInicio.HasValue && horaFin.HasValue)
+        {
+            _ingresos = ingresos
+                .Where(i =>
+                    i.FechaHoraIngreso.TimeOfDay >= horaInicio &&
+                    i.FechaHoraIngreso.TimeOfDay <= horaFin)
+                .ToList();
+        }
+        else
+        {
+            _ingresos = ingresos;
+        }
     }
 
     public DocumentMetadata GetMetadata() => DocumentMetadata.Default;
@@ -28,6 +49,7 @@ public class BitacoraIngresosPdf : IDocument
 
             page.Header().Element(Encabezado);
             page.Content().Element(Contenido);
+
             page.Footer().AlignCenter().Text(x =>
             {
                 x.Span("Generado el ");
@@ -48,6 +70,25 @@ public class BitacoraIngresosPdf : IDocument
             col.Item().Text($"Fecha: {_fecha:dd/MM/yyyy}")
                 .FontSize(12);
 
+            // NUEVO: mostrar rango
+            if (_horaInicio.HasValue && _horaFin.HasValue)
+            {
+                col.Item().Text($"Rango: {_horaInicio:hh\\:mm} - {_horaFin:hh\\:mm}")
+                    .FontSize(11)
+                    .FontColor(Colors.Grey.Darken1);
+            }
+            else
+            {
+                col.Item().Text("Rango: Todo el día")
+                    .FontSize(11)
+                    .FontColor(Colors.Grey.Darken1);
+            }
+
+            // EXTRA PRO: total registros
+            col.Item().Text($"Total registros: {_ingresos.Count}")
+                .FontSize(10)
+                .FontColor(Colors.Grey.Darken1);
+
             col.Item().LineHorizontal(1);
         });
     }
@@ -58,16 +99,16 @@ public class BitacoraIngresosPdf : IDocument
         {
             table.ColumnsDefinition(columns =>
             {
-                columns.ConstantColumn(45);   // Hora
-                columns.ConstantColumn(80);   // Contenedor
-                columns.RelativeColumn(1.0f);    // Marchamos     ← quieres achicar esta
-                columns.RelativeColumn(0.7f); // Transportista
-                columns.RelativeColumn(1.2f); // Cliente       ← quieres agrandar esta un poco
-                columns.ConstantColumn(45);   // Tamaño
-                columns.RelativeColumn();     // Chofer
-                columns.ConstantColumn(80);   // Placa
-                columns.ConstantColumn(70);   // Chasis
-                columns.RelativeColumn();     // Viaje / DUA
+                columns.ConstantColumn(45);
+                columns.ConstantColumn(80);
+                columns.RelativeColumn(1.0f);
+                columns.RelativeColumn(0.7f);
+                columns.RelativeColumn(1.2f);
+                columns.ConstantColumn(45);
+                columns.RelativeColumn();
+                columns.ConstantColumn(80);
+                columns.ConstantColumn(70);
+                columns.RelativeColumn();
             });
 
             // HEADER
@@ -85,19 +126,25 @@ public class BitacoraIngresosPdf : IDocument
                 HeaderCell(header, "Viaje / DUA");
             });
 
+            int index = 0;
+
             // BODY
             foreach (var i in _ingresos)
             {
-                BodyCell(table, i.FechaHoraIngreso.ToString("HH:mm"));
-                BodyCell(table, i.Contenedor);
-                BodyCell(table, i.Marchamos);
-                BodyCell(table, i.Transportista);
-                BodyCell(table, i.Cliente);
-                BodyCell(table, i.Tamaño);
-                BodyCell(table, i.Chofer);
-                BodyCell(table, i.PlacaCabezal);
-                BodyCell(table, i.Chasis);
-                BodyCell(table, i.ViajeDua);
+                var bg = index % 2 == 0 ? Colors.White : Colors.Grey.Lighten4;
+
+                BodyCell(table, i.FechaHoraIngreso.ToString("HH:mm"), bg);
+                BodyCell(table, i.Contenedor, bg);
+                BodyCell(table, i.Marchamos, bg);
+                BodyCell(table, i.Transportista, bg);
+                BodyCell(table, i.Cliente, bg);
+                BodyCell(table, i.Tamaño, bg);
+                BodyCell(table, i.Chofer, bg);
+                BodyCell(table, i.PlacaCabezal, bg);
+                BodyCell(table, i.Chasis, bg);
+                BodyCell(table, i.ViajeDua, bg);
+
+                index++;
             }
         });
     }
@@ -115,9 +162,12 @@ public class BitacoraIngresosPdf : IDocument
             .SemiBold();
     }
 
-    static void BodyCell(TableDescriptor table, string text)
+    // MODIFICADO: ahora acepta color alterno
+    static void BodyCell(TableDescriptor table, string text, string bg)
     {
         table.Cell()
+            .ShowEntire()
+            .Background(bg)
             .BorderBottom(1)
             .BorderColor(Colors.Grey.Lighten3)
             .PaddingVertical(4)
