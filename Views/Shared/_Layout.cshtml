@@ -236,3 +236,23 @@
 
 </body>
 </html>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const sidebarState = localStorage.getItem("sidebar");
+
+        // Restaurar estado desktop
+        if (window.innerWidth > 768) {
+
+            if (sidebarState === "collapsed") {
+                document.body.classList.add("sidebar-collapsed");
+            }
+            else {
+                document.body.classList.remove("sidebar-collapsed");
+            }
+
+        }
+
+    });
+</script>

@@ -121,6 +121,10 @@ public class BitacoraController : Controller
                 .ToList();
         }
 
+        // CONTADORES
+        int totalIngresos = movimientos.Count(m => m.HoraEntrada.HasValue);
+        int totalDespachos = movimientos.Count(m => m.HoraSalida.HasValue);
+
         QuestPDF.Settings.License = LicenseType.Community;
 
         var pdf = Document.Create(container =>
@@ -147,9 +151,9 @@ public class BitacoraController : Controller
                         col.Item().AlignCenter().Text($"Fecha operativa: {fecha:dd/MM/yyyy}")
                             .FontSize(11);
 
-                        col.Item().AlignCenter().Text($"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}")
-                            .FontSize(10)
-                            .FontColor(Colors.Grey.Darken1);
+                        //col.Item().AlignCenter().Text($"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}")
+                        //    .FontSize(10)
+                        //    .FontColor(Colors.Grey.Darken1);
 
                         // NUEVO: RANGO
                         //if (horaInicio.HasValue && horaFin.HasValue)
@@ -160,15 +164,19 @@ public class BitacoraController : Controller
                         //}
                         //else
                         //{
-                        //.Item().AlignCenter().Text("Rango: Todo el día")
+                        //col.Item().AlignCenter().Text("Rango: Todo el día")
                         //        .FontSize(11)
                         //        .FontColor(Colors.Grey.Darken1);
                         //}
 
                         // NUEVO: TOTAL
-                        //col.Item().AlignCenter().Text($"Total registros: {movimientos.Count}")
-                        //    .FontSize(10)
-                        //    .FontColor(Colors.Grey.Darken1);
+                        col.Item().AlignCenter().Text(
+                            $"Total registros: {movimientos.Count} | " +
+                            $"Ingresos: {totalIngresos} | " +
+                            $"Despachos: {totalDespachos}"
+                        )
+                        .FontSize(10)
+                        .FontColor(Colors.Grey.Darken1);
 
                         col.Item().PaddingTop(5).LineHorizontal(1);
 
