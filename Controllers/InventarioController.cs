@@ -923,4 +923,97 @@ public async Task<IActionResult> Mover(
         return Json(new { success = true });
     }
 
+    //Eliminar un contenedor
+    [Authorize(Roles = "Administrador")]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EliminarContenedorInventario(
+    int id,
+    string ubicacionActual,
+    string motivo)
+    {
+        object? entidad = null;
+        string contenedor = "";
+
+        switch (ubicacionActual)
+        {
+            case "SinAsignar":
+                entidad = await _context.ContenedoresSinAsignarPatio
+                    .FirstOrDefaultAsync(x => x.Id == id);
+                break;
+
+            case "Patio1":
+                entidad = await _context.Patio1
+                    .FirstOrDefaultAsync(x => x.Id == id);
+                break;
+
+            case "Patio2":
+                entidad = await _context.Patio2
+                    .FirstOrDefaultAsync(x => x.Id == id);
+                break;
+
+            case "Anden2000":
+                entidad = await _context.Anden2000
+                    .FirstOrDefaultAsync(x => x.Id == id);
+                break;
+
+            case "PatioQuimicos":
+                entidad = await _context.PatioQuimicos
+                    .FirstOrDefaultAsync(x => x.Id == id);
+                break;
+        }
+
+        if (entidad == null)
+        {
+            TempData["Error"] = "No se encontró el contenedor.";
+            return RedirectToAction("Index");
+        }
+
+        // ====================================
+        // OBTENER CONTENEDOR
+        // ====================================
+
+        var inventario = (IContenedorInventario)entidad;
+
+        contenedor = inventario.Contenedor;
+               
+        // ====================================
+        // ELIMINAR SEGÚN PATIO
+        // ====================================
+
+        switch (entidad)
+        {
+            case ContenedorSinAsignarPatio c:
+                _context.ContenedoresSinAsignarPatio.Remove(c);
+                break;
+
+            case Patio1 c:
+                _context.Patio1.Remove(c);
+                break;
+
+            case Patio2 c:
+                _context.Patio2.Remove(c);
+                break;
+
+            case Anden2000 c:
+                _context.Anden2000.Remove(c);
+                break;
+
+            case PatioQuimicos c:
+                _context.PatioQuimicos.Remove(c);
+                break;
+        }
+
+        await _context.SaveChangesAsync();
+
+        TempData["Success"] =
+            $"Contenedor {contenedor} eliminado manualmente del inventario.";
+
+        return Json(new
+        {
+            success = true,
+            message = $"Contenedor {contenedor} eliminado."
+        });
+    }
+
 }

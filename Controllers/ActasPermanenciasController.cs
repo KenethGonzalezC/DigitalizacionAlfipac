@@ -52,11 +52,11 @@ namespace BitacoraAlfipac.Controllers
             var existe = await _context.ActasPermanencias
                 .AnyAsync(x => x.Contenedor == model.Contenedor);
 
-            if (existe)
-            {
-                TempData["Error"] = "Este contenedor ya existe en Actas/PAB.";
-                return RedirectToAction(nameof(Index));
-            }
+            //if (existe)
+            //{
+            //    TempData["Error"] = "Este contenedor ya existe en Actas/PAB.";
+            //    return RedirectToAction(nameof(Index));
+            //}
 
             _context.Add(model);
             await _context.SaveChangesAsync();
@@ -512,21 +512,27 @@ namespace BitacoraAlfipac.Controllers
         [HttpGet]
         public JsonResult BuscarContenedorEnPendientes(string contenedor)
         {
-            if (string.IsNullOrEmpty(contenedor))
+            if (string.IsNullOrWhiteSpace(contenedor))
                 return Json(new { encontrado = false });
 
-            var registro = _context.ActasPermanencias
-                .Where(a => a.Contenedor == contenedor && a.FechaHoraIngresoContenedor == null)
-                .FirstOrDefault();
+            var registros = _context.ActasPermanencias
+                .Where(a =>
+                    a.Contenedor == contenedor &&
+                    a.FechaHoraIngresoContenedor == null)
+                .Select(a => new
+                {
+                    tipo = a.Tipo,
+                    numero = a.Numero
+                })
+                .ToList();
 
-            if (registro == null)
+            if (!registros.Any())
                 return Json(new { encontrado = false });
 
             return Json(new
             {
                 encontrado = true,
-                tipo = registro.Tipo,
-                numero = registro.Numero
+                resultados = registros
             });
         }
 

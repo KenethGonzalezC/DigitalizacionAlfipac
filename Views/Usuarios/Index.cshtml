@@ -99,15 +99,39 @@
                                     }
                                 </td>
 
-                                <td>
+                                <td class="d-flex gap-2">
 
-                                    <form asp-action="ToggleActivo" method="post"
+                                    <!-- ACTIVAR / DESACTIVAR -->
+                                    <form asp-action="ToggleActivo"
+                                          method="post"
                                           class="d-inline">
 
-                                        <input type="hidden" name="id" value="@u.Id" />
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@u.Id" />
 
                                         <button class="btn btn-sm btn-outline-warning">
-                                            🔁 Cambiar estado
+                                            🔁 Estado
+                                        </button>
+
+                                    </form>
+
+                                    <!-- ELIMINAR -->
+                                    <form asp-action="Eliminar"
+                                          method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm('⚠️ ¿Eliminar permanentemente este usuario?');">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@u.Id" />
+
+                                        <button class="btn btn-sm btn-outline-danger">
+                                            🗑 Eliminar
                                         </button>
 
                                     </form>

@@ -1,6 +1,30 @@
 ﻿@using BitacoraAlfipac.Models.ViewModels
 @model BusquedaGlobalContenedorVM
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show shadow-sm">
+        @TempData["Success"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm">
+        @TempData["Error"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+    </div>
+}
+
 <div class="container mt-3">
 
     @if (Model == null)
@@ -136,9 +160,33 @@
                     <!-- BOTÓN -->
                     <button class="btn btn-success w-100 py-2">
                         ✔ Confirmar cambios
-                    </button>
+                    </button>                    
 
                 </form>
+
+                @if (User.IsInRole("Administrador"))
+                {
+                    <hr />
+
+                    <form asp-controller="Inventario"
+                          asp-action="EliminarContenedorInventario"
+                          method="post"
+                          onsubmit="return confirmarEliminacion();">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <input type="hidden" name="ubicacionActual" value="@Model.UbicacionActual" />
+                        <input type="hidden"
+                               name="motivo"
+                               value="Eliminación manual desde búsqueda global" />
+
+                        <button class="btn btn-danger w-100">
+                            🗑 Eliminar
+                        </button>
+
+                    </form>
+                }
 
             </div>
 
@@ -146,3 +194,15 @@
     }
 
 </div>
+
+<script>
+    function confirmarEliminacion() {
+
+        return confirm(
+            "⚠️ ATENCIÓN\n\n" +
+            "Esta acción eliminará el contenedor SOLO del inventario físico.\n\n" +
+            "NO se eliminarán ingresos, despachos ni historial.\n\n" +
+            "¿Desea continuar?"
+        );
+    }
+</script>

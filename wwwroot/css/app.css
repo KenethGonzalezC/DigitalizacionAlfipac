@@ -8,6 +8,10 @@ html, body {
     overflow: hidden; /* todo el scroll pasa al content */
 }
 
+    body.preload * {
+        transition: none !important;
+    }
+
 * {
     box-sizing: border-box;
 }

@@ -15,7 +15,26 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
 
-<body>
+<body class="preload">
+
+    <script>
+            (() => {
+
+                const sidebarState = localStorage.getItem("sidebar");
+
+                if (
+                    window.innerWidth > 768 &&
+                    sidebarState === "collapsed"
+                ) {
+                    document.body.classList.add("sidebar-collapsed");
+                }
+
+            })();
+
+                        window.addEventListener("load", () => {
+                document.body.classList.remove("preload");
+            });
+    </script>
 
     <div class="app-wrapper">
 
@@ -222,13 +241,40 @@
 
     <!-- ITEM ACTIVO -->
     <script>
-            const links = document.querySelectorAll(".sidebar-menu a");
-            const currentUrl = window.location.pathname.toLowerCase();
+            document.addEventListener("DOMContentLoaded", function () {
 
-            links.forEach(link => {
-                if (currentUrl.includes(link.getAttribute("href").toLowerCase())) {
-                    link.classList.add("active");
+                const links = document.querySelectorAll(".sidebar-menu a");
+
+                let currentPath = window.location.pathname
+                    .toLowerCase()
+                    .replace(/\/$/, "");
+
+                // ROOT
+                if (currentPath === "") {
+                    currentPath = "/";
                 }
+
+                links.forEach(link => {
+
+                    let href = link.getAttribute("href");
+
+                    if (!href) return;
+
+                    href = href
+                        .toLowerCase()
+                        .replace(/\/$/, "");
+
+                    if (href === "") {
+                        href = "/";
+                    }
+
+                    // MATCH EXACTO
+                    if (currentPath === href) {
+                        link.classList.add("active");
+                    }
+
+                });
+
             });
     </script>
 
@@ -236,23 +282,3 @@
 
 </body>
 </html>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-
-        const sidebarState = localStorage.getItem("sidebar");
-
-        // Restaurar estado desktop
-        if (window.innerWidth > 768) {
-
-            if (sidebarState === "collapsed") {
-                document.body.classList.add("sidebar-collapsed");
-            }
-            else {
-                document.body.classList.remove("sidebar-collapsed");
-            }
-
-        }
-
-    });
-</script>

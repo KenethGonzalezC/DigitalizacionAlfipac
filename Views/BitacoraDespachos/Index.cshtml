@@ -515,9 +515,49 @@
 
                 const data = await res.json();
 
-                if (data?.encontrado) {
-                    infoPatio.innerText = `Ubicación: ${data.patio ?? "-"} | Estado: ${data.estado ?? "-"}`;
-                    llenarCampos(data);
+                       if (data?.encontrado) {
+
+            const estado = data.estado?.toUpperCase() ?? "-";
+
+            let claseEstado = "alert-secondary";
+            let iconoEstado = "📦";
+
+            if (estado === "CARGADO") {
+                claseEstado = "alert-success";
+                iconoEstado = "🟢";
+            }
+            else if (estado === "VACIO") {
+                claseEstado = "alert-warning";
+                iconoEstado = "🟡";
+            }
+
+            infoPatio.innerHTML = `
+                <div class="alert ${claseEstado} py-2 px-3 mb-2 shadow-sm rounded">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <strong>
+                                📍 ${data.patio ?? "Sin ubicación"}
+                            </strong>
+
+                            <div class="small text-muted">
+                                Ubicación actual del contenedor
+                            </div>
+                        </div>
+
+                        <div class="text-end">
+                            <div class="fw-bold">
+                                ${iconoEstado} ${estado}
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            `;
+
+            llenarCampos(data);        
                 } else {
                     infoPatio.innerText = data.mensaje ?? "No encontrado";
                 }

@@ -93,4 +93,38 @@ public class UsuariosController : Controller
 
         return RedirectToAction(nameof(Index));
     }
+
+    // ELIMINAR USUARIO
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Eliminar(int id)
+    {
+        var usuario = await _context.Usuarios.FindAsync(id);
+
+        if (usuario == null)
+        {
+            TempData["Error"] = "Usuario no encontrado.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // 🚫 evitar eliminarse a sí mismo
+        var usuarioActual = User.Identity?.Name;
+
+        if (usuario.NombreUsuario == usuarioActual)
+        {
+            TempData["Error"] =
+                "No puede eliminar el usuario actualmente autenticado.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        _context.Usuarios.Remove(usuario);
+
+        await _context.SaveChangesAsync();
+
+        TempData["Success"] =
+            $"Usuario '{usuario.NombreUsuario}' eliminado correctamente.";
+
+        return RedirectToAction(nameof(Index));
+    }
 }
