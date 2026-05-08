@@ -156,18 +156,18 @@ public class BitacoraController : Controller
                         //    .FontColor(Colors.Grey.Darken1);
 
                         // NUEVO: RANGO
-                        //if (horaInicio.HasValue && horaFin.HasValue)
-                        //{
-                        //    col.Item().AlignCenter().Text($"Rango: {horaInicio:hh\\:mm} - {horaFin:hh\\:mm}")
-                        //        .FontSize(11)
-                        //        .FontColor(Colors.Grey.Darken1);
-                        //}
-                        //else
-                        //{
-                        //col.Item().AlignCenter().Text("Rango: Todo el día")
-                        //        .FontSize(11)
-                        //        .FontColor(Colors.Grey.Darken1);
-                        //}
+                        if (horaInicio.HasValue && horaFin.HasValue)
+                        {
+                            col.Item().AlignCenter().Text($"Horario: {horaInicio:hh\\:mm} - {horaFin:hh\\:mm}")
+                                .FontSize(11)
+                                .FontColor(Colors.Grey.Darken1);
+                        }
+                        else
+                        {
+                        col.Item().AlignCenter().Text("Horario: Todo el día")
+                                .FontSize(11)
+                                .FontColor(Colors.Grey.Darken1);
+                        }
 
                         // NUEVO: TOTAL
                         col.Item().AlignCenter().Text(
