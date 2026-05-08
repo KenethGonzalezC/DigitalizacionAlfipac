@@ -32,9 +32,21 @@ public class ContenedorTemperaturasPdf : IDocument
                     .Bold()
                     .FontColor(Colors.Blue.Darken2);
 
-                col.Item().Text($"Contenedor: {_c.Contenedor}")
-                    .FontSize(12)
-                    .SemiBold();
+                col.Item().Text(text =>
+                {
+                    text.Span("Contenedor: ")
+                        .SemiBold();
+
+                    text.Span(_c.Contenedor);
+
+                    if (!string.IsNullOrWhiteSpace(_c.Cliente))
+                    {
+                        text.Span("   |   Cliente: ")
+                            .SemiBold();
+
+                        text.Span(_c.Cliente);
+                    }
+                });
 
                 col.Item().LineHorizontal(1).LineColor(Colors.Grey.Lighten2);
             });
@@ -59,10 +71,20 @@ public class ContenedorTemperaturasPdf : IDocument
 
                         string tiempoFormateado = "-";
 
-                        if (_c.FechaHoraConexion != null && _c.FechaHoraDesconexion != null)
+                        //tiempo por conexion
+                        //if (_c.FechaHoraConexion != null && _c.FechaHoraDesconexion != null)
+                        //{
+                        //var ts = _c.FechaHoraDesconexion.Value - _c.FechaHoraConexion.Value;
+                        //    tiempoFormateado = $"{(int)ts.TotalHours:D2}:{ts.Minutes:D2}";
+                        //}
+
+                        if (_c.FechaHoraIngreso != null && _c.FechaHoraDespacho != null)
                         {
-                            var ts = _c.FechaHoraDesconexion.Value - _c.FechaHoraConexion.Value;
-                            tiempoFormateado = $"{(int)ts.TotalHours:D2}:{ts.Minutes:D2}";
+                            var ts = _c.FechaHoraDespacho.Value - _c.FechaHoraIngreso.Value;
+
+                            var horas = (int)Math.Ceiling(ts.TotalHours);
+
+                            tiempoFormateado = $"{horas:D2}:00";
                         }
 
                         void Row(string label, string value)

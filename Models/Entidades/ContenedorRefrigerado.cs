@@ -9,6 +9,8 @@ public class ContenedorRefrigerado
     [Required]
     public string Contenedor { get; set; } = null!;
 
+    public string? Cliente { get; set; }
+
     public DateTime? FechaHoraIngreso { get; set; }
 
     public DateTime? FechaHoraConexion { get; set; }

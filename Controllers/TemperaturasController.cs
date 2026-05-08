@@ -39,9 +39,7 @@ public class TemperaturasController : Controller
         return View();
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(string contenedor)
+    public async Task<IActionResult> Create(string contenedor, string? cliente)
     {
         if (string.IsNullOrWhiteSpace(contenedor))
         {
@@ -52,13 +50,16 @@ public class TemperaturasController : Controller
         var nuevo = new ContenedorRefrigerado
         {
             Contenedor = contenedor.ToUpper(),
+            Cliente = cliente,
             FechaHoraIngreso = DateTime.Now
         };
 
         _context.ContenedoresRefrigerados.Add(nuevo);
+
         await _context.SaveChangesAsync();
 
         TempData["Success"] = "Contenedor refrigerado creado correctamente";
+
         return RedirectToAction(nameof(Index));
     }
 
@@ -95,6 +96,7 @@ public class TemperaturasController : Controller
     public async Task<IActionResult> ActualizarEncabezado(
     int id,
     string contenedor,
+    string cliente,
     DateTime? fechaHoraIngreso,
     DateTime? fechaHoraConexion,
     decimal? setPoint,
@@ -108,6 +110,7 @@ public class TemperaturasController : Controller
             return NotFound();
 
         entidad.Contenedor = contenedor;
+        entidad.Cliente = cliente;
         entidad.FechaHoraIngreso = fechaHoraIngreso;
         entidad.FechaHoraConexion = fechaHoraConexion;
         entidad.SetPoint = setPoint;

@@ -36,6 +36,7 @@ namespace BitacoraAlfipac.Controllers
         {
             var ingresados = await _context.ActasPermanencias
                 .Where(x => x.FechaHoraIngresoContenedor != null)
+                .OrderByDescending(x => x.FechaHoraIngresoContenedor)
                 .ToListAsync();
 
             return View(ingresados);
@@ -583,6 +584,32 @@ namespace BitacoraAlfipac.Controllers
 
             // Forzar que use la vista Historial.cshtml
             return View("Historial", registros);
+        }
+
+        //Busca registro, no contenedor
+        [HttpGet]
+        public async Task<IActionResult> BuscarRegistro(int id)
+        {
+            var item = await _context.ActasPermanencias
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (item == null)
+                return Json(new { encontrado = false });
+
+            return Json(new
+            {
+                encontrado = true,
+                id = item.Id,
+                tipo = item.Tipo,
+                contenedor = item.Contenedor,
+                numero = item.Numero,
+                detalle = item.Detalle,
+                viaje = item.Viaje,
+                cliente = item.Cliente,
+                fechaIngreso = item.FechaHoraIngresoContenedor?
+                    .ToString("yyyy-MM-ddTHH:mm"),
+                aplicadoCorrectamente = item.AplicadoCorrectamente
+            });
         }
 
     }

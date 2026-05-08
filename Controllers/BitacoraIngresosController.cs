@@ -152,6 +152,7 @@ public class BitacoraIngresosController : Controller
                 _context.ContenedoresRefrigerados.Add(new ContenedorRefrigerado
                 {
                     Contenedor = model.Contenedor,
+                    Cliente = model.Cliente,
                     FechaHoraIngreso = fechaHora,
                 });
             }

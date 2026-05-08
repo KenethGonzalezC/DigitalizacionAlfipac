@@ -182,7 +182,8 @@
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-2">
 
-                                        <button class="btn btn-sm btn-outline-primary btnEditar">
+                                        <button class="btn btn-sm btn-outline-primary btnEditar"
+                                                data-id="@item.Id">
                                             Editar
                                         </button>
 
@@ -249,7 +250,8 @@
                                 <td class="text-center">
                                     <div class="d-flex justify-content-center gap-2">
 
-                                        <button class="btn btn-sm btn-outline-primary btnEditar">
+                                        <button class="btn btn-sm btn-outline-primary btnEditar"
+                                                data-id="@item.Id">
                                             Editar
                                         </button>
 
@@ -403,9 +405,9 @@
         document.querySelectorAll(".btnEditar").forEach(btn => {
             btn.addEventListener("click", function () {
 
-                const contenedor = this.closest("tr").children[0].innerText;
+                    const id = this.dataset.id;
 
-                fetch(`/ActasPermanencias/BuscarContenedor?contenedor=${contenedor}`)
+                    fetch(`/ActasPermanencias/BuscarRegistro?id=${id}`)
                     .then(r => r.json())
                     .then(data => abrirModal(data));
             });
