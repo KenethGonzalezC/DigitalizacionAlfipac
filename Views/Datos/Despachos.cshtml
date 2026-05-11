@@ -94,6 +94,11 @@
                     </div>
 
                     <div class="col-md-3">
+                        <label class="form-label">Cedula</label>
+                        <input name="Cedula" class="form-control" />
+                    </div>
+
+                    <div class="col-md-3">
                         <label class="form-label">Placa Cabezal</label>
                         <input name="PlacaCabezal" class="form-control" />
                     </div>
@@ -186,6 +191,7 @@
                         <th>Cliente</th>
                         <th>Chasis</th>
                         <th>Chofer</th>
+                        <th>Cedula</th>
                         <th>Placa</th>
                         <th>Viaje/DUA</th>
                         <th>Boleta</th>
@@ -214,6 +220,7 @@
                                 <td>@item.Cliente</td>
                                 <td>@item.Chasis</td>
                                 <td>@item.Chofer</td>
+                                <td>@item.Cedula</td>
                                 <td>@item.PlacaCabezal</td>
                                 <td>@item.ViajeDua</td>
                                 <td>@item.Boleta</td>
@@ -235,6 +242,20 @@
                                                 data-contenedor="@item.Contenedor">
                                             🗑
                                         </button>
+
+                                        <a class="btn btn-sm btn-success"
+                                               asp-controller="BitacoraDespachos"
+                                               asp-action="Index"
+                                               asp-route-contenedor="@item.Contenedor"
+                                               asp-route-marchamos="@item.Marchamos"
+                                               asp-route-transportista="@item.Transportista"
+                                               asp-route-cliente="@item.Cliente"
+                                               asp-route-chasis="@item.Chasis"
+                                               asp-route-chofer="@item.Chofer"
+                                               asp-route-placaCabezal="@item.PlacaCabezal"
+                                               asp-route-viajeDua="@item.ViajeDua">
+                                            🚛
+                                        </a>
 
                                     </div>
                                 </td>
@@ -298,6 +319,11 @@
                         <div class="col-md-4">
                             <label class="form-label">Chofer</label>
                             <input name="Chofer" id="editChofer" class="form-control" />
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Cedula</label>
+                            <input name="Cedula" id="editCedula" class="form-control" />
                         </div>
 
                         <div class="col-md-4">
@@ -407,6 +433,7 @@
         document.getElementById("editMarchamos").value = item.Marchamos;
         document.getElementById("editTransportista").value = item.Transportista;
         document.getElementById("editCliente").value = item.Cliente;
+        document.getElementById("editCedula").value = item.Cedula;
         document.getElementById("editChofer").value = item.Chofer;
         document.getElementById("editPlaca").value = item.PlacaCabezal;
         document.getElementById("editChasis").value = item.Chasis;

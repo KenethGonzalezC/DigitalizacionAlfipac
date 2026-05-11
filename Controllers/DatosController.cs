@@ -418,6 +418,7 @@ public class DatosController : Controller
             PlacaCabezal = null,
             ViajeDua = null,
             Boleta = null,
+            Cedula = null,
 
             FechaCreacion = DateTime.Now
         });
@@ -437,6 +438,7 @@ public class DatosController : Controller
         string transportista,
         string cliente,
         string chofer,
+        string cedula,
         string placa,
         string chasis,
         string viajeDua,
@@ -466,6 +468,7 @@ public class DatosController : Controller
             string.IsNullOrEmpty(transportista) &&
             string.IsNullOrEmpty(cliente) &&
             string.IsNullOrEmpty(chofer) &&
+            string.IsNullOrEmpty(cedula) &&
             string.IsNullOrEmpty(placa) &&
             string.IsNullOrEmpty(chasis) &&
             string.IsNullOrEmpty(viajeDua) &&
@@ -477,31 +480,31 @@ public class DatosController : Controller
 
         // 🔎 FILTROS
         if (!string.IsNullOrEmpty(contenedor))
-            queryContador = queryContador.Where(x => x.Contenedor.Contains(contenedor));
+            query = query.Where(x => x.Contenedor.Contains(contenedor));
 
         if (!string.IsNullOrEmpty(marchamos))
-            queryContador = queryContador.Where(x => x.Marchamos.Contains(marchamos));
+            query = query.Where(x => x.Marchamos.Contains(marchamos));
 
         if (!string.IsNullOrEmpty(transportista))
-            queryContador = queryContador.Where(x => x.Transportista.Contains(transportista));
+            query = query.Where(x => x.Transportista.Contains(transportista));
 
         if (!string.IsNullOrEmpty(cliente))
-            queryContador = queryContador.Where(x => x.Cliente.Contains(cliente));
+            query = query.Where(x => x.Cliente.Contains(cliente));
 
         if (!string.IsNullOrEmpty(chofer))
-            queryContador = queryContador.Where(x => x.Chofer.Contains(chofer));
+            query = query.Where(x => x.Chofer.Contains(chofer));
 
         if (!string.IsNullOrEmpty(placa))
-            queryContador = queryContador.Where(x => x.PlacaCabezal.Contains(placa));
+            query = query.Where(x => x.PlacaCabezal.Contains(placa));
 
         if (!string.IsNullOrEmpty(chasis))
-            queryContador = queryContador.Where(x => x.Chasis.Contains(chasis));
+            query = query.Where(x => x.Chasis.Contains(chasis));
 
         if (!string.IsNullOrEmpty(viajeDua))
-            queryContador = queryContador.Where(x => x.ViajeDua.Contains(viajeDua));
+            query = query.Where(x => x.ViajeDua.Contains(viajeDua));
 
         if (!string.IsNullOrEmpty(boleta))
-            queryContador = queryContador.Where(x => x.Boleta.Contains(boleta));
+            query = query.Where(x => x.Boleta.Contains(boleta));
 
         if (fechaRegistroDate.HasValue)
             query = query.Where(x => x.FechaCreacion.Date == fechaRegistroDate.Value.Date);
@@ -551,6 +554,7 @@ public class DatosController : Controller
         data.Cliente = model.Cliente;
         data.Chasis = model.Chasis;
         data.Chofer = model.Chofer;
+        data.Cedula = model.Cedula;
         data.PlacaCabezal = model.PlacaCabezal;
         data.ViajeDua = model.ViajeDua;
         data.Boleta = model.Boleta;
@@ -594,7 +598,7 @@ public class DatosController : Controller
                 chofer = x.Chofer,
                 placaCabezal = x.PlacaCabezal,
                 chasis = x.Chasis,
-                viajeDua = x.ViajeDua
+                viajeDua = x.ViajeDua,
             })
             .FirstOrDefaultAsync();
 
@@ -611,7 +615,7 @@ public class DatosController : Controller
             chofer = ingreso.chofer,
             placaCabezal = ingreso.placaCabezal,
             chasis = ingreso.chasis,
-            viajeDua = ingreso.viajeDua
+            viajeDua = ingreso.viajeDua,
         });
     }
 }

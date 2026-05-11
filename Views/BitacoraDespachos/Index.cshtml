@@ -558,9 +558,37 @@
             `;
 
             llenarCampos(data);        
-                } else {
-                    infoPatio.innerText = data.mensaje ?? "No encontrado";
+                } 
+                        else {
+
+            // ⚠️ Existe en precarga pero no en inventario
+            if (data.requiereSalidaFurgon) {
+
+                infoPatio.innerHTML = `
+                    <div class="alert alert-warning py-2 px-3 shadow-sm">
+                        ⚠️ ${data.mensaje}
+                    </div>
+                `;
+
+                llenarCampos(data);
+
+                // marcar automáticamente
+                const chkFurgon = document.getElementById("EsSalidaEnFurgon");
+
+                if (chkFurgon) {
+                    chkFurgon.checked = true;
                 }
+            }
+            else {
+
+                // ❌ No existe realmente
+                infoPatio.innerHTML = `
+                    <div class="alert alert-danger py-2 px-3 shadow-sm">
+                        ❌ ${data.mensaje ?? "No encontrado"}
+                    </div>
+                `;
+            }
+        }
 
             } catch {
                 infoPatio.innerText = "Error consultando";

@@ -27,7 +27,11 @@ namespace BitacoraAlfipac.Controllers
         string? contenedor,
         string? marchamos,
         string? cliente,
-        string? chasis)
+        string? chasis,
+        string? transportista,
+        string? chofer,
+        string? placaCabezal,
+        string? viajeDua)
             {
             var fechaSeleccionada = fecha ?? DateTime.Today;
 
@@ -45,10 +49,15 @@ namespace BitacoraAlfipac.Controllers
                 FechaSeleccionada = fechaSeleccionada,
                 FechaHoraDespacho = DateTime.Now,
 
-                // 👇 AUTO-RELLENO
+                // 🔥 AUTO-RELLENO
                 Contenedor = contenedor ?? "",
                 Marchamos = marchamos ?? "",
-                Informacion = cliente ?? "" // opcional aquí
+                Informacion = cliente ?? "",
+                Chasis = chasis ?? "",
+                Transportista = transportista ?? "",
+                Chofer = chofer ?? "",
+                PlacaCabezal = placaCabezal ?? "",
+                ViajeDua = viajeDua ?? ""
             };
 
             return View(vm);
@@ -276,10 +285,34 @@ namespace BitacoraAlfipac.Controllers
 
             if (entidad == null)
             {
+                // ⚠️ Existe en precarga pero no en inventario
+                if (precarga != null)
+                {
+                    return Json(new
+                    {
+                        encontrado = false,
+                        requiereSalidaFurgon = true,
+
+                        mensaje = "Unidad no encontrada en inventario. Debe marcar la salida en furgón.",
+
+                        // 🔥 aprovechar datos precarga
+                        contenedor = precarga.Contenedor,
+                        marchamos = precarga.Marchamos ?? "",
+                        chasis = precarga.Chasis ?? "",
+                        transportista = precarga.Transportista ?? "",
+                        cliente = precarga.Cliente ?? "",
+                        chofer = precarga.Chofer ?? "",
+                        placaCabezal = precarga.PlacaCabezal ?? "",
+                        viajeDua = precarga.ViajeDua ?? ""
+                    });
+                }
+
+                // ❌ No existe en ningún lado
                 return Json(new
                 {
                     encontrado = false,
-                    mensaje = "No se encontró en inventario"
+                    requiereSalidaFurgon = false,
+                    mensaje = "Unidad no encontrada"
                 });
             }
 

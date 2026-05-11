@@ -17,6 +17,8 @@
         public string? ViajeDua { get; set; }
 
         public string? Boleta { get; set; }
+
+        public string? Cedula { get; set; }
         public DateTime FechaCreacion { get; set; } = DateTime.Now;
     }
 }
