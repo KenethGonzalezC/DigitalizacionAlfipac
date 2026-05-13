@@ -1,5 +1,6 @@
 ﻿using BitacoraAlfipac.Data;
 using BitacoraAlfipac.Documents;
+using BitacoraAlfipac.Helpers;
 using BitacoraAlfipac.Models.Entidades;
 using BitacoraAlfipac.Models.ViewModels;
 using ClosedXML.Excel;
@@ -72,7 +73,7 @@ public class BitacoraIngresosController : Controller
 
         var ingreso = new BitacoraIngreso
         {
-            Contenedor = model.Contenedor,
+            Contenedor = ContenedorHelper.Normalizar(model.Contenedor),
             Marchamos = model.Marchamos,
             FechaHoraIngreso = fechaHora,
             Transportista = model.Transportista,

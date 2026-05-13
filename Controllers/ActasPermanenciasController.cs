@@ -516,10 +516,23 @@ namespace BitacoraAlfipac.Controllers
             if (string.IsNullOrWhiteSpace(contenedor))
                 return Json(new { encontrado = false });
 
+            string Normalizar(string s)
+            {
+                return (s ?? "")
+                    .Trim()
+                    .ToUpper()
+                    .Replace(" ", "")
+                    .Replace("-", "");
+            }
+
+            contenedor = Normalizar(contenedor);
+
             var registros = _context.ActasPermanencias
+                .AsEnumerable()
                 .Where(a =>
-                    a.Contenedor == contenedor &&
-                    a.FechaHoraIngresoContenedor == null)
+                    a.FechaHoraIngresoContenedor == null &&
+                    Normalizar(a.Contenedor) == contenedor
+                )
                 .Select(a => new
                 {
                     tipo = a.Tipo,
