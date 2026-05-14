@@ -102,6 +102,7 @@
                         <th>Cliente</th>
                         <th>Transportista</th>
                         <th>Consecutivo</th>
+                        <th>Despacho</th>
                         <th>Usuario</th>
                         <th class="text-center">PDF</th>
                         <th class="text-center">Editar</th>
@@ -135,6 +136,33 @@
                                     <span class="badge bg-primary">
                                         @item.Consecutivo
                                     </span>
+                                </td>
+
+                                <td>
+
+                                    @if (item.EstadoDespacho == "Despachado")
+                                    {
+                                        <span class="badge bg-success">
+                                            Despachado
+                                        </span>
+                                    }
+                                    else if (item.EstadoDespacho == "Parcial")
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            Parcial
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            Pendiente
+                                        </span>
+                                    }
+
+                                    <div class="small text-muted mt-1">
+                                        @item.DetalleDespacho
+                                    </div>
+
                                 </td>
 
                                 <td>@item.Usuario</td>

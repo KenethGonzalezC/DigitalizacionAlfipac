@@ -89,7 +89,7 @@ public class BitacoraIngresosController : Controller
 
         _context.HistorialContenedores.Add(new HistorialContenedor
         {
-            Contenedor = model.Contenedor,
+            Contenedor = ContenedorHelper.Normalizar(model.Contenedor),
             FechaHoraIngreso = fechaHora
         });
 
@@ -101,7 +101,7 @@ public class BitacoraIngresosController : Controller
             // 📦 CONTENEDOR NORMAL (SE MANTIENE IGUAL)
             _context.ContenedoresSinAsignarPatio.Add(new ContenedorSinAsignarPatio
             {
-                Contenedor = model.Contenedor,
+                Contenedor = ContenedorHelper.Normalizar(model.Contenedor),
                 Marchamos = model.Marchamos,
                 Tamano = model.Tamano,
                 Transportista = model.Transportista,
@@ -126,7 +126,7 @@ public class BitacoraIngresosController : Controller
 
             var vehiculo = new Vehiculo
             {
-                Contenedor = model.Contenedor.ToUpper().Trim(),
+                Contenedor = ContenedorHelper.Normalizar(model.Contenedor).ToUpper().Trim(),
                 Marchamos = string.IsNullOrWhiteSpace(model.Marchamos) ? "S/M" : model.Marchamos,
                 FechaHoraIngreso = fechaHora,
                 Transportista = model.Transportista,
@@ -152,7 +152,7 @@ public class BitacoraIngresosController : Controller
             {
                 _context.ContenedoresRefrigerados.Add(new ContenedorRefrigerado
                 {
-                    Contenedor = model.Contenedor,
+                    Contenedor = ContenedorHelper.Normalizar(model.Contenedor),
                     Cliente = model.Cliente,
                     FechaHoraIngreso = fechaHora,
                 });

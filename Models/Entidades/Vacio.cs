@@ -1,4 +1,6 @@
-﻿namespace BitacoraAlfipac.Models.Entidades
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace BitacoraAlfipac.Models.Entidades
 {
     public class Vacio
     {
@@ -15,5 +17,14 @@
         public string Consecutivo { get; set; } = "";
 
         public string Usuario { get; set; } = "";
+
+        [NotMapped]
+        public string EstadoDespacho { get; set; } = "Pendiente";
+
+        [NotMapped]
+        public DateTime? FechaDespacho { get; set; }
+
+        [NotMapped]
+        public string DetalleDespacho { get; set; } = "";
     }
 }

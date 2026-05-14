@@ -1,5 +1,6 @@
 ﻿using Aspose.Pdf.Forms;
 using BitacoraAlfipac.Data;
+using BitacoraAlfipac.Helpers;
 using BitacoraAlfipac.Models.Entidades;
 using BitacoraAlfipac.Models.ViewModels;
 using ClosedXML.Excel;
@@ -284,6 +285,8 @@ public async Task<IActionResult> Mover(
     [HttpGet]
     public async Task<IActionResult> BuscarGlobal(string contenedor)
     {
+        contenedor = ContenedorHelper.Normalizar(contenedor);
+
         if (string.IsNullOrWhiteSpace(contenedor))
             return PartialView("_ResultadoBusquedaGlobal", null);
 
@@ -806,10 +809,10 @@ public async Task<IActionResult> Mover(
             return RedirectToAction("InventarioGeneral");
         }
 
-        var contenedor = model.Contenedor?.ToUpper().Trim();
+        var Contenedor = ContenedorHelper.Normalizar(model.Contenedor)?.ToUpper().Trim();
 
         var existe = await _context.ContenedoresSinAsignarPatio
-            .AnyAsync(x => x.Contenedor == contenedor);
+            .AnyAsync(x => x.Contenedor == Contenedor);
 
         if (existe)
         {
@@ -819,7 +822,7 @@ public async Task<IActionResult> Mover(
 
         var inventario = new ContenedorSinAsignarPatio
         {
-            Contenedor = contenedor,
+            Contenedor = Contenedor,
             Marchamos = model.Marchamos,
             Tamano = model.Tamano,
             Chasis = model.Chasis,
@@ -1014,6 +1017,30 @@ public async Task<IActionResult> Mover(
             success = true,
             message = $"Contenedor {contenedor} eliminado."
         });
+    }
+
+    public async Task<IActionResult> NormalizarContenedores()
+    {
+        var tablas = new List<dynamic>
+    {
+        _context.ContenedoresSinAsignarPatio,
+        _context.Patio1,
+        _context.Patio2,
+        _context.Anden2000,
+        _context.PatioQuimicos
+    };
+
+        foreach (var tabla in tablas)
+        {
+            foreach (var item in tabla)
+            {
+                item.Contenedor = item.Contenedor.Trim().ToUpper();
+            }
+        }
+
+        await _context.SaveChangesAsync();
+
+        return Content("OK");
     }
 
 }

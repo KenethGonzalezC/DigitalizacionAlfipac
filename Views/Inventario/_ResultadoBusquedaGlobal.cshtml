@@ -170,8 +170,7 @@
 
                     <form asp-controller="Inventario"
                           asp-action="EliminarContenedorInventario"
-                          method="post"
-                          onsubmit="return confirmarEliminacion();">
+                          method="post">
 
                         @Html.AntiForgeryToken()
 
@@ -181,7 +180,9 @@
                                name="motivo"
                                value="Eliminación manual desde búsqueda global" />
 
-                        <button class="btn btn-danger w-100">
+                        <button type="submit"
+                                id="btnEliminarContenedor"
+                                class="btn btn-danger w-100">
                             🗑 Eliminar
                         </button>
 
@@ -196,13 +197,26 @@
 </div>
 
 <script>
-    function confirmarEliminacion() {
+    document.addEventListener("DOMContentLoaded", function () {
 
-        return confirm(
-            "⚠️ ATENCIÓN\n\n" +
-            "Esta acción eliminará el contenedor SOLO del inventario físico.\n\n" +
-            "NO se eliminarán ingresos, despachos ni historial.\n\n" +
-            "¿Desea continuar?"
-        );
-    }
+        const btnEliminar =
+            document.getElementById("btnEliminarContenedor");
+
+        btnEliminar?.addEventListener("click", function (e) {
+
+            const confirmado = confirm(
+                "⚠️ ATENCIÓN\n\n" +
+                "Esta acción eliminará el contenedor SOLO del inventario físico.\n\n" +
+                "NO se eliminarán ingresos, despachos ni historial.\n\n" +
+                "¿Desea continuar?"
+            );
+
+            if (!confirmado) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+        });
+
+    });
 </script>

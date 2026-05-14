@@ -132,11 +132,68 @@ namespace BitacoraAlfipac.Controllers
                 .ThenBy(x => x.Contenedor)
                 .ToList();
 
-            //historial de hoy
-            ViewBag.HistorialHoy = _context.Vacios
-            .Where(x => x.Fecha.Date == DateTime.Today)
-            .OrderByDescending(x => x.Fecha)
-            .ToList();
+            // ================= HISTORIAL HOY =================
+            var historialHoy = _context.Vacios
+                .Where(x => x.Fecha.Date == DateTime.Today)
+                .OrderByDescending(x => x.Fecha)
+                .ToList();
+
+            // ================= VALIDAR DESPACHOS =================
+            foreach (var item in historialHoy)
+            {
+                // separar múltiples contenedores
+                var contenedores = item.Contenedor
+                    .Split('/', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => x.Trim())
+                    .ToList();
+
+                var detalles = new List<string>();
+                int despachados = 0;
+
+                foreach (var cont in contenedores)
+                {
+                    var despacho = _context.HistorialContenedores
+                        .Where(h =>
+                            h.Contenedor == cont &&
+                            h.FechaHoraSalida != null)
+                        .OrderByDescending(h => h.FechaHoraSalida)
+                        .FirstOrDefault();
+
+                    if (despacho != null)
+                    {
+                        despachados++;
+
+                        detalles.Add(
+                            despacho.FechaHoraSalida?
+                            .ToString("dd/MM/yyyy HH:mm")
+                            ?? "Despachado"
+                        );
+                    }
+                    else
+                    {
+                        detalles.Add("Pendiente");
+                    }
+                }
+
+                // ================= ESTADO GENERAL =================
+                if (despachados == 0)
+                {
+                    item.EstadoDespacho = "Pendiente";
+                }
+                else if (despachados == contenedores.Count)
+                {
+                    item.EstadoDespacho = "Despachado";
+                }
+                else
+                {
+                    item.EstadoDespacho = "Parcial";
+                }
+
+                item.DetalleDespacho = string.Join(" / ", detalles);
+            }
+
+            // enviar a vista
+            ViewBag.HistorialHoy = historialHoy;
 
             return View(resultado);
         }
@@ -423,6 +480,7 @@ namespace BitacoraAlfipac.Controllers
             if (!hayFecha && !hayContenedor)
             {
                 DateTime hoy = DateTime.Today;
+
                 query = query.Where(x => x.Fecha.Date == hoy);
 
                 ViewBag.Fecha = hoy.ToString("yyyy-MM-dd");
@@ -432,31 +490,85 @@ namespace BitacoraAlfipac.Controllers
             if (hayFecha)
             {
                 DateTime fechaFiltro = fecha.Value.Date;
+
                 query = query.Where(x => x.Fecha.Date == fechaFiltro);
 
                 ViewBag.Fecha = fechaFiltro.ToString("yyyy-MM-dd");
             }
 
-            // 🔹 Si viene contenedor → aplicar (independiente)
+            // 🔹 Si viene contenedor → aplicar
             if (hayContenedor)
             {
-                query = query.Where(x => x.Contenedor.Contains(contenedor));
+                query = query.Where(x =>
+                    x.Contenedor.Contains(contenedor));
             }
 
             var historial = query
                 .OrderByDescending(x => x.Fecha)
                 .ToList();
 
+            // 🔎 Buscar fecha de despacho
+            foreach (var item in historial)
+            {
+                var contenedores = item.Contenedor?
+                    .Split('/', ',', ';')
+                    .Select(x => x.Trim().ToUpper())
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Distinct()
+                    .ToList();
+
+                if (contenedores == null || !contenedores.Any())
+                    continue;
+
+                var detalles = new List<string>();
+
+                int despachados = 0;
+
+                foreach (var cont in contenedores)
+                {
+                    var salida = _context.HistorialContenedores
+                        .Where(h =>
+                            h.Contenedor.ToUpper() == cont &&
+                            h.FechaHoraSalida != null)
+                        .OrderByDescending(h => h.FechaHoraSalida)
+                        .FirstOrDefault();
+
+                    if (salida != null)
+                    {
+                        despachados++;
+
+                        detalles.Add(
+                            salida.FechaHoraSalida?
+                            .ToString("dd/MM/yyyy HH:mm")
+                            ?? "Pendiente"
+                        );
+                    }
+                    else
+                    {
+                        detalles.Add("Pendiente");
+                    }
+                }
+
+                item.DetalleDespacho = string.Join(" / ", detalles);
+
+                if (despachados == 0)
+                    item.EstadoDespacho = "Pendiente";
+                else if (despachados == contenedores.Count)
+                    item.EstadoDespacho = "Despachado";
+                else
+                    item.EstadoDespacho = "Parcial";
+            }
+
             return View(historial);
         }
 
-        //exportar historial a exel
+        //exportar historial a excel
         [HttpPost]
         public IActionResult ExportarHistorialExcel(
-    DateTime fechaInicio,
-    DateTime fechaFin,
-    TimeSpan? horaInicio,
-    TimeSpan? horaFin)
+        DateTime fechaInicio,
+        DateTime fechaFin,
+        TimeSpan? horaInicio,
+        TimeSpan? horaFin)
         {
             // =====================================================
             // FILTRO FECHA + HORA
@@ -488,9 +600,9 @@ namespace BitacoraAlfipac.Controllers
             // TÍTULO
             // =====================================================
             ws.Cell("A1").Value = "ALFIPAC";
-            ws.Range("A1:F1").Merge();
+            ws.Range("A1:I1").Merge();
 
-            ws.Range("A1:F1").Style
+            ws.Range("A1:I1").Style
                 .Font.SetBold()
                 .Font.SetFontSize(18)
                 .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
@@ -498,9 +610,9 @@ namespace BitacoraAlfipac.Controllers
                 .Font.SetFontColor(XLColor.White);
 
             ws.Cell("A2").Value = "HISTORIAL DE REPORTES VACÍOS";
-            ws.Range("A2:F2").Merge();
+            ws.Range("A2:I2").Merge();
 
-            ws.Range("A2:F2").Style
+            ws.Range("A2:I2").Style
                 .Font.SetBold()
                 .Font.SetFontSize(14)
                 .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
@@ -515,10 +627,10 @@ namespace BitacoraAlfipac.Controllers
             ws.Cell("F3").Value =
                 $"{horaInicio:hh\\:mm} - {horaFin:hh\\:mm}";
 
-            ws.Range("A3:F3").Style.Font.SetBold();
+            ws.Range("A3:I3").Style.Font.SetBold();
 
             // =====================================================
-            // ENCABEZADOS (como imagen)
+            // ENCABEZADOS
             // =====================================================
             int fila = 5;
 
@@ -528,8 +640,11 @@ namespace BitacoraAlfipac.Controllers
             ws.Cell(fila, 4).Value = "Cliente";
             ws.Cell(fila, 5).Value = "Transportista";
             ws.Cell(fila, 6).Value = "Consecutivo";
+            ws.Cell(fila, 7).Value = "Fecha Salida";
+            ws.Cell(fila, 8).Value = "Hora";
+            ws.Cell(fila, 9).Value = "RETIRADO";
 
-            var header = ws.Range(fila, 1, fila, 6);
+            var header = ws.Range(fila, 1, fila, 9);
 
             header.Style
                 .Font.SetBold()
@@ -540,6 +655,11 @@ namespace BitacoraAlfipac.Controllers
                 .Border.SetOutsideBorder(XLBorderStyleValues.Thin)
                 .Border.SetInsideBorder(XLBorderStyleValues.Thin);
 
+            // ENCABEZADO RETIRADO EN ROJO
+            ws.Cell(fila, 9).Style.Fill.SetBackgroundColor(XLColor.Red);
+            ws.Cell(fila, 9).Style.Font.SetFontColor(XLColor.White);
+            ws.Cell(fila, 9).Style.Font.SetBold();
+
             fila++;
 
             // =====================================================
@@ -547,6 +667,49 @@ namespace BitacoraAlfipac.Controllers
             // =====================================================
             foreach (var item in datos)
             {
+                var contenedores = item.Contenedor
+                    .Split('/', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => x.Trim())
+                    .ToList();
+
+                var fechasSalida = new List<string>();
+                var horasSalida = new List<string>();
+
+                int total = contenedores.Count;
+                int despachados = 0;
+
+                foreach (var cont in contenedores)
+                {
+                    var despacho = _context.HistorialContenedores
+                        .Where(h =>
+                            h.Contenedor == cont &&
+                            h.FechaHoraSalida != null)
+                        .OrderByDescending(h => h.FechaHoraSalida)
+                        .FirstOrDefault();
+
+                    if (despacho != null)
+                    {
+                        despachados++;
+
+                        fechasSalida.Add(
+                            despacho.FechaHoraSalida?
+                            .ToString("dd/MM/yyyy")
+                            ?? "Pendiente");
+
+                        horasSalida.Add(
+                            despacho.FechaHoraSalida?
+                            .ToString("HH:mm")
+                            ?? "Pendiente");
+                    }
+                    else
+                    {
+                        fechasSalida.Add("Pendiente");
+                        horasSalida.Add("Pendiente");
+                    }
+                }
+
+                bool retiradoCompleto = despachados == total;
+
                 ws.Cell(fila, 1).Value = item.Fecha.ToString("d/M/yyyy");
                 ws.Cell(fila, 2).Value = item.Fecha.ToString("HH:mm");
                 ws.Cell(fila, 3).Value = item.Contenedor;
@@ -554,13 +717,23 @@ namespace BitacoraAlfipac.Controllers
                 ws.Cell(fila, 5).Value = item.Transportista;
                 ws.Cell(fila, 6).Value = item.Consecutivo;
 
+                ws.Cell(fila, 7).Value =
+                    string.Join(" / ", fechasSalida);
+
+                ws.Cell(fila, 8).Value =
+                    string.Join(" / ", horasSalida);
+
+                // X SOLO SI TODO ESTÁ RETIRADO
+                ws.Cell(fila, 9).Value =
+                    retiradoCompleto ? "X" : "";
+
                 fila++;
             }
 
             // =====================================================
             // FORMATO CUERPO
             // =====================================================
-            var body = ws.Range(6, 1, fila - 1, 6);
+            var body = ws.Range(6, 1, fila - 1, 9);
 
             body.Style
                 .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
@@ -568,32 +741,35 @@ namespace BitacoraAlfipac.Controllers
                 .Border.SetOutsideBorder(XLBorderStyleValues.Thin)
                 .Border.SetInsideBorder(XLBorderStyleValues.Thin);
 
-            // Zebra rows (similar visual)
+            // Zebra rows
             for (int i = 6; i < fila; i++)
             {
                 if (i % 2 == 0)
-                    ws.Range(i, 1, i, 6)
+                    ws.Range(i, 1, i, 9)
                       .Style.Fill.SetBackgroundColor(XLColor.White);
                 else
-                    ws.Range(i, 1, i, 6)
+                    ws.Range(i, 1, i, 9)
                       .Style.Fill.SetBackgroundColor(XLColor.FromHtml("#F2F2F2"));
             }
 
             // =====================================================
-            // ANCHOS PARECIDOS A IMAGEN
+            // ANCHOS
             // =====================================================
             ws.Column(1).Width = 12;
             ws.Column(2).Width = 10;
-            ws.Column(3).Width = 18;
+            ws.Column(3).Width = 25;
             ws.Column(4).Width = 55;
             ws.Column(5).Width = 22;
             ws.Column(6).Width = 15;
+            ws.Column(7).Width = 25;
+            ws.Column(8).Width = 20;
+            ws.Column(9).Width = 12;
 
             // Freeze header
             ws.SheetView.FreezeRows(5);
 
             // Filtro automático
-            ws.Range(5, 1, fila - 1, 6).SetAutoFilter();
+            ws.Range(5, 1, fila - 1, 9).SetAutoFilter();
 
             // =====================================================
             // DESCARGA

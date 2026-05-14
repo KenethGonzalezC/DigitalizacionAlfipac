@@ -1,5 +1,6 @@
 ﻿using BitacoraAlfipac.Data;
 using BitacoraAlfipac.Documents;
+using BitacoraAlfipac.Helpers;
 using BitacoraAlfipac.Models.Entidades;
 using BitacoraAlfipac.Models.ViewModels;
 using ClosedXML.Excel;
@@ -275,6 +276,7 @@ namespace BitacoraAlfipac.Controllers
                 return Json(new { encontrado = false });
 
             contenedor = contenedor.ToUpper().Trim();
+            contenedor = ContenedorHelper.Normalizar(contenedor);
 
             // 🔥 1. BUSCAR PRECARGA (PRIORIDAD)
             var precarga = await _context.DatosDespachosViajes

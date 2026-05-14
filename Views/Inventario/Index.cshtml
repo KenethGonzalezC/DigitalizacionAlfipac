@@ -223,7 +223,7 @@
                         </tr>
                     </thead>
 
-                    <tbody id="tablaOrden">
+                    <tbody id="tablaOrdenSinAsignar">
                         @foreach (var c in Model.ContenedoresSinAsignar)
                         {
                             <tr data-id="@c.Id">
@@ -378,7 +378,7 @@
         // =========================
         // ORDENAR TABLA
         // =========================
-        new Sortable(document.getElementById("tablaOrden"), {
+        new Sortable(document.getElementById("tablaOrdenSinAsignar"), {
         animation: 150,
         handle: ".handle",
         ghostClass: "table-warning",
@@ -468,7 +468,7 @@
 
         let lista = [];
 
-        document.querySelectorAll("#tablaOrden tr")
+        document.querySelectorAll("#tablaOrdenSinAsignar tr")
         .forEach((fila, index) => {
 
         lista.push({

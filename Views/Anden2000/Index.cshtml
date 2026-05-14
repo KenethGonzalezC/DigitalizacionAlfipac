@@ -217,7 +217,7 @@
                 </tr>
             </thead>
 
-            <tbody id="tablaOrden">
+            <tbody id="tablaOrdenAnden2000">
                 @foreach (var c in Model)
                 {
                     <tr data-id="@c.Id">
@@ -437,7 +437,7 @@
         // DRAG & DROP SOLO HANDLE
         let filaSeleccionada = null;
 
-        new Sortable(document.getElementById("tablaOrden"), {
+        new Sortable(document.getElementById("tablaOrdenAnden2000"), {
         animation: 150,
         handle: ".handle",
         ghostClass: "table-warning",
@@ -504,7 +504,7 @@
 
         let lista = [];
 
-        document.querySelectorAll("#tablaOrden tr")
+        document.querySelectorAll("#tablaOrdenAnden2000 tr")
         .forEach((fila, index) => {
 
         lista.push({
