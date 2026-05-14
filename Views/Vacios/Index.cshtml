@@ -269,7 +269,13 @@
                     <td>@r.Cliente</td>
                     <td>@r.Transportista</td>
                     <td>@r.Consecutivo</td>
-                    <td>
+                    @{
+                        bool vencido =
+                            r.EstadoDespacho == "Pendiente" &&
+                            (DateTime.Now - r.Fecha).TotalHours >= 24;
+                    }
+
+                    <td class="@(vencido ? "table-danger" : "")">
 
                         @if (r.EstadoDespacho == "Despachado")
                         {
@@ -290,11 +296,19 @@
                             </span>
                         }
 
+                        @if (vencido)
+                        {
+                            <div class="fw-bold text-danger small mt-1">
+                                +24h sin retiro
+                            </div>
+                        }
+
                         <div class="small text-muted mt-1">
                             @r.DetalleDespacho
                         </div>
 
                     </td>
+
                     <td>@r.Usuario</td>
 
                     <td>

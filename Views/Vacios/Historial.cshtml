@@ -138,7 +138,13 @@
                                     </span>
                                 </td>
 
-                                <td>
+                                @{
+                                    bool vencido =
+                                        item.EstadoDespacho == "Pendiente" &&
+                                        (DateTime.Now - item.Fecha).TotalHours >= 24;
+                                }
+
+                                <td class="@(vencido ? "table-danger" : "")">
 
                                     @if (item.EstadoDespacho == "Despachado")
                                     {
@@ -157,6 +163,13 @@
                                         <span class="badge bg-secondary">
                                             Pendiente
                                         </span>
+                                    }
+
+                                    @if (vencido)
+                                    {
+                                        <div class="fw-bold text-danger small mt-1">
+                                            +24h sin retiro
+                                        </div>
                                     }
 
                                     <div class="small text-muted mt-1">

@@ -723,9 +723,33 @@ namespace BitacoraAlfipac.Controllers
                 ws.Cell(fila, 8).Value =
                     string.Join(" / ", horasSalida);
 
-                // X SOLO SI TODO ESTÁ RETIRADO
+                // =====================================================
+                // RETIRADO
+                // =====================================================
                 ws.Cell(fila, 9).Value =
                     retiradoCompleto ? "X" : "";
+
+                // =====================================================
+                // ALERTA +24H SIN RETIRO
+                // SOLO SI NO ESTÁ DESPACHADO
+                // =====================================================
+                bool alerta24h =
+                    !retiradoCompleto &&
+                    despachados == 0 &&
+                    (DateTime.Now - item.Fecha).TotalHours >= 24;
+
+                if (alerta24h)
+                {
+                    ws.Range(fila, 1, fila, 9)
+                        .Style.Fill.SetBackgroundColor(
+                            XLColor.FromHtml("#F8D7DA"));
+
+                    ws.Range(fila, 1, fila, 9)
+                        .Style.Font.SetFontColor(
+                            XLColor.DarkRed);
+
+                    ws.Cell(fila, 9).Style.Font.SetBold();
+                }
 
                 fila++;
             }
@@ -741,15 +765,29 @@ namespace BitacoraAlfipac.Controllers
                 .Border.SetOutsideBorder(XLBorderStyleValues.Thin)
                 .Border.SetInsideBorder(XLBorderStyleValues.Thin);
 
-            // Zebra rows
+            // =====================================================
+            // ZEBRA ROWS
+            // NO SOBREESCRIBIR FILAS ROJAS
+            // =====================================================
             for (int i = 6; i < fila; i++)
             {
+                var colorActual =
+                    ws.Cell(i, 1).Style.Fill.BackgroundColor;
+
+                if (colorActual == XLColor.FromHtml("#F8D7DA"))
+                    continue;
+
                 if (i % 2 == 0)
+                {
                     ws.Range(i, 1, i, 9)
                       .Style.Fill.SetBackgroundColor(XLColor.White);
+                }
                 else
+                {
                     ws.Range(i, 1, i, 9)
-                      .Style.Fill.SetBackgroundColor(XLColor.FromHtml("#F2F2F2"));
+                      .Style.Fill.SetBackgroundColor(
+                          XLColor.FromHtml("#F2F2F2"));
+                }
             }
 
             // =====================================================
