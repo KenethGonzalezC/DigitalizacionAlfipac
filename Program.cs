@@ -23,7 +23,14 @@ QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 // ==========================
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 10,
+                maxRetryDelay: TimeSpan.FromSeconds(10),
+                errorNumbersToAdd: null);
+        }
     )
 );
 
@@ -73,13 +80,44 @@ else
 // ==========================
 // DATABASE MIGRATION + SEED
 // ==========================
-using (var scope = app.Services.CreateScope())
+var retries = 10;
+var delay = TimeSpan.FromSeconds(15);
+
+for (int i = 1; i <= retries; i++)
 {
-    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    try
+    {
+        using var scope = app.Services.CreateScope();
 
-    context.Database.Migrate(); // 👈 AGREGAR ESTO
+        var context = scope.ServiceProvider
+            .GetRequiredService<ApplicationDbContext>();
 
-    DbInitializer.Initialize(context);
+        context.Database.Migrate();
+
+        DbInitializer.Initialize(context);
+
+        Console.WriteLine("Base de datos lista.");
+
+        break;
+    }
+    catch (Exception ex)
+    {
+        var logPath = @"C:\inetpub\wwwroot\BitacoraAlfipac\logs\db-startup.txt";
+
+        Directory.CreateDirectory(
+            Path.GetDirectoryName(logPath)!);
+
+        File.AppendAllText(
+            logPath,
+            $"[{DateTime.Now}] Intento {i} falló:{Environment.NewLine}{ex}{Environment.NewLine}{Environment.NewLine}");
+
+        if (i == retries)
+        {
+            throw;
+        }
+
+        Thread.Sleep(delay);
+    }
 }
 
 // ==========================
