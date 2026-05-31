@@ -346,15 +346,22 @@
 
 <!--MODAL BUSQUEDA-->
 <div class="modal fade" id="modalBusquedaGlobal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content shadow">
 
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">🔎 Resultado de búsqueda</h5>
+                <h5 class="modal-title">🔍 Resultado de búsqueda</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="modal-body bg-light" id="contenidoModalBusqueda">
+            <div class="modal-body">
+                <div id="contenidoModalBusqueda"></div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    Cerrar
+                </button>
             </div>
 
         </div>

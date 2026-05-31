@@ -132,6 +132,41 @@ namespace BitacoraAlfipac.Controllers
                 .ThenBy(x => x.Contenedor)
                 .ToList();
 
+            // ================= REPORTES ACTIVOS =================
+            var reportesActivos = _context.Vacios
+                .ToList();
+
+            foreach (var item in resultado)
+            {
+                item.YaReportado = false;
+
+                foreach (var reporte in reportesActivos)
+                {
+                    var contenedoresReporte = reporte.Contenedor
+                        .Split('/', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(x => x.Trim().ToUpper())
+                        .ToList();
+
+                    // ¿este contenedor pertenece al reporte?
+                    if (!contenedoresReporte.Contains(
+                            item.Contenedor.Trim().ToUpper()))
+                        continue;
+
+                    // validar si ya fue despachado
+                    bool despachado = _context.HistorialContenedores
+                        .Any(h =>
+                            h.Contenedor.ToUpper() ==
+                                item.Contenedor.Trim().ToUpper()
+                            && h.FechaHoraSalida != null);
+
+                    if (!despachado)
+                    {
+                        item.YaReportado = true;
+                        break;
+                    }
+                }
+            }
+
             // ================= HISTORIAL HOY =================
             var historialHoy = _context.Vacios
                 .Where(x => x.Fecha.Date == DateTime.Today)
@@ -147,7 +182,13 @@ namespace BitacoraAlfipac.Controllers
                     .Select(x => x.Trim())
                     .ToList();
 
+                var fechasDespacho = new List<string>();
+                var choferesDespacho = new List<string>();
+                var placasDespacho = new List<string>();
+
                 var detalles = new List<string>();
+
+                var pendientes = new List<string>();
                 int despachados = 0;
 
                 foreach (var cont in contenedores)
@@ -159,8 +200,26 @@ namespace BitacoraAlfipac.Controllers
                         .OrderByDescending(h => h.FechaHoraSalida)
                         .FirstOrDefault();
 
+                    var despachoInfo = _context.BitacoraDespachos
+                    .FirstOrDefault(x =>
+                        x.Contenedor.ToUpper() == cont.ToUpper());
+
                     if (despacho != null)
                     {
+
+                        if (despachoInfo != null)
+                        {
+                            fechasDespacho.Add(
+                            despachoInfo.FechaHoraDespacho
+                                .ToString("dd/MM/yyyy HH:mm"));
+
+                            choferesDespacho.Add(
+                                despachoInfo.Chofer);
+
+                            placasDespacho.Add(
+                                despachoInfo.PlacaCabezal);
+                        }
+
                         despachados++;
 
                         detalles.Add(
@@ -171,6 +230,8 @@ namespace BitacoraAlfipac.Controllers
                     }
                     else
                     {
+                        pendientes.Add(cont);
+
                         detalles.Add("Pendiente");
                     }
                 }
@@ -188,6 +249,18 @@ namespace BitacoraAlfipac.Controllers
                 {
                     item.EstadoDespacho = "Parcial";
                 }
+
+                item.FechasDespachoTexto =
+                    string.Join(" | ", fechasDespacho);
+
+                item.ChoferesDespachoTexto =
+                    string.Join(" | ", choferesDespacho);
+
+                item.PlacasDespachoTexto =
+                    string.Join(" | ", placasDespacho);
+
+                item.ContenedoresPendientes =
+                    string.Join(" | ", pendientes);
 
                 item.DetalleDespacho = string.Join(" / ", detalles);
             }
@@ -468,16 +541,17 @@ namespace BitacoraAlfipac.Controllers
         }
 
         //historial
-        public IActionResult Historial(DateTime? fecha, string? contenedor)
+        public IActionResult Historial(DateTime? fecha, string? contenedor, string? consecutivo)
         {
             var query = _context.Vacios.AsQueryable();
 
             // 🔹 Detectar si viene algún filtro
             bool hayFecha = fecha.HasValue;
             bool hayContenedor = !string.IsNullOrWhiteSpace(contenedor);
+            bool hayConsecutivo = !string.IsNullOrWhiteSpace(consecutivo);
 
             // 🔹 Si NO viene ningún filtro → usar HOY
-            if (!hayFecha && !hayContenedor)
+            if (!hayFecha && !hayContenedor && !hayConsecutivo)
             {
                 DateTime hoy = DateTime.Today;
 
@@ -503,6 +577,13 @@ namespace BitacoraAlfipac.Controllers
                     x.Contenedor.Contains(contenedor));
             }
 
+            // si viene filtro de consecutivo
+            if (hayConsecutivo)
+            {
+                query = query.Where(x =>
+                    x.Consecutivo.Contains(consecutivo));
+            }
+
             var historial = query
                 .OrderByDescending(x => x.Fecha)
                 .ToList();
@@ -522,6 +603,12 @@ namespace BitacoraAlfipac.Controllers
 
                 var detalles = new List<string>();
 
+                var fechasDespacho = new List<string>();
+                var choferesDespacho = new List<string>();
+                var placasDespacho = new List<string>();
+
+                var pendientes = new List<string>();
+
                 int despachados = 0;
 
                 foreach (var cont in contenedores)
@@ -533,21 +620,66 @@ namespace BitacoraAlfipac.Controllers
                         .OrderByDescending(h => h.FechaHoraSalida)
                         .FirstOrDefault();
 
+                    var despachoInfo = _context.BitacoraDespachos
+                        .FirstOrDefault(x =>
+                            x.Contenedor.ToUpper() == cont);
+
                     if (salida != null)
                     {
+
+                        if (despachoInfo != null)
+                        {
+                            fechasDespacho.Add(
+                                despachoInfo.FechaHoraDespacho
+                                    .ToString("dd/MM/yyyy HH:mm"));
+
+                            choferesDespacho.Add(
+                                despachoInfo.Chofer);
+
+                            placasDespacho.Add(
+                                despachoInfo.PlacaCabezal);
+
+                            item.ChasisDespacho = despachoInfo.Chasis;
+                            item.ViajeDuaDespacho = despachoInfo.ViajeDua;
+                        }
                         despachados++;
 
-                        detalles.Add(
-                            salida.FechaHoraSalida?
-                            .ToString("dd/MM/yyyy HH:mm")
-                            ?? "Pendiente"
-                        );
+                        if (despachoInfo != null)
+                        {
+                            detalles.Add(
+                                $"{salida.FechaHoraSalida:dd/MM/yyyy HH:mm}" +
+                                $" | {despachoInfo.Chofer}" +
+                                $" | {despachoInfo.PlacaCabezal}"
+                            );
+                        }
+                        else
+                        {
+                            detalles.Add(
+                                salida.FechaHoraSalida?
+                                .ToString("dd/MM/yyyy HH:mm")
+                                ?? "Pendiente"
+                            );
+                        }
                     }
                     else
                     {
+                        pendientes.Add(cont);
+
                         detalles.Add("Pendiente");
                     }
                 }
+
+                item.FechasDespachoTexto =
+                    string.Join(" | ", fechasDespacho);
+
+                item.ChoferesDespachoTexto =
+                    string.Join(" | ", choferesDespacho);
+
+                item.PlacasDespachoTexto =
+                    string.Join(" | ", placasDespacho);
+
+                item.ContenedoresPendientes =
+                    string.Join(" | ", pendientes);
 
                 item.DetalleDespacho = string.Join(" / ", detalles);
 
@@ -843,6 +975,279 @@ namespace BitacoraAlfipac.Controllers
                 return RedirectToAction(nameof(Historial));
 
             return RedirectToAction(nameof(Index));
+        }
+
+        // EXPORTAR HISTORIAL EXCEL DETALLADO
+        [HttpPost]
+        public IActionResult ExportarHistorialExcelDetallado(
+            DateTime fechaInicio,
+            DateTime fechaFin,
+            TimeSpan? horaInicio,
+            TimeSpan? horaFin)
+        {
+            // =====================================================
+            // FILTRO FECHA + HORA
+            // =====================================================
+            var desde = fechaInicio.Date;
+            var hasta = fechaFin.Date.AddDays(1).AddTicks(-1);
+
+            var datos = _context.Vacios
+                .Where(x => x.Fecha >= desde && x.Fecha <= hasta)
+                .ToList();
+
+            if (horaInicio.HasValue)
+                datos = datos.Where(x => x.Fecha.TimeOfDay >= horaInicio.Value).ToList();
+
+            if (horaFin.HasValue)
+                datos = datos.Where(x => x.Fecha.TimeOfDay <= horaFin.Value).ToList();
+
+            datos = datos
+                .OrderBy(x => x.Fecha)
+                .ToList();
+
+            // =====================================================
+            // EXCEL
+            // =====================================================
+            using var workbook = new XLWorkbook();
+            var ws = workbook.Worksheets.Add("Historial Vacios Detallado");
+
+            // =====================================================
+            // TITULO
+            // =====================================================
+            ws.Cell("A1").Value = "ALFIPAC";
+            ws.Range("A1:K1").Merge();
+
+            ws.Range("A1:K1").Style
+                .Font.SetBold()
+                .Font.SetFontSize(18)
+                .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
+                .Fill.SetBackgroundColor(XLColor.DarkBlue)
+                .Font.SetFontColor(XLColor.White);
+
+            ws.Cell("A2").Value = "HISTORIAL DE REPORTES VACÍOS - DETALLADO";
+            ws.Range("A2:K2").Merge();
+
+            ws.Range("A2:K2").Style
+                .Font.SetBold()
+                .Font.SetFontSize(14)
+                .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+            ws.Cell("A3").Value = "Desde:";
+            ws.Cell("B3").Value = fechaInicio.ToString("dd/MM/yyyy");
+
+            ws.Cell("C3").Value = "Hasta:";
+            ws.Cell("D3").Value = fechaFin.ToString("dd/MM/yyyy");
+
+            ws.Cell("E3").Value = "Hora:";
+            ws.Cell("F3").Value =
+                $"{horaInicio:hh\\:mm} - {horaFin:hh\\:mm}";
+
+            ws.Range("A3:M3").Style.Font.SetBold();
+
+            // =====================================================
+            // ENCABEZADOS
+            // =====================================================
+            int fila = 5;
+
+            ws.Cell(fila, 1).Value = "Fecha";
+            ws.Cell(fila, 2).Value = "Hora";
+            ws.Cell(fila, 3).Value = "Contenedor";
+            ws.Cell(fila, 4).Value = "Cliente";
+            ws.Cell(fila, 5).Value = "Transportista";
+            ws.Cell(fila, 6).Value = "Consecutivo";
+            ws.Cell(fila, 7).Value = "Fecha Salida";
+            ws.Cell(fila, 8).Value = "Hora Salida";
+            ws.Cell(fila, 9).Value = "Chofer";
+            ws.Cell(fila, 10).Value = "Placa";
+            ws.Cell(fila, 11).Value = "RETIRADO";
+
+            var header = ws.Range(fila, 1, fila, 11);
+
+            header.Style
+                .Font.SetBold()
+                .Font.SetFontColor(XLColor.Black)
+                .Fill.SetBackgroundColor(XLColor.Lime)
+                .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
+                .Alignment.SetVertical(XLAlignmentVerticalValues.Center)
+                .Border.SetOutsideBorder(XLBorderStyleValues.Thin)
+                .Border.SetInsideBorder(XLBorderStyleValues.Thin);
+
+            ws.Cell(fila, 11).Style.Fill.SetBackgroundColor(XLColor.Red);
+            ws.Cell(fila, 11).Style.Font.SetFontColor(XLColor.White);
+            ws.Cell(fila, 11).Style.Font.SetBold();
+
+            fila++;
+
+            // =====================================================
+            // DETALLE
+            // =====================================================
+            foreach (var item in datos)
+            {
+                var contenedores = item.Contenedor
+                    .Split('/', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => x.Trim())
+                    .ToList();
+
+                var fechasSalida = new List<string>();
+                var horasSalida = new List<string>();
+                var choferes = new List<string>();
+                var placas = new List<string>();
+
+                int total = contenedores.Count;
+                int despachados = 0;
+
+                foreach (var cont in contenedores)
+                {
+                    var despacho = _context.HistorialContenedores
+                        .Where(h =>
+                            h.Contenedor == cont &&
+                            h.FechaHoraSalida != null)
+                        .OrderByDescending(h => h.FechaHoraSalida)
+                        .FirstOrDefault();
+
+                    var despachoInfo = _context.BitacoraDespachos
+                        .FirstOrDefault(x =>
+                            x.Contenedor.ToUpper() == cont.ToUpper());
+
+                    if (despacho != null)
+                    {
+                        despachados++;
+
+                        fechasSalida.Add(
+                            despacho.FechaHoraSalida?
+                            .ToString("dd/MM/yyyy")
+                            ?? "Pendiente");
+
+                        horasSalida.Add(
+                            despacho.FechaHoraSalida?
+                            .ToString("HH:mm")
+                            ?? "Pendiente");
+
+                        choferes.Add(
+                            despachoInfo?.Chofer ?? "N/D");
+
+                        placas.Add(
+                            despachoInfo?.PlacaCabezal ?? "N/D");
+                    }
+                    else
+                    {
+                        fechasSalida.Add("Pendiente");
+                        horasSalida.Add("Pendiente");
+                        choferes.Add("Pendiente");
+                        placas.Add("Pendiente");
+                    }
+                }
+
+                bool retiradoCompleto = despachados == total;
+
+                ws.Cell(fila, 1).Value = item.Fecha.ToString("dd/MM/yyyy");
+                ws.Cell(fila, 2).Value = item.Fecha.ToString("HH:mm");
+                ws.Cell(fila, 3).Value = item.Contenedor;
+                ws.Cell(fila, 4).Value = item.Cliente;
+                ws.Cell(fila, 5).Value = item.Transportista;
+                ws.Cell(fila, 6).Value = item.Consecutivo;
+
+                ws.Cell(fila, 7).Value =
+                    string.Join(" / ", fechasSalida);
+
+                ws.Cell(fila, 8).Value =
+                    string.Join(" / ", horasSalida);
+
+                ws.Cell(fila, 9).Value =
+                    string.Join(" / ", choferes);
+
+                ws.Cell(fila, 10).Value =
+                    string.Join(" / ", placas);
+
+                ws.Cell(fila, 11).Value =
+                    retiradoCompleto ? "X" : "";
+
+                bool alerta24h =
+                    !retiradoCompleto &&
+                    despachados == 0 &&
+                    (DateTime.Now - item.Fecha).TotalHours >= 24;
+
+                if (alerta24h)
+                {
+                    ws.Range(fila, 1, fila, 11)
+                        .Style.Fill.SetBackgroundColor(
+                            XLColor.FromHtml("#F8D7DA"));
+
+                    ws.Range(fila, 1, fila, 11)
+                        .Style.Font.SetFontColor(
+                            XLColor.DarkRed);
+
+                    ws.Cell(fila, 11).Style.Font.SetBold();
+                }
+
+                fila++;
+            }
+
+            // =====================================================
+            // FORMATO CUERPO
+            // =====================================================
+            var body = ws.Range(6, 1, fila - 1, 11);
+
+            body.Style
+                .Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center)
+                .Alignment.SetVertical(XLAlignmentVerticalValues.Center)
+                .Border.SetOutsideBorder(XLBorderStyleValues.Thin)
+                .Border.SetInsideBorder(XLBorderStyleValues.Thin);
+
+            // =====================================================
+            // ZEBRA ROWS
+            // =====================================================
+            for (int i = 6; i < fila; i++)
+            {
+                var colorActual =
+                    ws.Cell(i, 1).Style.Fill.BackgroundColor;
+
+                if (colorActual == XLColor.FromHtml("#F8D7DA"))
+                    continue;
+
+                if (i % 2 == 0)
+                {
+                    ws.Range(i, 1, i, 11)
+                      .Style.Fill.SetBackgroundColor(XLColor.White);
+                }
+                else
+                {
+                    ws.Range(i, 1, i, 11)
+                      .Style.Fill.SetBackgroundColor(
+                          XLColor.FromHtml("#F2F2F2"));
+                }
+            }
+
+            // =====================================================
+            // ANCHOS
+            // =====================================================
+            ws.Column(1).Width = 12;
+            ws.Column(2).Width = 10;
+            ws.Column(3).Width = 30;
+            ws.Column(4).Width = 55;
+            ws.Column(5).Width = 22;
+            ws.Column(6).Width = 15;
+            ws.Column(7).Width = 25;
+            ws.Column(8).Width = 15;
+            ws.Column(9).Width = 35;
+            ws.Column(10).Width = 18;
+            ws.Column(11).Width = 18;
+
+            ws.SheetView.FreezeRows(5);
+
+            ws.Range(5, 1, fila - 1, 11)
+                .SetAutoFilter();
+
+            // =====================================================
+            // DESCARGA
+            // =====================================================
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+
+            return File(
+                stream.ToArray(),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"Historial_Vacios_Detallado_{DateTime.Now:ddMMyyyy_HHmm}.xlsx");
         }
     }
 }

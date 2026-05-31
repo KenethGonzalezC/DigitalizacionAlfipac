@@ -124,8 +124,12 @@
                     {
                         foreach (var v in Model)
                         {
-                            <tr>
-                                <td class="fw-semibold">@v.Contenedor</td>
+                            <tr class="@(v.YaReportado ? "table-success" : "")">
+
+                                <td class="fw-semibold">
+                                    @v.Contenedor
+                                </td>
+
                                 <td>@v.Marchamos</td>
                                 <td>@v.Tamano</td>
                                 <td>@v.Chasis</td>
@@ -133,17 +137,31 @@
                                 <td>@v.Cliente</td>
 
                                 <td class="text-center">
-                                    <span class="badge bg-secondary">@v.Patio</span>
+                                    <span class="badge bg-secondary">
+                                        @v.Patio
+                                    </span>
                                 </td>
 
                                 <td class="text-center">
-                                    <button class="btn btn-sm btn-primary btnReportarVacio"
-                                            data-contenedor="@v.Contenedor"
-                                            data-cliente="@v.Cliente"
-                                            data-transportista="@v.Transportista">
-                                        📄 Reporte
-                                    </button>
+
+                                    @if (v.YaReportado)
+                                    {
+                                        <button class="btn btn-sm btn-success" disabled>
+                                            ✓ Reportado
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-sm btn-primary btnReportarVacio"
+                                                data-contenedor="@v.Contenedor"
+                                                data-cliente="@v.Cliente"
+                                                data-transportista="@v.Transportista">
+                                            📄 Reporte
+                                        </button>
+                                    }
+
                                 </td>
+
                             </tr>
                         }
                     }
@@ -201,7 +219,8 @@
 
                         @foreach (var v in Model)
                         {
-                            <div class="form-check">
+                            <div class="form-check @(v.YaReportado ? "bg-success bg-opacity-10 border rounded px-2 py-1 mb-1" : "")">
+
                                 <input type="checkbox"
                                        class="form-check-input multi-check"
                                        value="@v.Contenedor"
@@ -210,10 +229,26 @@
                                        data-transportista="@v.Transportista" />
 
                                 <label class="form-check-label">
+
                                     <strong>@v.Contenedor</strong>
-                                    <span class="text-muted">(@v.Transportista)</span>
-                                    <span class="text-muted">(@v.Patio)</span>
+
+                                    @if (v.YaReportado)
+                                    {
+                                        <span class="badge bg-success ms-1">
+                                            Reportado
+                                        </span>
+                                    }
+
+                                    <span class="text-muted">
+                                        (@v.Transportista)
+                                    </span>
+
+                                    <span class="text-muted">
+                                        (@v.Cliente)
+                                    </span>
+
                                 </label>
+
                             </div>
                         }
 
@@ -253,6 +288,8 @@
                 <th>Transportista</th>
                 <th>Consecutivo</th>
                 <th>Despacho</th>
+                <th>Chofer</th>
+                <th>Placa</th>
                 <th>Usuario</th>
                 <th>PDF</th>
                 <th>Editar</th>
@@ -304,10 +341,24 @@
                         }
 
                         <div class="small text-muted mt-1">
-                            @r.DetalleDespacho
+                            @(string.IsNullOrEmpty(r.FechasDespachoTexto)
+                                ? "Pendiente"
+                                : r.FechasDespachoTexto)
                         </div>
 
+                        @if (!string.IsNullOrWhiteSpace(r.ContenedoresPendientes))
+                        {
+                            <div class="small text-danger fw-bold mt-1">
+                                Pendiente:
+                                @r.ContenedoresPendientes
+                            </div>
+                        }
+
                     </td>
+
+                    <td>@r.ChoferesDespachoTexto</td>
+
+                    <td>@r.PlacasDespachoTexto</td>
 
                     <td>@r.Usuario</td>
 

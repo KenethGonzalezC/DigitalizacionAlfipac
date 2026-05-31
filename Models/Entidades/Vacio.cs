@@ -26,5 +26,32 @@ namespace BitacoraAlfipac.Models.Entidades
 
         [NotMapped]
         public string DetalleDespacho { get; set; } = "";
+
+        [NotMapped]
+        public string? ChoferDespacho { get; set; }
+
+        [NotMapped]
+        public string? PlacaDespacho { get; set; }
+
+        [NotMapped]
+        public string? ChasisDespacho { get; set; }
+
+        [NotMapped]
+        public string? ViajeDuaDespacho { get; set; }
+
+        [NotMapped]
+        public DateTime? FechaDespachoReal { get; set; }
+
+        [NotMapped]
+        public string? FechasDespachoTexto { get; set; }
+
+        [NotMapped]
+        public string? ChoferesDespachoTexto { get; set; }
+
+        [NotMapped]
+        public string? PlacasDespachoTexto { get; set; }
+
+        [NotMapped]
+        public string? ContenedoresPendientes { get; set; }
     }
 }

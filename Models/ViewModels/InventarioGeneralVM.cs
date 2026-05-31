@@ -11,6 +11,8 @@
         public string? Cliente { get; set; }
         public string? EstadoCarga { get; set; }
         public string? Patio { get; set; }
+
+        public bool YaReportado { get; set; }
     }
 
     public class InventarioGeneralVM
