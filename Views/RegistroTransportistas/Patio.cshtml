@@ -1,0 +1,231 @@
+﻿@using BitacoraAlfipac.Models.Entidades
+@model IEnumerable<RegistroTransportista>
+
+@{
+    ViewData["Title"] = "Registro de Transportistas - Patio";
+}
+
+@if (TempData["Ok"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Ok"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+<div class="container-fluid py-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                🚛 Registro de Transportistas - Patio
+            </h2>
+
+            <small class="text-muted">
+                Control de choferes que ingresan para retirar equipos ubicados en patio.
+            </small>
+
+        </div>
+
+        <a asp-action="CrearPatio"
+           class="btn btn-primary">
+
+            <i class="bi bi-plus-circle"></i>
+            Nuevo Registro
+
+        </a>
+
+    </div>
+
+    <!-- FILTRO -->
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-body">
+
+            <form method="get">
+
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+                            Fecha
+                        </label>
+
+                        <input type="date"
+                               name="fecha"
+                               value="@ViewBag.Fecha"
+                               class="form-control" />
+
+                    </div>
+
+                    <div class="col-md-auto">
+
+                        <button class="btn btn-outline-primary">
+
+                            <i class="bi bi-search"></i>
+                            Consultar
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- RESUMEN -->
+    <div class="alert alert-info">
+
+        <strong>Total registros:</strong>
+        @Model.Count()
+
+    </div>
+
+    <!-- TABLA -->
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-light">
+
+            <strong>
+                Registros del día
+            </strong>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-dark">
+
+                    <tr>
+                        <th>Hora</th>
+                        <th>Placa</th>
+                        <th>Chofer</th>
+                        <th>Cliente</th>
+                        <th>DUA</th>
+                        <th>Tipo</th>
+                        <th>Firma</th>
+                        <th class="text-center">Detalle</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @if (!Model.Any())
+                    {
+                        <tr>
+
+                            <td colspan="8"
+                                class="text-center text-muted py-4">
+
+                                No existen registros para esta fecha.
+
+                            </td>
+
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+
+                                <td>
+                                    @item.FechaRegistro.ToString("HH:mm")
+                                </td>
+
+                                <td class="fw-semibold">
+                                    @item.Placa
+                                </td>
+
+                                <td>
+                                    @item.NombreChofer
+                                </td>
+
+                                <td>
+                                    @item.Cliente
+                                </td>
+
+                                <td>
+                                    @item.DUA
+                                </td>
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(item.Tipo))
+                                    {
+                                        <span class="badge bg-primary">
+                                            @item.Tipo
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(item.RutaFirma))
+                                    {
+                                        <img src="@item.RutaFirma"
+                                             style="height:50px; max-width:150px;"
+                                             class="border rounded" />
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            Sin firma
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <td class="text-center">
+
+                                    <a asp-action="Detalle"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-outline-primary">
+
+                                        <i class="bi bi-eye"></i>
+
+                                    </a>
+
+                                </td>
+
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+
+    .table td,
+    .table th {
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+</style>

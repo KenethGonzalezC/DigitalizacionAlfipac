@@ -144,6 +144,14 @@
                     </a>
                 }
 
+                @if (User.IsInRole("Administrador") || User.IsInRole("Digitador") || User.IsInRole("Usuario"))
+                {
+                    <a asp-controller="RegistroTransportistas" asp-action="Index" class="menu-item">
+                        <i class="bi bi-bi bi-truck"></i>
+                        <span>Transportistas</span>
+                    </a>
+                }
+
                 @if (User.IsInRole("Administrador"))
                 {
                     <a asp-controller="Usuarios" asp-action="Index" class="menu-item text-danger">

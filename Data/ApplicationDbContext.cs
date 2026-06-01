@@ -35,5 +35,15 @@ namespace BitacoraAlfipac.Data
 
         public DbSet<Vehiculo> Vehiculos { get; set; }
         public DbSet<Vacio> Vacios { get; set; }
+        public DbSet<RegistroTransportista> RegistroTransportistas { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<RegistroTransportista>()
+                .Property(x => x.RutaFirma)
+                .HasColumnType("nvarchar(max)");
+        }
     }
 }
