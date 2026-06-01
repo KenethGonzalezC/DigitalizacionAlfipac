@@ -189,5 +189,105 @@ namespace BitacoraAlfipac.Controllers
 
             return View(registro);
         }
+
+        [HttpPost]
+        public IActionResult Eliminar(int id)
+        {
+            var registro = _context.RegistroTransportistas
+                .FirstOrDefault(x => x.Id == id);
+
+            if (registro == null)
+            {
+                TempData["Error"] = "Registro no encontrado.";
+                return RedirectToAction(nameof(Patio));
+            }
+
+            // eliminar firma física si existe
+            if (!string.IsNullOrWhiteSpace(registro.RutaFirma))
+            {
+                var rutaFisica = Path.Combine(
+                    _environment.WebRootPath,
+                    registro.RutaFirma.TrimStart('/')
+                        .Replace("/", "\\"));
+
+                if (System.IO.File.Exists(rutaFisica))
+                {
+                    System.IO.File.Delete(rutaFisica);
+                }
+            }
+
+            _context.RegistroTransportistas.Remove(registro);
+            _context.SaveChanges();
+
+            TempData["Ok"] = "Registro eliminado correctamente.";
+
+            return RedirectToAction(nameof(Patio));
+        }
+
+        //Detalle modal
+        public IActionResult DetalleModal(int id)
+        {
+            var registro = _context.RegistroTransportistas
+                .FirstOrDefault(x => x.Id == id);
+
+            if (registro == null)
+            {
+                return Content("Registro no encontrado");
+            }
+
+            return PartialView("_DetalleRegistro", registro);
+        }
+
+        // =====================================================
+        // EDITAR
+        // =====================================================
+        [HttpGet]
+        public IActionResult Editar(int id)
+        {
+            var registro = _context.RegistroTransportistas
+                .FirstOrDefault(x => x.Id == id);
+
+            if (registro == null)
+            {
+                TempData["Error"] = "Registro no encontrado.";
+                return RedirectToAction(nameof(Patio));
+            }
+
+            return View(registro);
+        }
+
+        // =====================================================
+        // GUARDAR EDICIÓN
+        // =====================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Editar(RegistroTransportista model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var registro = _context.RegistroTransportistas
+                .FirstOrDefault(x => x.Id == model.Id);
+
+            if (registro == null)
+            {
+                TempData["Error"] = "Registro no encontrado.";
+                return RedirectToAction(nameof(Patio));
+            }
+
+            registro.FechaRegistro = model.FechaRegistro;
+            registro.Placa = model.Placa?.Trim().ToUpper() ?? "";
+            registro.NombreChofer = model.NombreChofer?.Trim().ToUpper() ?? "";
+            registro.Cliente = model.Cliente?.Trim().ToUpper() ?? "";
+            registro.DUA = model.DUA?.Trim().ToUpper();
+            registro.Tipo = model.Tipo?.Trim();
+            registro.Ubicacion = model.Ubicacion;
+
+            _context.SaveChanges();
+
+            TempData["Ok"] = "Registro actualizado correctamente.";
+
+            return RedirectToAction(nameof(Patio));
+        }
     }
 }

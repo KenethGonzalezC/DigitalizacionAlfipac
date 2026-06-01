@@ -120,7 +120,7 @@
                         <th>DUA</th>
                         <th>Tipo</th>
                         <th>Firma</th>
-                        <th class="text-center">Detalle</th>
+                        <th class="text-center">Acciones</th>
                     </tr>
 
                 </thead>
@@ -196,13 +196,38 @@
 
                                 <td class="text-center">
 
-                                    <a asp-action="Detalle"
-                                       asp-route-id="@item.Id"
-                                       class="btn btn-sm btn-outline-primary">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#detalleModal"
+                                            onclick="cargarDetalle(@item.Id)">
 
                                         <i class="bi bi-eye"></i>
 
+                                    </button>
+
+                                    <a asp-action="Editar"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-outline-warning">
+
+                                        <i class="bi bi-pencil"></i>
+
                                     </a>
+
+                                    <form asp-action="Eliminar"
+                                          asp-route-id="@item.Id"
+                                          method="post"
+                                          class="d-inline">
+
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('¿Desea eliminar este registro?');">
+
+                                            <i class="bi bi-trash"></i>
+
+                                        </button>
+
+                                    </form>
 
                                 </td>
 
@@ -229,3 +254,55 @@
     }
 
 </style>
+
+<!-- MODAL DETALLE -->
+<div class="modal fade"
+     id="detalleModal"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    Detalle del Registro
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body"
+                 id="detalleContenido">
+
+                <div class="text-center p-5">
+
+                    <div class="spinner-border text-primary"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+        function cargarDetalle(id)
+    {
+        fetch('/RegistroTransportistas/DetalleModal/' + id)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('detalleContenido').innerHTML = html;
+            });
+    }
+
+</script>

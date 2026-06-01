@@ -20,13 +20,7 @@
         <div>
             <h2 class="fw-bold mb-0">Registro de despachos</h2>
             <small class="text-muted">Salida de contenedores del almacén</small>
-        </div>
-
-        <!-- RESUMEN -->
-        <div class="alert alert-info">
-            <strong>Total registros:</strong>
-            @Model.Despachos.Count()
-        </div>
+        </div>        
 
         <div>
             <a asp-controller="Datos" asp-action="Despachos" class="btn btn-outline-dark">
@@ -37,6 +31,12 @@
         <a asp-action="Backups" class="btn btn-warning">
             🗂 Backups
         </a>
+    </div>
+
+    <!-- RESUMEN -->
+    <div class="alert alert-info">
+        <strong>Total registros:</strong>
+        @Model.Despachos.Count()
     </div>
 
     <!-- =========================

@@ -1,0 +1,179 @@
+﻿@using BitacoraAlfipac.Models.Entidades
+@model RegistroTransportista
+
+<div class="container-fluid">
+
+    <div class="row g-4">
+
+        <!-- INFORMACIÓN -->
+        <div class="col-lg-8">
+
+            <div class="card border-0 shadow-sm">
+
+                <div class="card-header bg-primary text-white">
+
+                    <h5 class="mb-0">
+                        Información del Registro
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+
+                            <label class="fw-bold text-muted">
+                                Fecha y Hora
+                            </label>
+
+                            <div>
+                                @Model.FechaRegistro.ToString("dd/MM/yyyy HH:mm")
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label class="fw-bold text-muted">
+                                Placa
+                            </label>
+
+                            <div class="fs-5 fw-semibold">
+                                @Model.Placa
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label class="fw-bold text-muted">
+                                Nombre del Chofer
+                            </label>
+
+                            <div>
+                                @Model.NombreChofer
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label class="fw-bold text-muted">
+                                Cliente
+                            </label>
+
+                            <div>
+                                @Model.Cliente
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label class="fw-bold text-muted">
+                                DUA
+                            </label>
+
+                            <div>
+                                @(string.IsNullOrWhiteSpace(Model.DUA)
+                                    ? "No indicado"
+                                    : Model.DUA)
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label class="fw-bold text-muted">
+                                Tipo de Equipo
+                            </label>
+
+                            <div>
+
+                                <span class="badge bg-primary fs-6">
+                                    @Model.Tipo
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label class="fw-bold text-muted">
+                                Ubicación
+                            </label>
+
+                            <div>
+
+                                <span class="badge bg-success fs-6">
+                                    @Model.Ubicacion
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label class="fw-bold text-muted">
+                                Usuario Registro
+                            </label>
+
+                            <div>
+                                @(string.IsNullOrWhiteSpace(Model.UsuarioRegistro)
+                                    ? "Sistema"
+                                    : Model.UsuarioRegistro)
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- FIRMA -->
+        <div class="col-lg-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-header bg-dark text-white">
+
+                    <h5 class="mb-0">
+                        Firma del Chofer
+                    </h5>
+
+                </div>
+
+                <div class="card-body text-center">
+
+                    @if (!string.IsNullOrWhiteSpace(Model.RutaFirma))
+                    {
+                        <img src="@Model.RutaFirma"
+                             class="img-fluid border rounded p-2 bg-white"
+                             style="max-height:400px;" />
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning mb-0">
+
+                            No existe firma registrada.
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
