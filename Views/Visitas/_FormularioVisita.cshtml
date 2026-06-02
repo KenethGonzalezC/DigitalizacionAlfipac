@@ -1,0 +1,95 @@
+﻿@model BitacoraAlfipac.Models.ViewModels.VisitaViewModel
+
+<form asp-action="Crear"
+      method="post"
+      id="formVisita">
+
+    @Html.AntiForgeryToken()
+
+    <div class="row g-3">
+
+        <div class="col-md-12">
+
+            <label class="form-label fw-semibold">
+                Nombre Completo del Visitante
+            </label>
+
+            <input asp-for="NombreCompletoVisitante"
+                   class="form-control"
+                   placeholder="Nombre completo del visitante" />
+
+            <span asp-validation-for="NombreCompletoVisitante"
+                  class="text-danger"></span>
+
+        </div>
+
+        <div class="col-md-6">
+
+            <label class="form-label fw-semibold">
+                Número de Cédula
+            </label>
+
+            <input asp-for="NumeroCedula"
+                   class="form-control"
+                   placeholder="1-1111-1111" />
+
+            <span asp-validation-for="NumeroCedula"
+                  class="text-danger"></span>
+
+        </div>
+
+        <div class="col-md-6">
+
+            <label class="form-label fw-semibold">
+                Persona a la que Visita
+            </label>
+
+            <input asp-for="PersonaVisita"
+                   class="form-control"
+                   placeholder="Nombre de la persona" />
+
+            <span asp-validation-for="PersonaVisita"
+                  class="text-danger"></span>
+
+        </div>
+
+        <div class="col-md-12">
+
+            <label class="form-label fw-semibold">
+                Departamento
+            </label>
+
+            <input asp-for="Departamento"
+                   class="form-control"
+                   placeholder="Departamento visitado" />
+
+            <span asp-validation-for="Departamento"
+                  class="text-danger"></span>
+
+        </div>
+
+    </div>
+
+    <hr />
+
+    <div class="d-flex justify-content-end gap-2">
+
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+
+            Cancelar
+
+        </button>
+
+        <button type="submit"
+                class="btn btn-success">
+
+            <i class="bi bi-check-circle"></i>
+            Registrar Visita
+
+        </button>
+
+    </div>
+
+</form>

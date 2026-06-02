@@ -819,6 +819,50 @@ namespace BitacoraAlfipac.Migrations
                     b.ToTable("Vehiculos");
                 });
 
+            modelBuilder.Entity("BitacoraAlfipac.Models.Entidades.Visita", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Departamento")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("FechaIngreso")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaRegistroSistema")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("NombreCompletoVisitante")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("NumeroCedula")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("PersonaVisita")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("UsuarioRegistro")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Visitas");
+                });
+
             modelBuilder.Entity("BitacoraAlfipac.Models.Entidades.RegistroTemperatura", b =>
                 {
                     b.HasOne("BitacoraAlfipac.Models.Entidades.ContenedorRefrigerado", "ContenedorRefrigerado")

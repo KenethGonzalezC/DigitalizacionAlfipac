@@ -37,6 +37,8 @@ namespace BitacoraAlfipac.Data
         public DbSet<Vacio> Vacios { get; set; }
         public DbSet<RegistroTransportista> RegistroTransportistas { get; set; }
 
+        public DbSet<Visita> Visitas { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

@@ -1,5 +1,6 @@
 using BitacoraAlfipac.Data;
 using BitacoraAlfipac.Data.Seed;
+using BitacoraAlfipac.Services;
 using BitacoraAlfipac.Services.Implementations;
 using BitacoraAlfipac.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -38,6 +39,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // SERVICES
 // ==========================
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<OcrCedulaService>();
 
 // ==========================
 // AUTHENTICATION (Cookies)
