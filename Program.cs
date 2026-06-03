@@ -39,7 +39,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // SERVICES
 // ==========================
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<OcrCedulaService>();
 
 // ==========================
 // AUTHENTICATION (Cookies)

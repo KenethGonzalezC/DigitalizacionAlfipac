@@ -150,21 +150,7 @@
                     </div>
                 </a>
             </div>
-        }
-
-        @if (User.IsInRole("Administrador") || User.IsInRole("Digitador") || (User.IsInRole("Usuario")))
-        {
-            <div class="col-md-6 col-lg-3">
-                <a asp-controller="Visitas" asp-action="Index" class="dashboard-link">
-                    <div class="card dashboard-small-card">
-                        <div class="card-body">
-                            <i class="bi bi-person-vcard"></i>
-                            <span>Visitas</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        }
+        }        
 
         @if (User.IsInRole("Administrador"))
         {

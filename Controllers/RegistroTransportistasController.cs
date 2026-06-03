@@ -1,5 +1,6 @@
 ﻿using BitacoraAlfipac.Data;
 using BitacoraAlfipac.Models.Entidades;
+using BitacoraAlfipac.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,16 +33,30 @@ namespace BitacoraAlfipac.Controllers
         {
             DateTime fechaFiltro = fecha?.Date ?? DateTime.Today;
 
-            var registros = _context.RegistroTransportistas
+            var pendientes = _context.RegistroTransportistas
                 .Where(x =>
-                    x.Ubicacion == "Patio" &&
-                    x.FechaRegistro.Date == fechaFiltro)
+                    x.Ubicacion == "Patio"
+                    && x.FechaRegistro.Date == fechaFiltro
+                    && x.FechaHoraIngreso == null)
                 .OrderByDescending(x => x.FechaRegistro)
                 .ToList();
 
-            ViewBag.Fecha = fechaFiltro.ToString("yyyy-MM-dd");
+            var ingresados = _context.RegistroTransportistas
+                .Where(x =>
+                    x.Ubicacion == "Patio"
+                    && x.FechaRegistro.Date == fechaFiltro
+                    && x.FechaHoraIngreso != null)
+                .OrderByDescending(x => x.FechaHoraIngreso)
+                .ToList();
 
-            return View(registros);
+            var vm = new PatioViewModel
+            {
+                Pendientes = pendientes,
+                Ingresados = ingresados,
+                FechaFiltro = fechaFiltro
+            };
+
+            return View(vm);
         }
 
         // =====================================================
@@ -286,6 +301,54 @@ namespace BitacoraAlfipac.Controllers
             _context.SaveChanges();
 
             TempData["Ok"] = "Registro actualizado correctamente.";
+
+            return RedirectToAction(nameof(Patio));
+        }
+
+        //REGISTRAR INGRESO
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult RegistrarIngreso(
+        int id,
+        DateTime fechaHoraIngreso)
+        {
+            var registro = _context.RegistroTransportistas
+                .FirstOrDefault(x => x.Id == id);
+
+            if (registro == null)
+            {
+                TempData["Error"] = "Registro no encontrado.";
+                return RedirectToAction(nameof(Patio));
+            }
+
+            registro.FechaHoraIngreso = fechaHoraIngreso;
+
+            _context.SaveChanges();
+
+            TempData["Ok"] = "Ingreso registrado correctamente.";
+
+            return RedirectToAction(nameof(Patio));
+        }
+
+        //REVERTIR INGRESO
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult RevertirIngreso(int id)
+        {
+            var registro = _context.RegistroTransportistas
+                .FirstOrDefault(x => x.Id == id);
+
+            if (registro == null)
+            {
+                TempData["Error"] = "Registro no encontrado.";
+                return RedirectToAction(nameof(Patio));
+            }
+
+            registro.FechaHoraIngreso = null;
+
+            _context.SaveChanges();
+
+            TempData["Ok"] = "Ingreso revertido correctamente.";
 
             return RedirectToAction(nameof(Patio));
         }

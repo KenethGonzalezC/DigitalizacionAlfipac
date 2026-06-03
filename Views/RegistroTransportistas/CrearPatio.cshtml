@@ -76,26 +76,7 @@
                               class="text-danger">
                         </span>
 
-                    </div>
-
-                    <!-- TIPO -->
-                    <div class="col-md-4">
-
-                        <label asp-for="Tipo"
-                               class="form-label">
-                            Tipo
-                        </label>
-
-                        <input asp-for="Tipo"
-                               class="form-control"
-                               maxlength="50"
-                               placeholder="Contenedor, Furgon, Plana" />
-
-                        <span asp-validation-for="Tipo"
-                              class="text-danger">
-                        </span>
-
-                    </div>
+                    </div>                    
 
                     <!-- CHOFER -->
                     <div class="col-md-6">
@@ -141,6 +122,25 @@
                                class="form-control text-uppercase" />
 
                         <span asp-validation-for="DUA"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+                    <!-- TIPO -->
+                    <div class="col-md-4">
+
+                        <label asp-for="Tipo"
+                               class="form-label">
+                            Tipo
+                        </label>
+
+                        <input asp-for="Tipo"
+                               class="form-control"
+                               maxlength="50"
+                               placeholder="Contenedor, Furgon, Plana" />
+
+                        <span asp-validation-for="Tipo"
                               class="text-danger">
                         </span>
 

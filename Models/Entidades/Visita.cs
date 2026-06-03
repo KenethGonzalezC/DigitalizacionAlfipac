@@ -25,9 +25,15 @@ namespace BitacoraAlfipac.Models.Entidades
         [StringLength(100)]
         public string Departamento { get; set; }
 
+        [Required]
+        [StringLength(100)]
+        public string Compañía { get; set; }
+
         [StringLength(100)]
         public string UsuarioRegistro { get; set; }
 
         public DateTime FechaRegistroSistema { get; set; }
+
+        public string? RutaFirma { get; set; }
     }
 }

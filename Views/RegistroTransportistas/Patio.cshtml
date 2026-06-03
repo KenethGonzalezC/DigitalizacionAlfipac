@@ -1,5 +1,5 @@
-﻿@using BitacoraAlfipac.Models.Entidades
-@model IEnumerable<RegistroTransportista>
+﻿@using BitacoraAlfipac.Models.ViewModels
+@model PatioViewModel
 
 @{
     ViewData["Title"] = "Registro de Transportistas - Patio";
@@ -88,20 +88,50 @@
     </div>
 
     <!-- RESUMEN -->
-    <div class="alert alert-info">
+    <div class="row mb-3">
 
-        <strong>Total registros:</strong>
-        @Model.Count()
+        <div class="col-md-4">
+
+            <div class="alert alert-danger mb-0">
+
+                <strong>Pendientes:</strong>
+                @Model.Pendientes.Count
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="alert alert-success mb-0">
+
+                <strong>Ingresados:</strong>
+                @Model.Ingresados.Count
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="alert alert-info mb-0">
+
+                <strong>Total:</strong>
+                @(Model.Pendientes.Count + Model.Ingresados.Count)
+
+            </div>
+
+        </div>
 
     </div>
 
     <!-- TABLA -->
     <div class="card shadow-sm border-0">
 
-        <div class="card-header bg-light">
+        <div class="card-header bg-warning-subtle text-black-50">
 
             <strong>
-                Registros del día
+                🚪 Transportistas Registrados
             </strong>
 
         </div>
@@ -127,7 +157,7 @@
 
                 <tbody>
 
-                    @if (!Model.Any())
+                    @if (!Model.Pendientes.Any())
                     {
                         <tr>
 
@@ -142,7 +172,7 @@
                     }
                     else
                     {
-                        foreach (var item in Model)
+                        foreach (var item in Model.Pendientes)
                         {
                             <tr>
 
@@ -213,6 +243,177 @@
                                         <i class="bi bi-pencil"></i>
 
                                     </a>
+
+                                    <button type="button"
+                                            class="btn btn-sm btn-success"
+                                            onclick="abrirModalIngreso(@item.Id)">
+
+                                        <i class="bi bi-box-arrow-in-right"></i>
+
+                                    </button>
+
+                                    <form asp-action="Eliminar"
+                                          asp-route-id="@item.Id"
+                                          method="post"
+                                          class="d-inline">
+
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('¿Desea eliminar este registro?');">
+
+                                            <i class="bi bi-trash"></i>
+
+                                        </button>
+
+                                    </form>
+
+                                </td>
+
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!-- TABLA INGRESADOS -->
+
+    <div class="card shadow-sm border-0 mt-4">
+
+        <div class="card-header bg-success text-white">
+
+            <strong>
+                🚪 Transportistas Ingresados
+            </strong>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-dark">
+
+                    <tr>
+                        <th>Hora Registro</th>
+                        <th>Hora Ingreso</th>
+                        <th>Placa</th>
+                        <th>Chofer</th>
+                        <th>Cliente</th>
+                        <th>DUA</th>
+                        <th>Tipo</th>
+                        <th>Firma</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @if (!Model.Ingresados.Any())
+                    {
+                        <tr>
+
+                            <td colspan="9"
+                                class="text-center text-muted py-4">
+
+                                No existen transportistas ingresados.
+
+                            </td>
+
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model.Ingresados)
+                        {
+                            <tr>
+
+                                <td>
+                                    @item.FechaRegistro.ToString("HH:mm")
+                                </td>
+
+                                <td>
+                                    @(item.FechaHoraIngreso?.ToString("HH:mm"))
+                                </td>
+
+                                <td class="fw-semibold">
+                                    @item.Placa
+                                </td>
+
+                                <td>
+                                    @item.NombreChofer
+                                </td>
+
+                                <td>
+                                    @item.Cliente
+                                </td>
+
+                                <td>
+                                    @item.DUA
+                                </td>
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(item.Tipo))
+                                    {
+                                        <span class="badge bg-success">
+                                            @item.Tipo
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(item.RutaFirma))
+                                    {
+                                        <img src="@item.RutaFirma"
+                                             style="height:50px; max-width:150px;"
+                                             class="border rounded" />
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            Sin firma
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <td class="text-center">
+
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#detalleModal"
+                                            onclick="cargarDetalle(@item.Id)">
+
+                                        <i class="bi bi-eye"></i>
+
+                                    </button>
+
+                                    <form asp-action="RevertirIngreso"
+                                          asp-route-id="@item.Id"
+                                          method="post"
+                                          class="d-inline">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-secondary"
+                                                onclick="return confirm('¿Desea devolver este transportista a Pendientes de Ingreso?');">
+
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+
+                                        </button>
+
+                                    </form>
 
                                     <form asp-action="Eliminar"
                                           asp-route-id="@item.Id"
@@ -293,6 +494,113 @@
     </div>
 
 </div>
+
+<!-- MODAL INGRESO -->
+<div class="modal fade"
+     id="modalIngreso"
+     tabindex="-1">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <form asp-action="RegistrarIngreso"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+                        Registrar Ingreso
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <input type="hidden"
+                           id="registroIdIngreso"
+                           name="id" />
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Fecha y Hora de Ingreso
+                        </label>
+
+                        <input type="datetime-local"
+                               class="form-control"
+                               id="fechaHoraIngreso"
+                               name="fechaHoraIngreso"
+                               required />
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+
+                        Cancelar
+
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-success">
+
+                        <i class="bi bi-check-circle"></i>
+                        Confirmar Ingreso
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    function abrirModalIngreso(id)
+    {
+        document.getElementById('registroIdIngreso').value = id;
+
+        const ahora = new Date();
+
+        const yyyy = ahora.getFullYear();
+        const mm = String(ahora.getMonth() + 1).padStart(2, '0');
+        const dd = String(ahora.getDate()).padStart(2, '0');
+
+        const hh = String(ahora.getHours()).padStart(2, '0');
+        const mi = String(ahora.getMinutes()).padStart(2, '0');
+
+        const fechaHora =
+            `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+
+        document.getElementById('fechaHoraIngreso').value =
+            fechaHora;
+
+        const modal =
+            new bootstrap.Modal(
+                document.getElementById('modalIngreso'));
+
+        modal.show();
+    }
+
+</script>
 
 <script>
 
