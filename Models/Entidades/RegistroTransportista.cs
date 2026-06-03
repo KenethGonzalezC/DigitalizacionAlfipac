@@ -38,5 +38,10 @@ namespace BitacoraAlfipac.Models.Entidades
         public string? UsuarioRegistro { get; set; }
 
         public DateTime? FechaHoraIngreso { get; set; }
+
+        public DateTime? FechaHoraSalida { get; set; }
+        
+        [StringLength(100)]
+        public string? UsuarioSalida { get; set; }
     }
 }

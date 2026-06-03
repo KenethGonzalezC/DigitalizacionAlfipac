@@ -130,7 +130,9 @@ namespace BitacoraAlfipac.Controllers
                 ViajeDua = vm.ViajeDua,
                 EsSalidaEnFurgon = vm.EsSalidaEnFurgon,
                 ContenedorReferencia = vm.ContenedorReferencia,
-                GuardarContenedorSalida = vm.GuardarContenedorSalida
+                GuardarContenedorSalida = vm.GuardarContenedorSalida,
+
+                RegistroTransportistaId = vm.RegistroTransportistaId
             };
 
             _context.BitacoraDespachos.Add(despacho);
@@ -218,6 +220,28 @@ namespace BitacoraAlfipac.Controllers
 
             if (precarga != null)
                 _context.DatosDespachosViajes.Remove(precarga);
+
+            // =====================================
+            // CERRAR TRANSPORTISTA
+            // =====================================
+
+            if (vm.RegistroTransportistaId.HasValue)
+            {
+                var transportista =
+                    await _context.RegistroTransportistas
+                    .FirstOrDefaultAsync(x =>
+                        x.Id == vm.RegistroTransportistaId.Value);
+
+                if (transportista != null &&
+                    transportista.FechaHoraSalida == null)
+                {
+                    transportista.FechaHoraSalida =
+                        vm.FechaHoraDespacho;
+
+                    transportista.UsuarioSalida =
+                        User.Identity?.Name;
+                }
+            }
 
             await _context.SaveChangesAsync();
 

@@ -33,6 +33,7 @@ namespace BitacoraAlfipac.Controllers
         {
             DateTime fechaFiltro = fecha?.Date ?? DateTime.Today;
 
+            // PENDIENTES
             var pendientes = _context.RegistroTransportistas
                 .Where(x =>
                     x.Ubicacion == "Patio"
@@ -41,18 +42,30 @@ namespace BitacoraAlfipac.Controllers
                 .OrderByDescending(x => x.FechaRegistro)
                 .ToList();
 
+            // DENTRO DE INSTALACIONES
             var ingresados = _context.RegistroTransportistas
                 .Where(x =>
                     x.Ubicacion == "Patio"
                     && x.FechaRegistro.Date == fechaFiltro
-                    && x.FechaHoraIngreso != null)
+                    && x.FechaHoraIngreso != null
+                    && x.FechaHoraSalida == null)
                 .OrderByDescending(x => x.FechaHoraIngreso)
+                .ToList();
+
+            // SALIDOS
+            var salidos = _context.RegistroTransportistas
+                .Where(x =>
+                    x.Ubicacion == "Patio"
+                    && x.FechaRegistro.Date == fechaFiltro
+                    && x.FechaHoraSalida != null)
+                .OrderByDescending(x => x.FechaHoraSalida)
                 .ToList();
 
             var vm = new PatioViewModel
             {
                 Pendientes = pendientes,
                 Ingresados = ingresados,
+                Salidos = salidos,
                 FechaFiltro = fechaFiltro
             };
 
@@ -349,6 +362,61 @@ namespace BitacoraAlfipac.Controllers
             _context.SaveChanges();
 
             TempData["Ok"] = "Ingreso revertido correctamente.";
+
+            return RedirectToAction(nameof(Patio));
+        }
+
+        [HttpGet]
+        public IActionResult TransportistasActivos()
+        {
+            var activos = _context.RegistroTransportistas
+                .Where(x =>
+                    x.Ubicacion == "Patio"
+                    && x.FechaHoraIngreso != null
+                    && x.FechaHoraSalida == null)
+                .OrderBy(x => x.NombreChofer)
+                .Select(x => new
+                {
+                    id = x.Id,
+                    placa = x.Placa,
+                    chofer = x.NombreChofer,
+                    cliente = x.Cliente,
+                    tipo = x.Tipo,
+                    dua = x.DUA,
+                    horaIngreso = x.FechaHoraIngreso.HasValue
+                        ? x.FechaHoraIngreso.Value.ToString("HH:mm")
+                        : ""
+                })
+                .ToList();
+
+            return Json(activos);
+        }
+
+        //REGISTRAR SALIDA MANUALMENTE
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult RegistrarSalida(
+        int id,
+        DateTime fechaHoraSalida)
+        {
+            var registro = _context.RegistroTransportistas
+                .FirstOrDefault(x => x.Id == id);
+
+            if (registro == null)
+            {
+                TempData["Error"] = "Registro no encontrado.";
+                return RedirectToAction(nameof(Patio));
+            }
+
+            registro.FechaHoraSalida = fechaHoraSalida;
+
+            registro.UsuarioSalida =
+                User.Identity?.Name;
+
+            _context.SaveChanges();
+
+            TempData["Ok"] =
+                "Salida registrada correctamente.";
 
             return RedirectToAction(nameof(Patio));
         }

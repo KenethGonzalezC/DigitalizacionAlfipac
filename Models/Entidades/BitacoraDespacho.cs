@@ -23,5 +23,7 @@ public class BitacoraDespacho
     public string ViajeDua { get; set; } = null!;
     //Contenedor de salida
     public bool GuardarContenedorSalida { get; set; }
+
+    public int? RegistroTransportistaId { get; set; }// Relación opcional con RegistroTransportista
 }
     

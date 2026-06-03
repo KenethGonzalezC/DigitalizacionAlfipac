@@ -10,6 +10,9 @@ namespace BitacoraAlfipac.Models.ViewModels
         public List<RegistroTransportista> Ingresados { get; set; }
             = new();
 
+        public List<RegistroTransportista> Salidos { get; set; }
+            = new();
+
         public DateTime FechaFiltro { get; set; }
     }
 }

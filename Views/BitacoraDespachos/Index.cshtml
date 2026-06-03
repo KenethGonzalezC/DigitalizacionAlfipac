@@ -87,10 +87,35 @@
                         <input asp-for="Informacion" class="form-control" />
                     </div>
 
+                    <!--BUSQUEDA DE CHOFER CON REGISTRO DE TRANSPORTISTAS-->
                     <div class="col-md-3">
-                        <label class="form-label">Chofer</label>
-                        <input asp-for="Chofer" class="form-control" />
+
+                        <label class="form-label">
+                            Chofer
+                        </label>
+
+                        <div class="input-group">
+
+                            <input asp-for="Chofer"
+                                   id="Chofer"
+                                   class="form-control" />
+
+                            <button type="button"
+                                    class="btn btn-outline-secondary"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalTransportistas">
+
+                                Buscar
+
+                            </button>
+
+                        </div>
+
                     </div>
+
+                    <input type="hidden"
+                           id="RegistroTransportistaId"
+                           name="RegistroTransportistaId" />
 
                     <div class="col-md-3">
                         <label class="form-label">Placa cabezal</label>
@@ -141,7 +166,66 @@
 
             </form>
         </div>
-    </div>          
+    </div>  
+    
+    <!--MODAL PARA BUSCAR CHOFER-->
+        <div class="modal fade"
+             id="modalTransportistas"
+             tabindex="-1">
+
+            <div class="modal-dialog modal-xl">
+
+                <div class="modal-content">
+
+                    <div class="modal-header">
+
+                        <h5 class="modal-title">
+
+                            Transportistas dentro de instalaciones
+
+                        </h5>
+
+                        <button type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal">
+                        </button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover">
+
+                                <thead class="table-dark">
+
+                                    <tr>
+                                        <th>Placa</th>
+                                        <th>Chofer</th>
+                                        <th>Cliente</th>
+                                        <th>Tipo</th>
+                                        <th>DUA</th>
+                                        <th>Ingreso</th>
+                                        <th></th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody id="tbodyTransportistas">
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
 
     <!-- =========================
          HEADER TABLA
@@ -601,20 +685,51 @@
             }
         }
 
-        function llenarCampos(data) {
+            window.buscarContenedor = buscarContenedor;
+
+                function llenarCampos(data)
+        {
+            const rt =
+                window.transportistaSeleccionado ?? {};
+
             const map = {
-                Marchamos: data.marchamos,
-                Transportista: data.transportista,
-                Chasis: data.chasis,
-                Informacion: data.cliente,
-                Chofer: data.chofer,
-                PlacaCabezal: data.placaCabezal,
-                ViajeDua: data.viajeDua
+
+                // PRIORIDAD 1 Y 2
+                // (Precarga > Inventario)
+                Marchamos:
+                    data.marchamos,
+
+                Transportista:
+                    data.transportista,
+
+                Chasis:
+                    data.chasis,
+
+                // PRIORIDAD 3
+                // (Transportista)
+                Informacion:
+                    data.cliente || rt.cliente,
+
+                Chofer:
+                    data.chofer || rt.chofer,
+
+                PlacaCabezal:
+                    data.placaCabezal || rt.placa,
+
+                ViajeDua:
+                    data.viajeDua || rt.dua
             };
 
             Object.keys(map).forEach(name => {
-                const input = document.querySelector(`[name='${name}']`);
-                if (input && map[name] != null) input.value = map[name];
+
+                const input =
+                    document.querySelector(`[name='${name}']`);
+
+                if (input && map[name] != null)
+                {
+                    input.value = map[name];
+                }
+
             });
         }
 
@@ -730,3 +845,216 @@
 
     });
 </script>
+
+    <script>
+        window.transportistaSeleccionado = null;
+        // ==========================================
+        // CARGAR TRANSPORTISTAS ACTIVOS
+        // ==========================================
+        async function cargarTransportistasActivos() {
+
+            const tbody =
+                document.getElementById("tbodyTransportistas");
+
+            tbody.innerHTML =
+                "<tr><td colspan='7'>Cargando...</td></tr>";
+
+            try {
+
+                const res =
+                    await fetch('/RegistroTransportistas/TransportistasActivos');
+
+                const data =
+                    await res.json();
+
+                if (!data.length) {
+
+                    tbody.innerHTML =
+                        "<tr><td colspan='7'>No existen transportistas activos.</td></tr>";
+
+                    return;
+                }
+
+                tbody.innerHTML = "";
+
+                data.forEach(t => {
+
+                    tbody.innerHTML += `
+                        <tr>
+
+                            <td>${t.placa ?? ''}</td>
+
+                            <td>${t.chofer ?? ''}</td>
+
+                            <td>${t.cliente ?? ''}</td>
+
+                            <td>${t.tipo ?? ''}</td>
+
+                            <td>${t.dua ?? ''}</td>
+
+                            <td>${t.horaIngreso ?? ''}</td>
+
+                            <td>
+
+                                <button type="button"
+                                        class="btn btn-success btn-sm"
+                                        onclick="seleccionarTransportista(
+                                            ${t.id},
+                                            '${t.chofer ?? ""}',
+                                            '${t.placa ?? ""}',
+                                            '${t.cliente ?? ""}',
+                                            '${t.tipo ?? ""}',
+                                            '${t.dua ?? ""}'
+                                        )">
+
+                                    Seleccionar
+
+                                </button>
+
+                            </td>
+
+                        </tr>
+                    `;
+                });
+
+            }
+            catch {
+
+                tbody.innerHTML =
+                    "<tr><td colspan='7'>Error cargando transportistas.</td></tr>";
+            }
+        }
+
+        // ==========================================
+        // CARGAR MODAL
+        // ==========================================
+        document
+            .getElementById("modalTransportistas")
+            .addEventListener("show.bs.modal", function () {
+
+                cargarTransportistasActivos();
+
+            });
+
+        // ==========================================
+        // SELECCIONAR TRANSPORTISTA
+        // ==========================================
+        function seleccionarTransportista(
+            id,
+            chofer,
+            placa,
+            cliente,
+            tipo,
+            dua)
+        {
+
+            console.log("===== TRANSPORTISTA SELECCIONADO =====");
+            console.log("Id:", id);
+            console.log("Chofer:", chofer);
+            console.log("Placa:", placa);
+            console.log("Cliente:", cliente);
+            console.log("Tipo:", tipo);
+            console.log("DUA:", dua);
+
+                    window.transportistaSeleccionado = {
+
+            chofer: chofer,
+            placa: placa,
+            cliente: cliente,
+            dua: dua
+
+        };
+
+            // Id oculto
+            const registroInput =
+                document.getElementById("RegistroTransportistaId");
+
+            if (registroInput)
+                registroInput.value = id;
+
+            // Chofer
+            const choferInput =
+                document.getElementById("Chofer");
+
+            if (choferInput)
+                choferInput.value = chofer;
+
+            // Placa
+            const placaInput =
+                document.querySelector("[name='PlacaCabezal']");
+
+            if (placaInput)
+                placaInput.value = placa;
+
+            // Cliente
+            const clienteInput =
+                document.querySelector("[name='Informacion']");
+
+            if (clienteInput)
+                clienteInput.value = cliente;
+
+            // DUA
+            const duaInput =
+                document.querySelector("[name='ViajeDua']");
+
+            if (duaInput)
+                duaInput.value = dua;
+
+            // Contenedor
+            const contenedorInput =
+                document.querySelector("[name='Contenedor']");
+
+            if (contenedorInput)
+                contenedorInput.value = tipo;
+
+            // Diagnóstico
+            console.log(
+                "buscarContenedor:",
+                typeof buscarContenedor
+            );
+
+            // Ejecutar búsqueda automática
+            if (typeof buscarContenedor === "function") {
+
+                console.log("Ejecutando buscarContenedor()");
+
+                                const tipoUpper = (tipo ?? "").toUpperCase();
+
+                                if (
+                                    tipoUpper.includes("PLANA") ||
+                                    tipoUpper.includes("FURGON") ||
+                                    tipoUpper.includes("ARAÑA")
+                                )
+                                {
+                                    const chkFurgon =
+                                        document.getElementById("EsSalidaEnFurgon");
+
+                                    if (chkFurgon)
+                                        chkFurgon.checked = true;
+
+                                    console.log("Salida en furgón marcada automáticamente");
+                                }
+                                else
+                                {
+                                    if (typeof buscarContenedor === "function")
+                                    {
+                                        buscarContenedor();
+                                    }
+                                }
+
+            }
+            else {
+
+                console.warn(
+                    "buscarContenedor NO está disponible"
+                );
+            }
+
+            // Cerrar modal
+            bootstrap.Modal
+                .getInstance(
+                    document.getElementById("modalTransportistas"))
+                .hide();
+        }
+
+    </script>
