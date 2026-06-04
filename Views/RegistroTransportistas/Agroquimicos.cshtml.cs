@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BitacoraAlfipac.Views.RegistroTransportistas
 {
-    public class QuimicosModel : PageModel
+    public class AgroquimicosModel : PageModel
     {
         public void OnGet()
         {

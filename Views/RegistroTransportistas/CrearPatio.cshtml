@@ -1,7 +1,7 @@
 ﻿@model BitacoraAlfipac.Models.Entidades.RegistroTransportista
 
 @{
-    ViewData["Title"] = "Nuevo Registro - Patio";
+    ViewData["Title"] = "Nuevo Registro - " + Model.Ubicacion;
 }
 
 <div class="container-fluid py-4">
@@ -14,8 +14,12 @@
         </h2>
 
         <small class="text-muted">
-            Registro de ingreso para retiro de contenedores, furgones o plataformas ubicadas en Patio.
+            Registro de ingreso para retiro de contenedores, furgones o plataformas.
         </small>
+
+        <a asp-action="Index" class="btn btn-outline-dark">
+            ← Volver
+        </a>
 
     </div>
 
@@ -32,7 +36,7 @@
 
         <input asp-for="Ubicacion"
                type="hidden"
-               value="Patio" />
+               value="@Model.Ubicacion" />
 
         <div class="card shadow-sm border-0">
 

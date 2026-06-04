@@ -2,7 +2,7 @@
 @model PatioViewModel
 
 @{
-    ViewData["Title"] = "Registro de Transportistas - Patio";
+    ViewData["Title"] = "Registro de Transportistas - Agroquimicos";
 }
 
 @if (TempData["Ok"] != null)
@@ -27,11 +27,11 @@
         <div>
 
             <h2 class="fw-bold mb-1">
-                🚛 Registro de Transportistas - Patio
+                🚛 Registro de Transportistas - Agroquimicos
             </h2>
 
             <small class="text-muted">
-                Control de choferes que ingresan para retirar equipos ubicados en patio.
+                Control de choferes que ingresan a gestión de carga en Agroquimicos.
             </small>
 
         </div>
@@ -40,7 +40,7 @@
             ← Volver
         </a>
 
-        <a asp-action="CrearPatio"
+        <a asp-action="CrearAgroquimicos"
            class="btn btn-primary">
 
             <i class="bi bi-plus-circle"></i>
@@ -257,8 +257,8 @@
                                     @if (User.IsInRole("Administrador"))
                                     {
                                         <a asp-action="Editar"
-                                        asp-route-id="@item.Id"
-                                        class="btn btn-sm btn-outline-warning">
+                                           asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-warning">
 
                                             <i class="bi bi-pencil"></i>
 

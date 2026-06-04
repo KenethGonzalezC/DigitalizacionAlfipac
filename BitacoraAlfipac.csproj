@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\RegistroTransportistas\" />
     <Folder Include="wwwroot\firmas\transportistas\" />
     <Folder Include="wwwroot\cedulas\" />
   </ItemGroup>

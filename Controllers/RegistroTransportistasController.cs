@@ -11,6 +11,10 @@ namespace BitacoraAlfipac.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
 
+        private const string UBICACION_PATIO = "Patio";
+        private const string UBICACION_AGRO = "Agroquimicos";
+        private const string UBICACION_BODEGA = "Bodega2000";
+
         public RegistroTransportistasController(
             ApplicationDbContext context, IWebHostEnvironment environment)
         {
@@ -75,43 +79,97 @@ namespace BitacoraAlfipac.Controllers
         // =====================================================
         // QUIMICOS
         // =====================================================
-        public IActionResult Quimicos()
+        public IActionResult Agroquimicos(DateTime? fecha)
         {
-            var registros = _context.RegistroTransportistas
-                .Where(x => x.Ubicacion == "Agroquimicos")
+            DateTime fechaFiltro = fecha?.Date ?? DateTime.Today;
+
+            var pendientes = _context.RegistroTransportistas
+                .Where(x =>
+                    x.Ubicacion == "Agroquimicos"
+                    && x.FechaRegistro.Date == fechaFiltro
+                    && x.FechaHoraIngreso == null)
                 .OrderByDescending(x => x.FechaRegistro)
                 .ToList();
 
-            return View(registros);
+            var ingresados = _context.RegistroTransportistas
+                .Where(x =>
+                    x.Ubicacion == "Agroquimicos"
+                    && x.FechaRegistro.Date == fechaFiltro
+                    && x.FechaHoraIngreso != null
+                    && x.FechaHoraSalida == null)
+                .OrderByDescending(x => x.FechaHoraIngreso)
+                .ToList();
+
+            var salidos = _context.RegistroTransportistas
+                .Where(x =>
+                    x.Ubicacion == "Agroquimicos"
+                    && x.FechaRegistro.Date == fechaFiltro
+                    && x.FechaHoraSalida != null)
+                .OrderByDescending(x => x.FechaHoraSalida)
+                .ToList();
+
+            var vm = new PatioViewModel
+            {
+                Pendientes = pendientes,
+                Ingresados = ingresados,
+                Salidos = salidos,
+                FechaFiltro = fechaFiltro
+            };
+
+            ViewBag.Titulo = "Registro de Transportistas - Agroquímicos";
+
+            return View("Agroquimicos", vm);
         }
 
         // =====================================================
         // BODEGA 2000
         // =====================================================
-        public IActionResult Bodega2000()
+        public IActionResult Bodega2000(DateTime? fecha)
         {
-            var registros = _context.RegistroTransportistas
-                .Where(x => x.Ubicacion == "Bodega2000")
+            DateTime fechaFiltro = fecha?.Date ?? DateTime.Today;
+
+            var pendientes = _context.RegistroTransportistas
+                .Where(x =>
+                    x.Ubicacion == "Bodega2000"
+                    && x.FechaRegistro.Date == fechaFiltro
+                    && x.FechaHoraIngreso == null)
                 .OrderByDescending(x => x.FechaRegistro)
                 .ToList();
 
-            return View(registros);
-        }
+            var ingresados = _context.RegistroTransportistas
+                .Where(x =>
+                    x.Ubicacion == "Bodega2000"
+                    && x.FechaRegistro.Date == fechaFiltro
+                    && x.FechaHoraIngreso != null
+                    && x.FechaHoraSalida == null)
+                .OrderByDescending(x => x.FechaHoraIngreso)
+                .ToList();
 
-        // =====================================================
-        // CREAR PARA PATIO
-        // =====================================================
-        public IActionResult CrearPatio()
-        {
-            var model = new RegistroTransportista
+            var salidos = _context.RegistroTransportistas
+                .Where(x =>
+                    x.Ubicacion == "Bodega2000"
+                    && x.FechaRegistro.Date == fechaFiltro
+                    && x.FechaHoraSalida != null)
+                .OrderByDescending(x => x.FechaHoraSalida)
+                .ToList();
+
+            var vm = new PatioViewModel
             {
-                FechaRegistro = DateTime.Now,
-                Ubicacion = "Patio"
+                Pendientes = pendientes,
+                Ingresados = ingresados,
+                Salidos = salidos,
+                FechaFiltro = fechaFiltro
             };
 
-            return View(model);
+            ViewBag.Titulo = "Registro de Transportistas - Bodega 2000";
+
+            return View("Bodega2000", vm);
         }
 
+        // =====================================================
+        // CREAR
+        // =====================================================
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearPatio(
@@ -131,7 +189,10 @@ namespace BitacoraAlfipac.Controllers
 
                 model.RutaFirma = rutaFirma;
                 model.FechaRegistro = DateTime.Now;
-                model.Ubicacion = "Patio";
+                if (string.IsNullOrWhiteSpace(model.Ubicacion))
+                {
+                    model.Ubicacion = "Patio";
+                }
 
                 model.UsuarioRegistro = User.Identity?.Name;
 
@@ -140,7 +201,7 @@ namespace BitacoraAlfipac.Controllers
 
                 TempData["Ok"] = "Registro guardado correctamente.";
 
-                return RedirectToAction(nameof(Patio));
+                return RedirigirPorUbicacion(model.Ubicacion, model.FechaRegistro);
             }
             catch (Exception ex)
             {
@@ -227,7 +288,7 @@ namespace BitacoraAlfipac.Controllers
             if (registro == null)
             {
                 TempData["Error"] = "Registro no encontrado.";
-                return RedirectToAction(nameof(Patio));
+                return RedirigirPorUbicacion(registro.Ubicacion, registro.FechaRegistro);
             }
 
             // eliminar firma física si existe
@@ -249,7 +310,7 @@ namespace BitacoraAlfipac.Controllers
 
             TempData["Ok"] = "Registro eliminado correctamente.";
 
-            return RedirectToAction(nameof(Patio));
+            return RedirigirPorUbicacion(registro.Ubicacion, registro.FechaRegistro);
         }
 
         //Detalle modal
@@ -278,7 +339,7 @@ namespace BitacoraAlfipac.Controllers
             if (registro == null)
             {
                 TempData["Error"] = "Registro no encontrado.";
-                return RedirectToAction(nameof(Patio));
+                return RedirigirPorUbicacion(registro.Ubicacion, registro.FechaRegistro);
             }
 
             return View(registro);
@@ -300,7 +361,7 @@ namespace BitacoraAlfipac.Controllers
             if (registro == null)
             {
                 TempData["Error"] = "Registro no encontrado.";
-                return RedirectToAction(nameof(Patio));
+                return RedirigirPorUbicacion(model.Ubicacion, model.FechaRegistro);
             }
 
             registro.FechaRegistro = model.FechaRegistro;
@@ -315,7 +376,7 @@ namespace BitacoraAlfipac.Controllers
 
             TempData["Ok"] = "Registro actualizado correctamente.";
 
-            return RedirectToAction(nameof(Patio));
+            return RedirigirPorUbicacion(model.Ubicacion, model.FechaRegistro);
         }
 
         //REGISTRAR INGRESO
@@ -331,7 +392,7 @@ namespace BitacoraAlfipac.Controllers
             if (registro == null)
             {
                 TempData["Error"] = "Registro no encontrado.";
-                return RedirectToAction(nameof(Patio));
+                return RedirigirPorUbicacion(registro.Ubicacion, registro.FechaRegistro);
             }
 
             registro.FechaHoraIngreso = fechaHoraIngreso;
@@ -340,7 +401,7 @@ namespace BitacoraAlfipac.Controllers
 
             TempData["Ok"] = "Ingreso registrado correctamente.";
 
-            return RedirectToAction(nameof(Patio));
+            return RedirigirPorUbicacion(registro.Ubicacion, registro.FechaRegistro);
         }
 
         //REVERTIR INGRESO
@@ -354,7 +415,7 @@ namespace BitacoraAlfipac.Controllers
             if (registro == null)
             {
                 TempData["Error"] = "Registro no encontrado.";
-                return RedirectToAction(nameof(Patio));
+                return RedirigirPorUbicacion(registro.Ubicacion, registro.FechaRegistro);
             }
 
             registro.FechaHoraIngreso = null;
@@ -363,16 +424,14 @@ namespace BitacoraAlfipac.Controllers
 
             TempData["Ok"] = "Ingreso revertido correctamente.";
 
-            return RedirectToAction(nameof(Patio));
+            return RedirigirPorUbicacion(registro.Ubicacion, registro.FechaRegistro);
         }
 
         [HttpGet]
         public IActionResult TransportistasActivos()
         {
             var activos = _context.RegistroTransportistas
-                .Where(x =>
-                    x.Ubicacion == "Patio"
-                    && x.FechaHoraIngreso != null
+                .Where(x => x.FechaHoraIngreso != null
                     && x.FechaHoraSalida == null)
                 .OrderBy(x => x.NombreChofer)
                 .Select(x => new
@@ -405,7 +464,7 @@ namespace BitacoraAlfipac.Controllers
             if (registro == null)
             {
                 TempData["Error"] = "Registro no encontrado.";
-                return RedirectToAction(nameof(Patio));
+                return RedirigirPorUbicacion(registro.Ubicacion, registro.FechaRegistro);
             }
 
             registro.FechaHoraSalida = fechaHoraSalida;
@@ -418,7 +477,46 @@ namespace BitacoraAlfipac.Controllers
             TempData["Ok"] =
                 "Salida registrada correctamente.";
 
-            return RedirectToAction(nameof(Patio));
+            return RedirigirPorUbicacion(registro.Ubicacion, registro.FechaRegistro);
+        }
+
+        private IActionResult CrearVistaBase(string ubicacion)
+        {
+            return View("CrearPatio", new RegistroTransportista
+            {
+                FechaRegistro = DateTime.Now,
+                Ubicacion = ubicacion
+            });
+        }
+
+        public IActionResult CrearPatio()
+        {
+            var model = new RegistroTransportista
+            {
+                FechaRegistro = DateTime.Now,
+                Ubicacion = "Patio"
+            };
+
+            return View(model);
+        }
+
+        public IActionResult CrearAgroquimicos()
+        {
+            return CrearVistaBase("Agroquimicos");
+        }
+        public IActionResult CrearBodega2000()
+        {
+            return CrearVistaBase("Bodega2000");
+        }
+
+        private IActionResult RedirigirPorUbicacion(string ubicacion, DateTime? fecha = null)
+        {
+            return ubicacion switch
+            {
+                "Agroquimicos" => RedirectToAction("Agroquimicos", new { fecha }),
+                "Bodega2000" => RedirectToAction("Bodega2000", new { fecha }),
+                _ => RedirectToAction("Patio", new { fecha })
+            };
         }
     }
 }
