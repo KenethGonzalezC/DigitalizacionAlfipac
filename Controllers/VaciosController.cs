@@ -1088,99 +1088,80 @@ namespace BitacoraAlfipac.Controllers
                     .Select(x => x.Trim())
                     .ToList();
 
-                var fechasSalida = new List<string>();
-                var horasSalida = new List<string>();
-                var choferes = new List<string>();
-                var placas = new List<string>();
-
-                int total = contenedores.Count;
-                int despachados = 0;
-
                 foreach (var cont in contenedores)
                 {
                     var despacho = _context.HistorialContenedores
                         .Where(h =>
-                            h.Contenedor == cont &&
+                            h.Contenedor.ToUpper() == cont.ToUpper() &&
                             h.FechaHoraSalida != null)
                         .OrderByDescending(h => h.FechaHoraSalida)
                         .FirstOrDefault();
 
                     var despachoInfo = _context.BitacoraDespachos
-                        .FirstOrDefault(x =>
-                            x.Contenedor.ToUpper() == cont.ToUpper());
+                        .Where(x =>
+                            x.Contenedor.ToUpper() == cont.ToUpper())
+                        .OrderByDescending(x => x.FechaHoraDespacho)
+                        .FirstOrDefault();
 
-                    if (despacho != null)
+                    bool retirado = despacho != null;
+
+                    ws.Cell(fila, 1).Value =
+                        item.Fecha.ToString("dd/MM/yyyy");
+
+                    ws.Cell(fila, 2).Value =
+                        item.Fecha.ToString("HH:mm");
+
+                    ws.Cell(fila, 3).Value =
+                        cont;
+
+                    ws.Cell(fila, 4).Value =
+                        item.Cliente;
+
+                    ws.Cell(fila, 5).Value =
+                        item.Transportista;
+
+                    ws.Cell(fila, 6).Value =
+                        item.Consecutivo;
+
+                    ws.Cell(fila, 7).Value =
+                        despacho?.FechaHoraSalida?.ToString("dd/MM/yyyy")
+                        ?? "Pendiente";
+
+                    ws.Cell(fila, 8).Value =
+                        despacho?.FechaHoraSalida?.ToString("HH:mm")
+                        ?? "Pendiente";
+
+                    ws.Cell(fila, 9).Value =
+                        despachoInfo?.Chofer
+                        ?? "Pendiente";
+
+                    ws.Cell(fila, 10).Value =
+                        despachoInfo?.PlacaCabezal
+                        ?? "Pendiente";
+
+                    ws.Cell(fila, 11).Value =
+                        retirado ? "X" : "";
+
+                    bool alerta24h =
+                        !retirado &&
+                        (DateTime.Now - item.Fecha).TotalHours >= 24;
+
+                    if (alerta24h)
                     {
-                        despachados++;
+                        ws.Range(fila, 1, fila, 11)
+                            .Style.Fill.SetBackgroundColor(
+                                XLColor.FromHtml("#F8D7DA"));
 
-                        fechasSalida.Add(
-                            despacho.FechaHoraSalida?
-                            .ToString("dd/MM/yyyy")
-                            ?? "Pendiente");
+                        ws.Range(fila, 1, fila, 11)
+                            .Style.Font.SetFontColor(
+                                XLColor.DarkRed);
 
-                        horasSalida.Add(
-                            despacho.FechaHoraSalida?
-                            .ToString("HH:mm")
-                            ?? "Pendiente");
-
-                        choferes.Add(
-                            despachoInfo?.Chofer ?? "N/D");
-
-                        placas.Add(
-                            despachoInfo?.PlacaCabezal ?? "N/D");
+                        ws.Cell(fila, 11)
+                            .Style.Font.SetBold();
                     }
-                    else
-                    {
-                        fechasSalida.Add("Pendiente");
-                        horasSalida.Add("Pendiente");
-                        choferes.Add("Pendiente");
-                        placas.Add("Pendiente");
-                    }
+
+                    fila++;
                 }
-
-                bool retiradoCompleto = despachados == total;
-
-                ws.Cell(fila, 1).Value = item.Fecha.ToString("dd/MM/yyyy");
-                ws.Cell(fila, 2).Value = item.Fecha.ToString("HH:mm");
-                ws.Cell(fila, 3).Value = item.Contenedor;
-                ws.Cell(fila, 4).Value = item.Cliente;
-                ws.Cell(fila, 5).Value = item.Transportista;
-                ws.Cell(fila, 6).Value = item.Consecutivo;
-
-                ws.Cell(fila, 7).Value =
-                    string.Join(" / ", fechasSalida);
-
-                ws.Cell(fila, 8).Value =
-                    string.Join(" / ", horasSalida);
-
-                ws.Cell(fila, 9).Value =
-                    string.Join(" / ", choferes);
-
-                ws.Cell(fila, 10).Value =
-                    string.Join(" / ", placas);
-
-                ws.Cell(fila, 11).Value =
-                    retiradoCompleto ? "X" : "";
-
-                bool alerta24h =
-                    !retiradoCompleto &&
-                    despachados == 0 &&
-                    (DateTime.Now - item.Fecha).TotalHours >= 24;
-
-                if (alerta24h)
-                {
-                    ws.Range(fila, 1, fila, 11)
-                        .Style.Fill.SetBackgroundColor(
-                            XLColor.FromHtml("#F8D7DA"));
-
-                    ws.Range(fila, 1, fila, 11)
-                        .Style.Font.SetFontColor(
-                            XLColor.DarkRed);
-
-                    ws.Cell(fila, 11).Style.Font.SetBold();
-                }
-
-                fila++;
             }
 
             // =====================================================
