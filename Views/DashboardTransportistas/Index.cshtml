@@ -1,0 +1,432 @@
+﻿@model BitacoraAlfipac.Models.ViewModels.DashboardTransportistasGlobalViewModel
+
+@{
+    ViewData["Title"] = "Dashboard Global - Transportistas";
+}
+
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2 class="fw-bold">
+            🌍 Dashboard Global de Transportistas
+        </h2>
+
+        <a asp-controller="RegistroTransportistas" asp-action="Index" class="btn btn-outline-dark">
+            ← Volver
+        </a>
+
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-body">
+
+            <form method="get">
+
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">Fecha</label>
+
+                        <input type="date"
+                               name="fecha"
+                               value="@Model.FechaFiltro.ToString("yyyy-MM-dd")"
+                               class="form-control" />
+
+                    </div>
+
+                    <div class="col-md-auto">
+
+                        <button class="btn btn-outline-primary">
+                            <i class="bi bi-search"></i>
+                            Consultar
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!--REGISTRADOS-->
+
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-header bg-warning-subtle d-flex justify-content-between align-items-center">
+
+            <strong>📋 Registrados (Todas las ubicaciones)</strong>
+
+            <div class="d-flex gap-2 align-items-center">
+
+                <!-- BOTÓN PDF -->
+                <a class="btn btn-outline-danger btn-sm" 
+                target="_blank"
+                asp-action="ExportarPdfRegistrados" 
+                asp-route-inicio="@Model.FechaFiltro.ToString("yyyy-MM-dd")" 
+                asp-route-fin="@Model.FechaFiltro.ToString("yyyy-MM-dd")"> 
+                📄 PDF Registrados </a>
+
+            </div>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead class="table-dark">
+                    <tr>
+                        <th>Hora</th>
+                        <th>Ubicación</th>
+                        <th>Placa</th>
+                        <th>Chofer</th>
+                        <th>Cliente</th>
+                        <th>DUA</th>
+                        <th>Tipo</th>
+                        <th>Firma</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (!Model.Registrados.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-3">
+                                Sin registros
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model.Registrados)
+                        {
+                            <tr>
+                                <td>@item.FechaRegistro.ToString("HH:mm")</td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        @item.Ubicacion
+                                    </span>
+                                </td>
+                                <td>@item.Placa</td>
+                                <td>@item.NombreChofer</td>
+                                <td>@item.Cliente</td>
+                                <td>@item.DUA</td>
+                                <td>@item.Tipo</td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(item.RutaFirma))
+                                    {
+                                        <img src="@Url.Content("~" + item.RutaFirma)"
+                                             style="height:40px; max-width:120px;"
+                                             class="border rounded" />
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Sin firma</span>
+                                    }
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#detalleModal"
+                                            onclick="cargarDetalle(@item.Id)">
+
+                                        <i class="bi bi-eye"></i>
+
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!--INGRESADOS-->
+
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+
+            <strong>🚪 Ingresados</strong>
+
+            <div class="d-flex gap-2">
+
+                <a class="btn btn-outline-light btn-sm"
+                   target="_blank"
+                   asp-action="ExportarPdfIngresados"
+                   asp-route-inicio="@Model.FechaFiltro.ToString("yyyy-MM-dd")"
+                   asp-route-fin="@Model.FechaFiltro.ToString("yyyy-MM-dd")">
+
+                    📄 PDF Ingresados
+
+                </a>
+
+            </div>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead class="table-dark">
+                    <tr>
+                        <th>Registro</th>
+                        <th>Ingreso</th>
+                        <th>Ubicación</th>
+                        <th>Placa</th>
+                        <th>Chofer</th>
+                        <th>Cliente</th>
+                        <th>DUA</th>
+                        <th>Tipo</th>
+                        <th>Firma</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (!Model.Ingresados.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-3">
+                                Sin ingresados
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model.Ingresados)
+                        {
+                            <tr>
+                                <td>@item.FechaRegistro.ToString("HH:mm")</td>
+                                <td>@item.FechaHoraIngreso?.ToString("HH:mm")</td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        @item.Ubicacion
+                                    </span>
+                                </td>
+                                <td>@item.Placa</td>
+                                <td>@item.NombreChofer</td>
+                                <td>@item.Cliente</td>
+                                <td>@item.DUA</td>
+                                <td>@item.Tipo</td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(item.RutaFirma))
+                                    {
+                                        <img src="@Url.Content("~" + item.RutaFirma)"
+                                             style="height:40px; max-width:120px;"
+                                             class="border rounded" />
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Sin firma</span>
+                                    }
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#detalleModal"
+                                            onclick="cargarDetalle(@item.Id)">
+
+                                        <i class="bi bi-eye"></i>
+
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!--DESPACHADOS-->
+
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+
+            <strong>🚚 Salidos</strong>
+
+            <a class="btn btn-outline-light btn-sm"
+               target="_blank"
+               asp-action="ExportarPdfSalidos"
+               asp-route-inicio="@Model.FechaFiltro.ToString("yyyy-MM-dd")"
+               asp-route-fin="@Model.FechaFiltro.ToString("yyyy-MM-dd")">
+
+                📄 PDF Salidos
+
+            </a>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead class="table-dark">
+                    <tr>
+                        <th>Registro</th>
+                        <th>Ingreso</th>
+                        <th>Salida</th>
+                        <th>Tiempo E/S</th>
+                        <th>Ubicación</th>
+                        <th>Placa</th>
+                        <th>Chofer</th>
+                        <th>Cliente</th>
+                        <th>DUA</th>
+                        <th>Tipo</th>
+                        <th>Firma</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (!Model.Salidos.Any())
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center text-muted py-3">
+                                Sin salidos
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model.Salidos)
+                        {
+                            var permanencia = TimeSpan.Zero;
+
+                            if (item.FechaHoraIngreso.HasValue &&
+                                item.FechaHoraSalida.HasValue)
+                            {
+                                permanencia =
+                                    item.FechaHoraSalida.Value
+                                    - item.FechaHoraIngreso.Value;
+                            }
+
+                            <tr>
+                                <td>@item.FechaRegistro.ToString("HH:mm")</td>
+                                <td>@item.FechaHoraIngreso?.ToString("HH:mm")</td>
+                                <td>@item.FechaHoraSalida?.ToString("HH:mm")</td>
+                                <td>
+
+                                    @if (item.FechaHoraIngreso.HasValue &&
+                                         item.FechaHoraSalida.HasValue)
+                                    {
+                                        <span class="badge bg-info text-dark">
+
+                                            @($"{(int)permanencia.TotalHours}h {permanencia.Minutes}m")
+
+                                        </span>
+                                    }
+
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">
+                                        @item.Ubicacion
+                                    </span>
+                                </td>
+                                <td>@item.Placa</td>
+                                <td>@item.NombreChofer</td>
+                                <td>@item.Cliente</td>
+                                <td>@item.DUA</td>
+                                <td>@item.Tipo</td>
+                                <td>
+                                    @if (!string.IsNullOrWhiteSpace(item.RutaFirma))
+                                    {
+                                        <img src="@Url.Content("~" + item.RutaFirma)"
+                                             style="height:40px; max-width:120px;"
+                                             class="border rounded" />
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Sin firma</span>
+                                    }
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-primary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#detalleModal"
+                                            onclick="cargarDetalle(@item.Id)">
+
+                                        <i class="bi bi-eye"></i>
+
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- MODAL DETALLE -->
+<div class="modal fade"
+     id="detalleModal"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    Detalle del Registro
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body"
+                 id="detalleContenido">
+
+                <div class="text-center p-5">
+
+                    <div class="spinner-border text-primary"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<script>
+
+        function cargarDetalle(id)
+    {
+        fetch('/RegistroTransportistas/DetalleModal/' + id)
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('detalleContenido').innerHTML = html;
+            });
+    }
+
+</script>

@@ -97,6 +97,12 @@ public class BitacoraController : Controller
 
         ViewBag.FechaSeleccionada = dia;
 
+        ViewBag.TotalMovimientos = bitacora.Count;
+        ViewBag.TotalIngresos = ingresos.Count;
+        ViewBag.TotalDespachos = despachos.Count;
+
+        ViewBag.FechaSeleccionada = dia;
+
         return View(bitacora);
     }
 
@@ -164,9 +170,9 @@ public class BitacoraController : Controller
                         }
                         else
                         {
-                        col.Item().AlignCenter().Text("Horario: Todo el día")
-                                .FontSize(11)
-                                .FontColor(Colors.Grey.Darken1);
+                            col.Item().AlignCenter().Text("Horario: Todo el día")
+                                    .FontSize(11)
+                                    .FontColor(Colors.Grey.Darken1);
                         }
 
                         // NUEVO: TOTAL
@@ -281,6 +287,8 @@ public class BitacoraController : Controller
         }
 
         return File(pdf, "application/pdf", nombreArchivo);
+
+        //return File(pdf, "application/pdf");
     }
 
     //Exportar a Excel
@@ -503,5 +511,191 @@ public class BitacoraController : Controller
 
     return ingresos.Concat(despachos).OrderBy(x => x.HoraOrden).ToList();
 }
+
+    //PREVISUALIZAR PDF
+    [HttpGet]
+    public IActionResult PrevisualizarPDF(DateTime fecha, TimeSpan? horaInicio, TimeSpan? horaFin)
+    {
+        var movimientos = ObtenerMovimientosPorFecha(fecha);
+
+        // FILTRO NUEVO
+        if (horaInicio.HasValue && horaFin.HasValue)
+        {
+            movimientos = movimientos
+                .Where(m =>
+                    (m.HoraEntrada.HasValue &&
+                     m.HoraEntrada.Value.TimeOfDay >= horaInicio &&
+                     m.HoraEntrada.Value.TimeOfDay <= horaFin)
+                 ||
+                    (m.HoraSalida.HasValue &&
+                     m.HoraSalida.Value.TimeOfDay >= horaInicio &&
+                     m.HoraSalida.Value.TimeOfDay <= horaFin)
+                )
+                .ToList();
+        }
+
+        // CONTADORES
+        int totalIngresos = movimientos.Count(m => m.HoraEntrada.HasValue);
+        int totalDespachos = movimientos.Count(m => m.HoraSalida.HasValue);
+
+        QuestPDF.Settings.License = LicenseType.Community;
+
+        var pdf = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4.Landscape());
+                page.Margin(20);
+
+                page.Header().Row(row =>
+                {
+                    // LOGO IZQUIERDA
+                    row.ConstantItem(60).Height(60).Image("wwwroot/logo.jpg");
+
+                    // TEXTO CENTRO
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().AlignCenter().Text("ALFIPAC – BITÁCORA OPERATIVA DIARIA")
+                            .Bold().FontSize(18);
+
+                        col.Item().AlignCenter().Text("CONTROL INTERNO ENTRADA / SALIDA")
+                            .Bold().FontSize(18);
+
+                        col.Item().AlignCenter().Text($"Fecha operativa: {fecha:dd/MM/yyyy}")
+                            .FontSize(11);
+
+                        //col.Item().AlignCenter().Text($"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}")
+                        //    .FontSize(10)
+                        //    .FontColor(Colors.Grey.Darken1);
+
+                        // NUEVO: RANGO
+                        if (horaInicio.HasValue && horaFin.HasValue)
+                        {
+                            col.Item().AlignCenter().Text($"Horario: {horaInicio:hh\\:mm} - {horaFin:hh\\:mm}")
+                                .FontSize(11)
+                                .FontColor(Colors.Grey.Darken1);
+                        }
+                        else
+                        {
+                            col.Item().AlignCenter().Text("Horario: Todo el día")
+                                    .FontSize(11)
+                                    .FontColor(Colors.Grey.Darken1);
+                        }
+
+                        // NUEVO: TOTAL
+                        col.Item().AlignCenter().Text(
+                            $"Total registros: {movimientos.Count} | " +
+                            $"Ingresos: {totalIngresos} | " +
+                            $"Despachos: {totalDespachos}"
+                        )
+                        .FontSize(10)
+                        .FontColor(Colors.Grey.Darken1);
+
+                        col.Item().PaddingTop(5).LineHorizontal(1);
+
+                    });
+
+                    // ESPACIO DERECHO (para balance visual)
+                    row.ConstantItem(60);
+                });
+
+                page.Content().PaddingTop(10).Table(table =>
+                {
+                    table.ColumnsDefinition(columns =>
+                    {
+                        columns.RelativeColumn(2.2f);
+                        columns.RelativeColumn(2.0f);
+                        columns.RelativeColumn(1.2f);
+                        columns.RelativeColumn(1.2f);
+                        columns.RelativeColumn(2.4f);
+                        columns.RelativeColumn(2.8f);
+                        columns.RelativeColumn(2.1f);
+                        columns.RelativeColumn(1.4f);
+                        columns.RelativeColumn(1.8f);
+                        columns.RelativeColumn(2.0f);
+                    });
+
+                    table.Header(header =>
+                    {
+                        void H(string t) =>
+                            header.Cell().Element(HeaderStyle).Text(t).Bold().FontSize(10).AlignCenter();
+
+                        H("Contenedor");
+                        H("Marchamos");
+                        H("Entrada");
+                        H("Salida");
+                        H("Transportista");
+                        H("Información");
+                        H("Chofer");
+                        H("Placa");
+                        H("Chasis");
+                        H("Viaje/DUA");
+                    });
+
+                    int index = 0;
+
+                    foreach (var m in movimientos)
+                    {
+                        var bg = index % 2 == 0 ? Colors.White : Colors.Grey.Lighten4;
+
+                        table.Cell().Element(c => CellStyle(c, bg)).Text(m.Contenedor);
+                        table.Cell().Element(c => CellStyle(c, bg)).Text(m.Marchamos);
+                        table.Cell().Element(c => CellStyle(c, bg)).AlignCenter().Text(m.HoraEntrada?.ToString("HH:mm") ?? "");
+                        table.Cell().Element(c => CellStyle(c, bg)).AlignCenter().Text(m.HoraSalida?.ToString("HH:mm") ?? "");
+                        table.Cell().Element(c => CellStyle(c, bg)).Text(m.Transportista);
+                        table.Cell().Element(c => CellStyle(c, bg)).Text(m.Informacion);
+                        table.Cell().Element(c => CellStyle(c, bg)).Text(m.Chofer);
+                        table.Cell().Element(c => CellStyle(c, bg)).AlignCenter().Text(m.Placa);
+                        table.Cell().Element(c => CellStyle(c, bg)).Text(m.Chasis);
+                        table.Cell().Element(c => CellStyle(c, bg)).Text(m.ViajeODua);
+
+                        index++;
+                    }
+
+                    static IContainer HeaderStyle(IContainer c) =>
+                        c.Background(Colors.Grey.Lighten2)
+                         .Border(1)
+                         .PaddingVertical(4)
+                         .PaddingHorizontal(3);
+
+                    static IContainer CellStyle(IContainer c, string bg) =>
+                        c.Background(bg)
+                         .Border(0.5f)
+                         .BorderColor(Colors.Grey.Lighten1)
+                         .Padding(3)
+                         .DefaultTextStyle(x => x.FontSize(9))
+                         .ShowEntire(); //No parte renglon entre paginas
+                });
+
+                page.Footer().Element(footer =>
+                {
+                    footer.AlignCenter().Text(txt =>
+                    {
+                        txt.Span("Página ");
+                        txt.CurrentPageNumber();
+                        txt.Span(" de ");
+                        txt.TotalPages();
+                    });
+                });
+            });
+        }).GeneratePdf();
+
+        string nombreArchivo;
+
+        // SIN FILTRO (todo el día)
+        if (!horaInicio.HasValue || !horaFin.HasValue)
+        {
+            nombreArchivo = $"Bitacora_{fecha:dd-MM-yyyy}.pdf";
+        }
+        else
+        {
+            // CON RANGO
+            nombreArchivo = $"Bitacora_{fecha:dd-MM-yyyy}_{horaInicio:hh\\-mm}hrs_{horaFin:hh\\-mm}hrs.pdf";
+        }
+
+        //return File(pdf, "application/pdf", nombreArchivo);
+
+        return File(pdf, "application/pdf");
+    }
 
 }

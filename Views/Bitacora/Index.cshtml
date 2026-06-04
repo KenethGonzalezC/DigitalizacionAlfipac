@@ -26,7 +26,48 @@
 
         <div>
             <h2 class="fw-bold mb-0">📋 Bitácora del día</h2>
-            <small class="text-muted">@fecha.ToString("dd MMMM yyyy")</small>
+            <small class="text-muted">@fecha.ToString("dd MMMM yyyy")</small>            
+        </div>
+
+        <!-- RESUMEN -->
+        <div class="row mb-4">
+
+            <div class="col-md-4">
+                <div class="border-start border-4 border-primary ps-3">
+                    <div class="text-muted small">
+                        Total
+                    </div>
+
+                    <div class="fs-1 fw-bold">
+                        @ViewBag.TotalMovimientos
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="border-start border-4 border-success ps-3">
+                    <div class="text-muted small">
+                        Ingresos
+                    </div>
+
+                    <div class="fs-1 fw-bold">
+                        @ViewBag.TotalIngresos
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="border-start border-4 border-danger ps-3">
+                    <div class="text-muted small">
+                        Despachos
+                    </div>
+
+                    <div class="fs-1 fw-bold">
+                        @ViewBag.TotalDespachos
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <form method="get" class="d-flex align-items-center gap-2 flex-wrap">
@@ -47,6 +88,12 @@
             </div>
 
             <button type="button"
+                    class="btn btn-primary"
+                    onclick="previsualizarPdf()">
+                👁 Vista previa PDF
+            </button>
+
+            <button type="button"
                     class="btn btn-danger"
                     data-bs-toggle="modal"
                     data-bs-target="#modalExportarPdf">
@@ -63,6 +110,7 @@
 
     </div>
 
+    
     <!-- TABLA -->
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
@@ -209,4 +257,15 @@
 
         toggleRango();
     });
+</script>
+
+<script>
+    function previsualizarPdf() {
+
+        const fecha = '@fecha.ToString("yyyy-MM-dd")';
+
+        const url = `/Bitacora/PrevisualizarPdf?fecha=${fecha}`;
+
+        window.open(url, '_blank');
+    }
 </script>

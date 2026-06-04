@@ -31,9 +31,10 @@
                             Fecha y Hora
                         </label>
 
-                        <input asp-for="FechaRegistro"
+                        <input name="FechaRegistro"
                                type="datetime-local"
-                               class="form-control" />
+                               class="form-control"
+                               value="@Model.FechaRegistro.ToString("yyyy-MM-ddTHH:mm")" />
 
                     </div>
 
@@ -106,7 +107,7 @@
 
                     </button>
 
-                    <a asp-action="Patio"
+                    <a asp-action="Index"
                        class="btn btn-secondary">
 
                         Cancelar
