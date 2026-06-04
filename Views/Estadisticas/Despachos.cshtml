@@ -1,0 +1,726 @@
+﻿@model BitacoraAlfipac.Models.ViewModels.EstadisticasDespachosVM
+
+@{
+    ViewData["Title"] = "Estadísticas de Despachos";
+}
+
+<div class="container-fluid py-4">
+
+    <!--ESTADISTICA REAL-->
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                📊 Estadísticas de Despachos
+            </h2>
+
+            <small class="text-muted">
+                Análisis histórico y comportamiento operativo
+            </small>
+        </div>
+
+        <form method="get">
+
+            <select name="anio"
+                    class="form-select"
+                    onchange="this.form.submit()">
+
+                @foreach (var anio in Model.AniosDisponibles)
+                {
+                    if (anio == Model.AnioSeleccionado)
+                    {
+                        <option value="@anio" selected>
+                            @anio
+                        </option>
+                    }
+                    else
+                    {
+                        <option value="@anio">
+                            @anio
+                        </option>
+                    }
+                }
+
+            </select>
+
+        </form>
+
+    </div>
+
+    <!-- KPI -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        Despachos Hoy
+                    </h6>
+
+                    <h2 class="fw-bold text-primary mb-0">
+                        @Model.TotalHoy
+                    </h2>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        Mes Actual
+                    </h6>
+
+                    <h2 class="fw-bold text-success mb-0">
+                        @Model.TotalMesActual
+                    </h2>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        Total Año @Model.AnioSeleccionado
+                    </h6>
+
+                    <h2 class="fw-bold text-info mb-0">
+                        @Model.TotalAnioSeleccionado
+                    </h2>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        Promedio Diario
+                    </h6>
+
+                    <h2 class="fw-bold text-warning mb-0">
+                        @Model.PromedioDiario.ToString("N1")
+                    </h2>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- GRÁFICA -->
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white">
+
+            <h5 class="mb-0 fw-bold">
+                Despachos por Mes
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div style="height:450px;">
+                <canvas id="graficaDespachos"></canvas>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TABLA -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white">
+
+            <h5 class="mb-0 fw-bold">
+                Resumen Mensual
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th>Mes</th>
+                            <th class="text-end">
+                                Cantidad
+                            </th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in Model.ResumenMensual)
+                        {
+                            <tr>
+
+                                <td>
+                                    @item.Mes
+                                </td>
+
+                                <td class="text-end fw-bold">
+                                    @item.Cantidad
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                    <tfoot class="table-light">
+
+                        <tr>
+
+                            <th>
+                                Total
+                            </th>
+
+                            <th class="text-end">
+                                @Model.TotalAnioSeleccionado
+                            </th>
+
+                        </tr>
+
+                    </tfoot>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!--ESTADISTICA SEMANAL-->
+<div class="container-fluid py-4">
+
+    <hr class="my-5" />
+
+    <div class="mb-4">
+
+        <h3 class="fw-bold mb-1">
+            📅 Estadísticas Operativas Semanales
+        </h3>
+
+        <small class="text-muted">
+            Análisis basado únicamente en días operativos (Lunes a Viernes)
+        </small>
+
+    </div>
+
+    <!-- KPI OPERATIVOS -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        📈 Día Más Activo
+                    </h6>
+
+                    <h4 class="fw-bold text-success">
+                        @Model.DiaMasActivo
+                    </h4>
+
+                    <small class="text-muted">
+                        Promedio @Model.PromedioDiaMasActivo despachos
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        📉 Día Menos Activo
+                    </h6>
+
+                    <h4 class="fw-bold text-warning">
+                        @Model.DiaMenosActivo
+                    </h4>
+
+                    <small class="text-muted">
+                        Promedio @Model.PromedioDiaMenosActivo despachos
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        📊 Récord Operativo
+                    </h6>
+
+                    <h4 class="fw-bold text-primary">
+
+                        @(Model.FechaRecordOperativo?.ToString("dd/MM/yyyy"))
+
+                    </h4>
+
+                    <small class="text-muted">
+                        @Model.CantidadRecordOperativo despachos
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        📊 Promedio Diario Operativo
+                    </h6>
+
+                    <h4 class="fw-bold text-info">
+                        @Model.PromedioDiarioOperativo
+                    </h4>
+
+                    <small class="text-muted">
+                        Despachos por día hábil
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- GRAFICA SEMANAL -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white">
+
+            <h5 class="fw-bold mb-0">
+                Comportamiento por Día de Semana
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div style="height:400px;">
+
+                <canvas id="graficaSemanal">
+                </canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ============================================ -->
+<!-- ESTADÍSTICAS POR CLIENTE -->
+<!-- ============================================ -->
+
+<div class="container-fluid py-4">
+
+    <hr class="my-5" />
+
+    <div class="mb-4">
+
+        <h3 class="fw-bold mb-1">
+            🏢 Estadísticas por Cliente
+        </h3>
+
+        <small class="text-muted">
+            Análisis de participación y volumen de despachos por cliente
+        </small>
+
+    </div>
+
+    <!-- KPI CLIENTES -->
+
+    <div class="row g-4 mb-4">
+
+        <!-- CLIENTE PRINCIPAL -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        🏆 Cliente Principal
+                    </h6>
+
+                    <h4 class="fw-bold text-primary">
+
+                        @if (!string.IsNullOrWhiteSpace(Model.ClientePrincipal))
+                        {
+                            @Model.ClientePrincipal
+                        }
+                        else
+                        {
+                            <span>N/A</span>
+                        }
+
+                    </h4>
+
+                    <small class="text-muted">
+                        @Model.CantidadClientePrincipal despachos
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- CLIENTES ACTIVOS -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        👥 Clientes Activos
+                    </h6>
+
+                    <h2 class="fw-bold text-success">
+
+                        @Model.TotalClientesActivos
+
+                    </h2>
+
+                    <small class="text-muted">
+                        Clientes con al menos un despacho
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- PARTICIPACION -->
+
+        <div class="col-md-4">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        📊 Participación Principal
+                    </h6>
+
+                    <h2 class="fw-bold text-warning">
+
+                        @Model.PorcentajeClientePrincipal%
+
+                    </h2>
+
+                    <small class="text-muted">
+                        Del total anual seleccionado
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- GRAFICA TOP CLIENTES -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white">
+
+            <h5 class="fw-bold mb-0">
+                Top 10 Clientes por Cantidad de Despachos
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div style="height:550px;">
+
+                <canvas id="graficaClientes">
+                </canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+
+        //estadistica real
+
+        const meses =
+        @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(Model.Meses));
+
+        const cantidades =
+        @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(Model.CantidadesPorMes));
+
+        new Chart(
+        document.getElementById('graficaDespachos'),
+        {
+        type: 'bar',
+
+        data: {
+
+        labels: meses,
+
+        datasets: [
+        {
+        label: 'Despachos',
+
+        data: cantidades,
+
+        borderWidth: 1,
+
+        borderRadius: 8
+        }]
+        },
+
+        options: {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        scales: {
+
+        y: {
+        beginAtZero: true,
+
+        ticks: {
+        precision: 0
+        }
+        }
+        },
+
+        plugins: {
+
+        legend: {
+        display: false
+        },
+
+        tooltip: {
+
+        callbacks: {
+
+        label: function(context) {
+
+        return context.raw + ' despachos';
+
+        }
+        }
+        }
+        }
+        }
+        });
+
+        //reporte semanal
+
+        const diasSemana =
+        @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(Model.DiasSemana));
+
+        const promediosSemana =
+        @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(Model.PromediosSemana));
+
+        new Chart(
+        document.getElementById('graficaSemanal'),
+        {
+        type: 'bar',
+
+        data: {
+
+        labels: diasSemana,
+
+        datasets: [
+        {
+        label: 'Promedio',
+
+        data: promediosSemana,
+
+        borderWidth: 1,
+
+        borderRadius: 8
+        }]
+        },
+
+        options: {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        scales: {
+
+        y: {
+
+        beginAtZero: true,
+
+        ticks: {
+        precision: 1
+        }
+        }
+        },
+
+        plugins: {
+
+        legend: {
+        display: false
+        },
+
+        tooltip: {
+
+        callbacks: {
+
+        label: function(context) {
+
+        return context.raw +
+        ' despachos promedio';
+
+        }
+        }
+        }
+        }
+        }
+        });
+
+        //clientes
+
+        const clientesTop =
+        @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(Model.ClientesTop));
+
+        const cantidadesClientes =
+        @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(Model.CantidadesClientesTop));
+
+        new Chart(
+        document.getElementById('graficaClientes'),
+        {
+        type: 'bar',
+
+        data: {
+
+        labels: clientesTop,
+
+        datasets: [
+        {
+        label: 'Despachos',
+
+        data: cantidadesClientes,
+
+        borderWidth: 1,
+
+        borderRadius: 8
+        }]
+        },
+
+        options: {
+
+        indexAxis: 'y',
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        plugins: {
+
+        legend: {
+        display: false
+        },
+
+        tooltip: {
+
+        callbacks: {
+
+        label: function(context) {
+
+        return context.raw + ' despachos';
+
+        }
+        }
+        }
+        },
+
+        scales: {
+
+        x: {
+
+        beginAtZero: true,
+
+        ticks: {
+        precision: 0
+        }
+        }
+        }
+        }
+        });
+
+    </script>
+}

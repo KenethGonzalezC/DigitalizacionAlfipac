@@ -92,6 +92,34 @@
                             </div>
                         </div>
 
+                        <!--VACIOS-->
+                        @if (Model.EstadoCarga.Equals("VACIO",
+                        StringComparison.OrdinalIgnoreCase))
+                        {
+                            <div class="col-md-6">
+                                <div class="p-2 border rounded bg-light">
+
+                                    <small class="text-muted">
+                                        Estado Vacíos
+                                    </small>
+
+                                    @if (Model.YaReportado)
+                                    {
+                                        <div class="fw-semibold text-success">
+                                            ✓ Reportado
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="fw-semibold text-danger">
+                                            ❌ No reportado
+                                        </div>
+                                    }
+
+                                </div>
+                            </div>
+                        }
+
                     </div>
 
                     <!-- DATOS OPERATIVOS -->

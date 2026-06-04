@@ -11,5 +11,8 @@
         public string Cliente { get; set; } = "";
         public string EstadoCarga { get; set; } = "";
         public string UbicacionActual { get; set; } = "";
+
+        //vacios
+        public bool YaReportado { get; set; }
     }
 }

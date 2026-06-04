@@ -332,7 +332,7 @@ public async Task<IActionResult> Mover(
     IContenedorInventario c,
     string ubicacion)
     {
-        return new BusquedaGlobalContenedorVM
+        var vm = new BusquedaGlobalContenedorVM
         {
             Id = c.Id,
             Contenedor = c.Contenedor,
@@ -344,6 +344,35 @@ public async Task<IActionResult> Mover(
             EstadoCarga = c.EstadoCarga,
             UbicacionActual = ubicacion
         };
+
+        // VALIDAR SI ESTÁ REPORTADO EN VACÍOS
+        var reportesActivos = _context.Vacios.ToList();
+
+        foreach (var reporte in reportesActivos)
+        {
+            var contenedoresReporte = reporte.Contenedor
+                .Split('/', StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim().ToUpper())
+                .ToList();
+
+            if (!contenedoresReporte.Contains(
+                    vm.Contenedor.Trim().ToUpper()))
+                continue;
+
+            bool despachado = _context.HistorialContenedores
+                .Any(h =>
+                    h.Contenedor.ToUpper() ==
+                        vm.Contenedor.Trim().ToUpper()
+                    && h.FechaHoraSalida != null);
+
+            if (!despachado)
+            {
+                vm.YaReportado = true;
+                break;
+            }
+        }
+
+        return vm;
     }
 
     private void CopiarDatosBase(IContenedorInventario origen, dynamic destino)

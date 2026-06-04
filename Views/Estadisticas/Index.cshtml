@@ -1,0 +1,182 @@
+﻿@{
+    ViewData["Title"] = "Módulo Estadísticas";
+}
+
+@if (TempData["Ok"] != null)
+{
+    <div class="alert alert-success">@TempData["Ok"]</div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<div class="container-fluid py-4">
+
+    <!-- HEADER -->
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">📈 Módulo Estadísticas</h2>
+
+        <small class="text-muted">
+            Indicadores operativos, tendencias y análisis histórico de movimientos
+        </small>
+    </div>
+
+    <!-- GRID -->
+    <div class="row g-4">
+
+        <!-- DESPACHOS -->
+        <div class="col-md-6 col-xl-4">
+            <a asp-controller="Estadisticas"
+               asp-action="Despachos"
+               class="text-decoration-none">
+
+                <div class="card shadow-sm h-100 border-0 card-hover">
+
+                    <div class="card-body text-center p-4">
+
+                        <div class="icon-box bg-info-subtle text-info mb-3">
+                            <i class="bi bi-bar-chart-line fs-3"></i>
+                        </div>
+
+                        <h5 class="fw-bold text-info mb-2">
+                            Despachos
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            Análisis mensual, diario y tendencias de despachos registrados
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </a>
+        </div>
+
+        <!-- INGRESOS -->
+        <div class="col-md-6 col-xl-4">
+            <a href="javascript:void(0)"
+               class="text-decoration-none">
+
+                <div class="card shadow-sm h-100 border-0 card-hover">
+
+                    <div class="card-body text-center p-4">
+
+                        <div class="icon-box bg-success-subtle text-success mb-3">
+                            <i class="bi bi-graph-up-arrow fs-3"></i>
+                        </div>
+
+                        <h5 class="fw-bold text-success mb-2">
+                            Ingresos
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            Estadísticas y comportamiento histórico de ingresos
+                        </p>
+
+                        <span class="badge bg-secondary mt-3">
+                            Próximamente
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </a>
+        </div>
+
+        <!-- VACÍOS -->
+        <div class="col-md-6 col-xl-4">
+            <a href="javascript:void(0)"
+               class="text-decoration-none">
+
+                <div class="card shadow-sm h-100 border-0 card-hover">
+
+                    <div class="card-body text-center p-4">
+
+                        <div class="icon-box bg-warning-subtle text-warning mb-3">
+                            <i class="bi bi-pie-chart fs-3"></i>
+                        </div>
+
+                        <h5 class="fw-bold text-warning mb-2">
+                            Vacíos
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            Indicadores históricos y control de movimientos de vacíos
+                        </p>
+
+                        <span class="badge bg-secondary mt-3">
+                            Próximamente
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </a>
+        </div>
+
+    </div>
+
+    <!-- INFO -->
+    <div class="card border-0 shadow-sm mt-5">
+        <div class="card-body">
+
+            <h5 class="fw-bold mb-3">
+                🚧 Próximas Métricas
+            </h5>
+
+            <div class="row">
+
+                <div class="col-md-6">
+                    <ul class="mb-0">
+                        <li>Comparativos mensuales</li>
+                        <li>Indicadores de crecimiento</li>
+                        <li>Promedios diarios</li>
+                    </ul>
+                </div>
+
+                <div class="col-md-6">
+                    <ul class="mb-0">
+                        <li>KPIs operativos</li>
+                        <li>Transportistas más utilizados</li>
+                        <li>Tendencias históricas</li>
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .card-hover {
+        border-radius: 16px;
+        transition: all 0.25s ease;
+    }
+
+        .card-hover:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+    .icon-box {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
