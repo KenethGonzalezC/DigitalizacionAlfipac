@@ -9,24 +9,54 @@ namespace BitacoraAlfipac.Models.Entidades
         [Display(Name = "Fecha Registro")]
         public DateTime FechaRegistro { get; set; }
 
+        private string _placa = string.Empty;
+
         [Required]
         [StringLength(20)]
-        public string Placa { get; set; } = string.Empty;
+        public string Placa
+        {
+            get => _placa;
+            set => _placa = value?.Trim().ToUpperInvariant() ?? string.Empty;
+        }
+
+        private string _nombreChofer = string.Empty;
 
         [Required]
         [StringLength(150)]
-        public string NombreChofer { get; set; } = string.Empty;
+        public string NombreChofer
+        {
+            get => _nombreChofer;
+            set => _nombreChofer = value?.Trim().ToUpperInvariant() ?? string.Empty;
+        }
+
+        private string _cliente = string.Empty;
 
         [Required]
         [StringLength(200)]
-        public string Cliente { get; set; } = string.Empty;
+        public string Cliente
+        {
+            get => _cliente;
+            set => _cliente = value?.Trim().ToUpperInvariant() ?? string.Empty;
+        }
+
+        private string? _dua;
 
         [StringLength(100)]
-        public string? DUA { get; set; }
+        public string? DUA
+        {
+            get => _dua;
+            set => _dua = value?.Trim().ToUpperInvariant();
+        }
+
+        private string _tipo = string.Empty;
 
         [Required]
         [StringLength(50)]
-        public string Tipo { get; set; } = string.Empty;
+        public string Tipo
+        {
+            get => _tipo;
+            set => _tipo = value?.Trim().ToUpperInvariant() ?? string.Empty;
+        }
 
         [Required]
         [StringLength(50)]
@@ -40,7 +70,7 @@ namespace BitacoraAlfipac.Models.Entidades
         public DateTime? FechaHoraIngreso { get; set; }
 
         public DateTime? FechaHoraSalida { get; set; }
-        
+
         [StringLength(100)]
         public string? UsuarioSalida { get; set; }
     }

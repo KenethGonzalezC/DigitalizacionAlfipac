@@ -92,6 +92,7 @@
                         <th>DUA</th>
                         <th>Tipo</th>
                         <th>Firma</th>
+                        <th></th>
                     </tr>
                 </thead>
 
@@ -129,7 +130,16 @@
                                 <td>@item.NombreChofer</td>
                                 <td>@item.Cliente</td>
                                 <td>@item.DUA</td>
-                                <td>@item.Tipo</td>
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(item.Tipo))
+                                    {
+                                        <span class="badge bg-primary">
+                                            @item.Tipo
+                                        </span>
+                                    }
+
+                                </td>
                                 <td>
                                     @if (!string.IsNullOrWhiteSpace(item.RutaFirma))
                                     {
@@ -140,8 +150,10 @@
                                     else
                                     {
                                         <span class="text-muted">Sin firma</span>
-                                    }
-                                    <button type="button"
+                                    }                                    
+                                </td>
+                                <td>
+                                        <button type="button"
                                             class="btn btn-sm btn-outline-primary"
                                             data-bs-toggle="modal"
                                             data-bs-target="#detalleModal"
@@ -150,14 +162,13 @@
                                         <i class="bi bi-eye"></i>
 
                                     </button>
-
                                     @if (User.IsInRole("Administrador"))
                                     {
                                         <button type="button"
-                                        class="btn btn-sm btn-warning"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editarAdminModal"
-                                        onclick="cargarEdicionAdmin(@item.Id)">
+                                                class="btn btn-sm btn-warning"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editarAdminModal"
+                                                onclick="cargarEdicionAdmin(@item.Id)">
 
                                             <i class="bi bi-pencil-square"></i>
 
@@ -215,6 +226,7 @@
                         <th>DUA</th>
                         <th>Tipo</th>
                         <th>Firma</th>
+                        <th></th>
                     </tr>
                 </thead>
 
@@ -253,7 +265,16 @@
                                 <td>@item.NombreChofer</td>
                                 <td>@item.Cliente</td>
                                 <td>@item.DUA</td>
-                                <td>@item.Tipo</td>
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(item.Tipo))
+                                    {
+                                        <span class="badge bg-success">
+                                            @item.Tipo
+                                        </span>
+                                    }
+
+                                </td>
                                 <td>
                                     @if (!string.IsNullOrWhiteSpace(item.RutaFirma))
                                     {
@@ -265,7 +286,10 @@
                                     {
                                         <span class="text-muted">Sin firma</span>
                                     }
-                                    <button type="button"
+                                    
+                                </td>
+                                <td>
+                                        <button type="button"
                                             class="btn btn-sm btn-outline-primary"
                                             data-bs-toggle="modal"
                                             data-bs-target="#detalleModal"
@@ -274,14 +298,13 @@
                                         <i class="bi bi-eye"></i>
 
                                     </button>
-
                                     @if (User.IsInRole("Administrador"))
                                     {
                                         <button type="button"
-                                        class="btn btn-sm btn-warning"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editarAdminModal"
-                                        onclick="cargarEdicionAdmin(@item.Id)">
+                                                class="btn btn-sm btn-warning"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editarAdminModal"
+                                                onclick="cargarEdicionAdmin(@item.Id)">
 
                                             <i class="bi bi-pencil-square"></i>
 
@@ -337,6 +360,7 @@
                         <th>DUA</th>
                         <th>Tipo</th>
                         <th>Firma</th>
+                        <th></th>
                     </tr>
                 </thead>
 
@@ -399,7 +423,16 @@
                                 <td>@item.NombreChofer</td>
                                 <td>@item.Cliente</td>
                                 <td>@item.DUA</td>
-                                <td>@item.Tipo</td>
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(item.Tipo))
+                                    {
+                                        <span class="badge bg-secondary">
+                                            @item.Tipo
+                                        </span>
+                                    }
+
+                                </td>
                                 <td>
                                     @if (!string.IsNullOrWhiteSpace(item.RutaFirma))
                                     {
@@ -411,7 +444,10 @@
                                     {
                                         <span class="text-muted">Sin firma</span>
                                     }
-                                    <button type="button"
+                                    
+                                </td>
+                                <td>
+                                        <button type="button"
                                             class="btn btn-sm btn-outline-primary"
                                             data-bs-toggle="modal"
                                             data-bs-target="#detalleModal"
@@ -420,14 +456,13 @@
                                         <i class="bi bi-eye"></i>
 
                                     </button>
-
                                     @if (User.IsInRole("Administrador"))
                                     {
                                         <button type="button"
-                                        class="btn btn-sm btn-warning"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editarAdminModal"
-                                        onclick="cargarEdicionAdmin(@item.Id)">
+                                                class="btn btn-sm btn-warning"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editarAdminModal"
+                                                onclick="cargarEdicionAdmin(@item.Id)">
 
                                             <i class="bi bi-pencil-square"></i>
 
