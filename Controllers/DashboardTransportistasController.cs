@@ -20,6 +20,8 @@ namespace BitacoraAlfipac.Controllers
 
         public async Task<IActionResult> Index(DateTime? fecha)
         {
+            ViewBag.UbicacionActual = "Dashboard";
+
             DateTime fechaFiltro = fecha?.Date ?? DateTime.Today;
 
             var registros = await _context.RegistroTransportistas
@@ -236,7 +238,14 @@ namespace BitacoraAlfipac.Controllers
 
                             table.Cell().Element(c => Cell(c, bg)).Text(item.FechaRegistro.ToString("HH:mm"));
 
-                            table.Cell().Element(c => Cell(c, bg)).Text(item.Ubicacion);
+                            if (item.Ubicacion == "Patio") 
+                            {
+                                table.Cell().Element(c => Cell(c, bg)).Text("Cargado");
+                            }
+                            else
+                            {
+                                table.Cell().Element(c => Cell(c, bg)).Text(item.Ubicacion);
+                            }
 
                             table.Cell().Element(c => Cell(c, bg)).Text(item.Placa);
 
@@ -402,8 +411,14 @@ namespace BitacoraAlfipac.Controllers
                             table.Cell().Element(c => Cell(c, bg))
                                 .Text(item.FechaHoraIngreso?.ToString("HH:mm") ?? "");
 
-                            table.Cell().Element(c => Cell(c, bg))
-                                .Text(item.Ubicacion);
+                            if (item.Ubicacion == "Patio")
+                            {
+                                table.Cell().Element(c => Cell(c, bg)).Text("Cargado");
+                            }
+                            else
+                            {
+                                table.Cell().Element(c => Cell(c, bg)).Text(item.Ubicacion);
+                            }
 
                             table.Cell().Element(c => Cell(c, bg))
                                 .Text(item.Placa);
@@ -587,8 +602,14 @@ namespace BitacoraAlfipac.Controllers
                                 .AlignCenter()
                                 .Text(tiempo);
 
-                            table.Cell().Element(c => Cell(c, bg))
-                                .Text(item.Ubicacion);
+                            if (item.Ubicacion == "Patio")
+                            {
+                                table.Cell().Element(c => Cell(c, bg)).Text("Cargado");
+                            }
+                            else
+                            {
+                                table.Cell().Element(c => Cell(c, bg)).Text(item.Ubicacion);
+                            }
 
                             table.Cell().Element(c => Cell(c, bg))
                                 .Text(item.Placa);

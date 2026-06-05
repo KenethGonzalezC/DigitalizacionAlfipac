@@ -21,7 +21,7 @@
             </small>
         </div>
 
-        <form method="get">
+        <form method="get" class="d-flex gap-2">
 
             <select name="anio"
                     class="form-select"
@@ -41,6 +41,51 @@
                             @anio
                         </option>
                     }
+                }
+
+            </select>
+
+            <select name="tipo"
+                    class="form-select"
+                    onchange="this.form.submit()">
+
+                @if (Model.TipoSeleccionado == "todos")
+                {
+                    <option value="todos" selected>
+                        Todos
+                    </option>
+                }
+                else
+                {
+                    <option value="todos">
+                        Todos
+                    </option>
+                }
+
+                @if (Model.TipoSeleccionado == "comercial")
+                {
+                    <option value="comercial" selected>
+                        Sin Vacíos
+                    </option>
+                }
+                else
+                {
+                    <option value="comercial">
+                        Sin Vacíos
+                    </option>
+                }
+
+                @if (Model.TipoSeleccionado == "vacios")
+                {
+                    <option value="vacios" selected>
+                        Solo Vacíos
+                    </option>
+                }
+                else
+                {
+                    <option value="vacios">
+                        Solo Vacíos
+                    </option>
                 }
 
             </select>
@@ -89,7 +134,20 @@
                 <div class="card-body text-center">
 
                     <h6 class="text-muted">
-                        Total Año @Model.AnioSeleccionado
+
+                        @if (Model.TipoSeleccionado == "comercial")
+                        {
+                            <text>Total Comercial @Model.AnioSeleccionado</text>
+                        }
+                        else if (Model.TipoSeleccionado == "vacios")
+                        {
+                            <text>Total Vacíos @Model.AnioSeleccionado</text>
+                        }
+                        else
+                        {
+                            <text>Total Año @Model.AnioSeleccionado</text>
+                        }
+
                     </h6>
 
                     <h2 class="fw-bold text-info mb-0">
@@ -124,7 +182,20 @@
         <div class="card-header bg-white">
 
             <h5 class="mb-0 fw-bold">
-                Despachos por Mes
+
+                @if (Model.TipoSeleccionado == "comercial")
+                {
+                    <text>Despachos Comerciales por Mes</text>
+                }
+                else if (Model.TipoSeleccionado == "vacios")
+                {
+                    <text>Despachos Vacíos por Mes</text>
+                }
+                else
+                {
+                    <text>Despachos por Mes</text>
+                }
+
             </h5>
 
         </div>
@@ -145,7 +216,20 @@
         <div class="card-header bg-white">
 
             <h5 class="mb-0 fw-bold">
-                Resumen Mensual
+
+                @if (Model.TipoSeleccionado == "comercial")
+                {
+                    <text>Resumen Mensual Comercial</text>
+                }
+                else if (Model.TipoSeleccionado == "vacios")
+                {
+                    <text>Resumen Mensual de Vacíos</text>
+                }
+                else
+                {
+                    <text>Resumen Mensual</text>
+                }
+
             </h5>
 
         </div>
@@ -361,7 +445,7 @@
 </div>
 
 <!-- ============================================ -->
-<!-- ESTADÍSTICAS POR CLIENTE -->
+<!-- CLIENTES COMERCIALES (SIN CCV) -->
 <!-- ============================================ -->
 
 <div class="container-fluid py-4">
@@ -371,11 +455,11 @@
     <div class="mb-4">
 
         <h3 class="fw-bold mb-1">
-            🏢 Estadísticas por Cliente
+            🏢 Clientes Comerciales
         </h3>
 
         <small class="text-muted">
-            Análisis de participación y volumen de despachos por cliente
+            Análisis de clientes excluyendo movimientos de contenedores vacíos (CCV)
         </small>
 
     </div>
@@ -410,7 +494,7 @@
                     </h4>
 
                     <small class="text-muted">
-                        @Model.CantidadClientePrincipal despachos
+                        @Model.CantidadClientePrincipal despachos comerciales
                     </small>
 
                 </div>
@@ -428,7 +512,7 @@
                 <div class="card-body text-center">
 
                     <h6 class="text-muted">
-                        👥 Clientes Activos
+                        👥 Clientes Comerciales
                     </h6>
 
                     <h2 class="fw-bold text-success">
@@ -438,7 +522,7 @@
                     </h2>
 
                     <small class="text-muted">
-                        Clientes con al menos un despacho
+                        Clientes con movimiento comercial
                     </small>
 
                 </div>
@@ -447,7 +531,7 @@
 
         </div>
 
-        <!-- PARTICIPACION -->
+        <!-- PARTICIPACIÓN -->
 
         <div class="col-md-4">
 
@@ -456,7 +540,7 @@
                 <div class="card-body text-center">
 
                     <h6 class="text-muted">
-                        📊 Participación Principal
+                        📊 Participación del Principal
                     </h6>
 
                     <h2 class="fw-bold text-warning">
@@ -466,7 +550,7 @@
                     </h2>
 
                     <small class="text-muted">
-                        Del total anual seleccionado
+                        Del total comercial del año
                     </small>
 
                 </div>
@@ -477,14 +561,14 @@
 
     </div>
 
-    <!-- GRAFICA TOP CLIENTES -->
+    <!-- GRÁFICA -->
 
     <div class="card border-0 shadow-sm">
 
         <div class="card-header bg-white">
 
             <h5 class="fw-bold mb-0">
-                Top 10 Clientes por Cantidad de Despachos
+                Top 10 Clientes Comerciales
             </h5>
 
         </div>
@@ -495,6 +579,225 @@
 
                 <canvas id="graficaClientes">
                 </canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ============================================ -->
+<!-- ESTADÍSTICAS SIN VACÍOS -->
+<!-- ============================================ -->
+
+<div class="container-fluid py-4">
+
+    <hr class="my-5" />
+
+    <div class="mb-4">
+
+        <h3 class="fw-bold mb-1">
+            💰 Estadísticas Sin Vacíos
+        </h3>
+
+        <small class="text-muted">
+            Análisis comercial excluyendo movimientos CCV
+        </small>
+
+    </div>
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        Despachos Comerciales
+                    </h6>
+
+                    <h2 class="fw-bold text-success">
+
+                        @Model.TotalDespachosComerciales
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        Despachos Vacíos
+                    </h6>
+
+                    <h2 class="fw-bold text-danger">
+
+                        @Model.TotalDespachosVacios
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        % Vacíos
+                    </h6>
+
+                    <h2 class="fw-bold text-warning">
+
+                        @Model.PorcentajeVacios%
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body text-center">
+
+                    <h6 class="text-muted">
+                        Promedio Diario Comercial
+                    </h6>
+
+                    <h2 class="fw-bold text-primary">
+
+                        @Model.PromedioDiarioComercial
+
+                    </h2>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- GRAFICA -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white">
+
+            <h5 class="fw-bold mb-0">
+                Despachos Comerciales por Mes
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div style="height:450px;">
+
+                <canvas id="graficaComercial">
+                </canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!--TABLA SIN VACIOS ENTRE SEMANA-->
+    <div class="card border-0 shadow-sm mt-4">
+
+        <div class="card-header bg-white">
+
+            <h5 class="mb-0 fw-bold">
+                Resumen Mensual Comercial
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>
+                                Mes
+                            </th>
+
+                            <th class="text-end">
+                                Despachos Comerciales
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in Model.ResumenMensualComercial)
+                        {
+                            <tr>
+
+                                <td>
+                                    @item.Mes
+                                </td>
+
+                                <td class="text-end fw-bold">
+
+                                    @item.Cantidad
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                    <tfoot class="table-light">
+
+                        <tr>
+
+                            <th>
+                                Total Comercial
+                            </th>
+
+                            <th class="text-end">
+
+                                @Model.TotalDespachosComerciales
+
+                            </th>
+
+                        </tr>
+
+                    </tfoot>
+
+                </table>
 
             </div>
 
@@ -671,7 +974,7 @@
 
         datasets: [
         {
-        label: 'Despachos',
+        label: 'Despachos Comerciales',
 
         data: cantidadesClientes,
 
@@ -701,7 +1004,8 @@
 
         label: function(context) {
 
-        return context.raw + ' despachos';
+        return context.raw +
+        ' despachos comerciales';
 
         }
         }
@@ -711,6 +1015,63 @@
         scales: {
 
         x: {
+
+        beginAtZero: true,
+
+        ticks: {
+        precision: 0
+        }
+        }
+        }
+        }
+        });
+
+        //comercial vs vacios
+        const mesesComerciales =
+        @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(Model.MesesComerciales));
+
+        const cantidadesComerciales =
+        @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(Model.CantidadesComerciales));
+
+        new Chart(
+        document.getElementById('graficaComercial'),
+        {
+        type: 'bar',
+
+        data: {
+
+        labels: mesesComerciales,
+
+        datasets: [
+        {
+        label: 'Despachos Comerciales',
+
+        data: cantidadesComerciales,
+
+        borderWidth: 1,
+
+        borderRadius: 8
+        }]
+        },
+
+        options: {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        plugins: {
+
+        legend: {
+        display: false
+        }
+        },
+
+        scales: {
+
+        y: {
 
         beginAtZero: true,
 

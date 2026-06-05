@@ -93,6 +93,69 @@
 
                     </div>
 
+                    <hr />
+
+                    <div class="card border-primary">
+
+                        <div class="card-header bg-primary text-white">
+
+                            <strong>
+                                📍 Movimiento de Ubicación
+                            </strong>
+
+                        </div>
+
+                        <div class="card-body">
+
+                            <div class="alert alert-info mb-3">
+
+                                Ubicación actual:
+                                <strong>@Model.Ubicacion</strong>
+
+                            </div>
+
+                            <label class="form-label">
+
+                                Mover transportista a:
+
+                            </label>
+
+                            <select name="nuevaUbicacion"
+                                    class="form-select">
+
+                                <option value="">
+                                    No mover
+                                </option>
+
+                                <option value="Patio">
+                                    Cargados
+                                </option>
+
+                                <option value="Vacios">
+                                    Vacios
+                                </option>
+
+                                <option value="Bodega2000">
+                                    Bodega 2000
+                                </option>
+
+                                <option value="Agroquimicos">
+                                    Agroquímicos
+                                </option>
+
+                            </select>
+
+                            <small class="text-muted">
+
+                                Si selecciona una ubicación diferente,
+                                el registro será trasladado al guardar.
+
+                            </small>
+
+                        </div>
+
+                    </div>
+
                 </div>
 
                 <hr />

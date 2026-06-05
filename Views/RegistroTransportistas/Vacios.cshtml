@@ -2,7 +2,7 @@
 @model PatioViewModel
 
 @{
-    ViewData["Title"] = "Registro de Transportistas - Agroquimicos";
+    ViewData["Title"] = "Registro de Transportistas - Vacios";
 }
 
 @if (TempData["Ok"] != null)
@@ -27,12 +27,12 @@
         <div>
 
             <h2 class="fw-bold mb-1">
-                🚛 Registro de Transportistas - Agroquimicos
+                🚛 Registro de Transportistas - Vacios.
             </h2>
 
             <small class="text-muted">
-                Control de choferes que ingresan a gestión de carga en Agroquimicos.
-            </small>
+                Control de choferes que ingresan para retirar equipos vacios.
+            </small>           
 
         </div>
 
@@ -40,7 +40,7 @@
             ← Volver
         </a>
 
-        <a asp-action="CrearAgroquimicos"
+        <a asp-action="CrearVacios"
            class="btn btn-primary">
 
             <i class="bi bi-plus-circle"></i>
@@ -167,7 +167,7 @@
                         <th>Placa</th>
                         <th>Chofer</th>
                         <th>Cliente</th>
-                        <th>DUA</th>
+                        <th>Consecutivo</th>
                         <th>Tipo</th>
                         <th>Firma</th>
                         <th class="text-center">Acciones</th>
@@ -328,7 +328,7 @@
                         <th>Placa</th>
                         <th>Chofer</th>
                         <th>Cliente</th>
-                        <th>DUA</th>
+                        <th>Consecutivo</th>
                         <th>Tipo</th>
                         <th>Firma</th>
                         <th class="text-center">Acciones</th>
@@ -503,7 +503,7 @@
                         <th>Placa</th>
                         <th>Chofer</th>
                         <th>Cliente</th>
-                        <th>DUA</th>
+                        <th>Consecutivo</th>
                         <th>Tipo</th>
                         <th class="text-center">Acciones</th>
                     </tr>
@@ -629,7 +629,6 @@
         white-space: nowrap;
         vertical-align: middle;
     }
-
 </style>
 
 <!--MODAL SALIDA MANUAL-->

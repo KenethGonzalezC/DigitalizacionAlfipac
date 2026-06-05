@@ -14,6 +14,7 @@ namespace BitacoraAlfipac.Controllers
         private const string UBICACION_PATIO = "Patio";
         private const string UBICACION_AGRO = "Agroquimicos";
         private const string UBICACION_BODEGA = "Bodega2000";
+        private const string UBICACION_VACIOS = "Vacios";
 
         public RegistroTransportistasController(
             ApplicationDbContext context, IWebHostEnvironment environment)
@@ -35,6 +36,8 @@ namespace BitacoraAlfipac.Controllers
         // =====================================================
         public IActionResult Patio(DateTime? fecha)
         {
+            ViewBag.UbicacionActual = "Patio";
+
             DateTime fechaFiltro = fecha?.Date ?? DateTime.Today;
 
             // PENDIENTES
@@ -81,6 +84,8 @@ namespace BitacoraAlfipac.Controllers
         // =====================================================
         public IActionResult Agroquimicos(DateTime? fecha)
         {
+            ViewBag.UbicacionActual = "Agroquimicos";
+
             DateTime fechaFiltro = fecha?.Date ?? DateTime.Today;
 
             var pendientes = _context.RegistroTransportistas
@@ -126,6 +131,8 @@ namespace BitacoraAlfipac.Controllers
         // =====================================================
         public IActionResult Bodega2000(DateTime? fecha)
         {
+            ViewBag.UbicacionActual = "Bodega2000";
+
             DateTime fechaFiltro = fecha?.Date ?? DateTime.Today;
 
             var pendientes = _context.RegistroTransportistas
@@ -167,9 +174,56 @@ namespace BitacoraAlfipac.Controllers
         }
 
         // =====================================================
+        // VACIOS
+        // =====================================================
+        public IActionResult Vacios(DateTime? fecha)
+        {
+            ViewBag.UbicacionActual = "Vacios";
+
+            DateTime fechaFiltro = fecha?.Date ?? DateTime.Today;
+
+            var pendientes = _context.RegistroTransportistas
+                .Where(x =>
+                    x.Ubicacion == "Vacios"
+                    && x.FechaRegistro.Date == fechaFiltro
+                    && x.FechaHoraIngreso == null)
+                .OrderByDescending(x => x.FechaRegistro)
+                .ToList();
+
+            var ingresados = _context.RegistroTransportistas
+                .Where(x =>
+                    x.Ubicacion == "Vacios"
+                    && x.FechaRegistro.Date == fechaFiltro
+                    && x.FechaHoraIngreso != null
+                    && x.FechaHoraSalida == null)
+                .OrderByDescending(x => x.FechaHoraIngreso)
+                .ToList();
+
+            var salidos = _context.RegistroTransportistas
+                .Where(x =>
+                    x.Ubicacion == "Vacios"
+                    && x.FechaRegistro.Date == fechaFiltro
+                    && x.FechaHoraSalida != null)
+                .OrderByDescending(x => x.FechaHoraSalida)
+                .ToList();
+
+            var vm = new PatioViewModel
+            {
+                Pendientes = pendientes,
+                Ingresados = ingresados,
+                Salidos = salidos,
+                FechaFiltro = fechaFiltro
+            };
+
+            ViewBag.Titulo = "Registro de Transportistas - Vacios";
+
+            return View("Vacios", vm);
+        }
+
+        // =====================================================
         // CREAR
         // =====================================================
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CrearPatio(
@@ -339,45 +393,52 @@ namespace BitacoraAlfipac.Controllers
             if (registro == null)
             {
                 TempData["Error"] = "Registro no encontrado.";
-                return RedirigirPorUbicacion(registro.Ubicacion, registro.FechaRegistro);
+                return RedirectToAction(nameof(Index));
             }
 
             return View(registro);
         }
 
-        // =====================================================
-        // GUARDAR EDICIÓN
-        // =====================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Editar(RegistroTransportista model)
+        public async Task<IActionResult> Editar(
+            RegistroTransportista model,
+            string? nuevaUbicacion)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var registro = _context.RegistroTransportistas
-                .FirstOrDefault(x => x.Id == model.Id);
+            var registro = await _context.RegistroTransportistas
+                .FirstOrDefaultAsync(x => x.Id == model.Id);
 
             if (registro == null)
             {
                 TempData["Error"] = "Registro no encontrado.";
-                return RedirigirPorUbicacion(model.Ubicacion, model.FechaRegistro);
+                return RedirectToAction(nameof(Index));
             }
 
             registro.FechaRegistro = model.FechaRegistro;
-            registro.Placa = model.Placa?.Trim().ToUpper() ?? "";
-            registro.NombreChofer = model.NombreChofer?.Trim().ToUpper() ?? "";
-            registro.Cliente = model.Cliente?.Trim().ToUpper() ?? "";
-            registro.DUA = model.DUA?.Trim().ToUpper();
-            registro.Tipo = model.Tipo?.Trim();
-            registro.Ubicacion = model.Ubicacion;
+            registro.Placa = model.Placa;
+            registro.Tipo = model.Tipo;
+            registro.NombreChofer = model.NombreChofer;
+            registro.Cliente = model.Cliente;
+            registro.DUA = model.DUA;
 
-            _context.SaveChanges();
+            // =====================================
+            // MOVIMIENTO DE UBICACIÓN
+            // =====================================
+
+            if (!string.IsNullOrWhiteSpace(nuevaUbicacion))
+            {
+                registro.Ubicacion = nuevaUbicacion;
+            }
+
+            await _context.SaveChangesAsync();
 
             TempData["Ok"] = "Registro actualizado correctamente.";
 
-            return RedirigirPorUbicacion(model.Ubicacion, model.FechaRegistro);
+            return RedirigirPorUbicacion(
+                registro.Ubicacion,
+                registro.FechaRegistro);
         }
+
 
         //REGISTRAR INGRESO
         [HttpPost]
@@ -509,14 +570,75 @@ namespace BitacoraAlfipac.Controllers
             return CrearVistaBase("Bodega2000");
         }
 
+        public IActionResult CrearVacios()
+        {
+            return CrearVistaBase("Vacios");
+        }
+
         private IActionResult RedirigirPorUbicacion(string ubicacion, DateTime? fecha = null)
         {
             return ubicacion switch
             {
                 "Agroquimicos" => RedirectToAction("Agroquimicos", new { fecha }),
                 "Bodega2000" => RedirectToAction("Bodega2000", new { fecha }),
+                "Vacios" => RedirectToAction("Vacios", new { fecha }),
                 _ => RedirectToAction("Patio", new { fecha })
             };
+        }
+
+        //EDITAR ADMIN
+        [HttpGet]
+        public async Task<IActionResult> EditarAdminModal(int id)
+        {
+            var registro = await _context
+                .RegistroTransportistas
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (registro == null)
+                return Content("Registro no encontrado.");
+
+            return PartialView(
+                "_EditarAdminModal",
+                registro);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditarAdmin(
+        RegistroTransportista model,
+        string? nuevaUbicacion)
+            {
+            var registro = await _context
+                .RegistroTransportistas
+                .FirstOrDefaultAsync(x => x.Id == model.Id);
+
+            if (registro == null)
+                return NotFound();
+
+            registro.FechaRegistro = model.FechaRegistro;
+            registro.Placa = model.Placa;
+            registro.NombreChofer = model.NombreChofer;
+            registro.Cliente = model.Cliente;
+            registro.DUA = model.DUA;
+            registro.Tipo = model.Tipo;
+
+            registro.UsuarioRegistro = model.UsuarioRegistro;
+            registro.FechaHoraIngreso = model.FechaHoraIngreso;
+            registro.FechaHoraSalida = model.FechaHoraSalida;
+            registro.UsuarioSalida = model.UsuarioSalida;
+
+            if (!string.IsNullOrWhiteSpace(nuevaUbicacion))
+            {
+                registro.Ubicacion = nuevaUbicacion;
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["Ok"] = "Registro actualizado correctamente.";
+
+            return RedirectToAction(
+                "Index",
+                "DashboardTransportistas");
         }
     }
 }

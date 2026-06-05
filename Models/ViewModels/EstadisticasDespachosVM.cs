@@ -52,6 +52,26 @@ public class EstadisticasDespachosVM
     public List<string> ClientesTop { get; set; } = new();
 
     public List<int> CantidadesClientesTop { get; set; } = new();
+
+    // ============================================
+    // ESTADÍSTICAS SIN VACÍOS
+    // ============================================
+
+    public int TotalDespachosComerciales { get; set; }
+
+    public int TotalDespachosVacios { get; set; }
+
+    public double PorcentajeVacios { get; set; }
+
+    public double PromedioDiarioComercial { get; set; }
+
+    public List<string> MesesComerciales { get; set; } = new();
+
+    public List<int> CantidadesComerciales { get; set; } = new();
+
+    public List<ResumenMesVM> ResumenMensualComercial { get; set; } = new();
+
+    public string TipoSeleccionado { get; set; } = "todos";
 }
 
 public class ResumenMesVM

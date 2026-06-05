@@ -14,9 +14,11 @@
 
         <a asp-controller="RegistroTransportistas" asp-action="Index" class="btn btn-outline-dark">
             ← Volver
-        </a>
+        </a>        
 
     </div>
+
+    <partial name="_NavegacionTransportistas" />
 
     <div class="card shadow-sm border-0 mb-4">
 
@@ -58,7 +60,7 @@
 
     <div class="card shadow-sm border-0 mb-4">
 
-        <div class="card-header bg-warning-subtle d-flex justify-content-between align-items-center">
+        <div class="card-header bg-danger-subtle d-flex justify-content-between align-items-center">
 
             <strong>📋 Registrados (Todas las ubicaciones)</strong>
 
@@ -110,9 +112,18 @@
                             <tr>
                                 <td>@item.FechaRegistro.ToString("HH:mm")</td>
                                 <td>
-                                    <span class="badge bg-info">
-                                        @item.Ubicacion
-                                    </span>
+                                    @if(item.Ubicacion == "Patio")
+                                    {
+                                        <span class="badge bg-info">
+                                            Cargado 
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info">
+                                            @item.Ubicacion
+                                        </span>
+                                    }
                                 </td>
                                 <td>@item.Placa</td>
                                 <td>@item.NombreChofer</td>
@@ -139,6 +150,19 @@
                                         <i class="bi bi-eye"></i>
 
                                     </button>
+
+                                    @if (User.IsInRole("Administrador"))
+                                    {
+                                        <button type="button"
+                                        class="btn btn-sm btn-warning"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editarAdminModal"
+                                        onclick="cargarEdicionAdmin(@item.Id)">
+
+                                            <i class="bi bi-pencil-square"></i>
+
+                                        </button>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -156,7 +180,7 @@
 
     <div class="card shadow-sm border-0 mb-4">
 
-        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+        <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
 
             <strong>🚪 Ingresados</strong>
 
@@ -212,9 +236,18 @@
                                 <td>@item.FechaRegistro.ToString("HH:mm")</td>
                                 <td>@item.FechaHoraIngreso?.ToString("HH:mm")</td>
                                 <td>
-                                    <span class="badge bg-info">
-                                        @item.Ubicacion
-                                    </span>
+                                    @if (item.Ubicacion == "Patio")
+                                    {
+                                        <span class="badge bg-info">
+                                            Cargado
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info">
+                                            @item.Ubicacion
+                                        </span>
+                                    }
                                 </td>
                                 <td>@item.Placa</td>
                                 <td>@item.NombreChofer</td>
@@ -241,6 +274,19 @@
                                         <i class="bi bi-eye"></i>
 
                                     </button>
+
+                                    @if (User.IsInRole("Administrador"))
+                                    {
+                                        <button type="button"
+                                        class="btn btn-sm btn-warning"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editarAdminModal"
+                                        onclick="cargarEdicionAdmin(@item.Id)">
+
+                                            <i class="bi bi-pencil-square"></i>
+
+                                        </button>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -258,7 +304,7 @@
 
     <div class="card shadow-sm border-0 mb-4">
 
-        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
 
             <strong>🚚 Salidos</strong>
 
@@ -336,9 +382,18 @@
 
                                 </td>
                                 <td>
-                                    <span class="badge bg-info">
-                                        @item.Ubicacion
-                                    </span>
+                                    @if (item.Ubicacion == "Patio")
+                                    {
+                                        <span class="badge bg-info">
+                                            Cargado
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-info">
+                                            @item.Ubicacion
+                                        </span>
+                                    }
                                 </td>
                                 <td>@item.Placa</td>
                                 <td>@item.NombreChofer</td>
@@ -365,6 +420,19 @@
                                         <i class="bi bi-eye"></i>
 
                                     </button>
+
+                                    @if (User.IsInRole("Administrador"))
+                                    {
+                                        <button type="button"
+                                        class="btn btn-sm btn-warning"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editarAdminModal"
+                                        onclick="cargarEdicionAdmin(@item.Id)">
+
+                                            <i class="bi bi-pencil-square"></i>
+
+                                        </button>
+                                    }
                                 </td>
                             </tr>
                         }
@@ -418,6 +486,47 @@
     </div>
 
 </div>
+
+<!--MODAL EDITAR-->
+<div class="modal fade"
+     id="editarAdminModal"
+     tabindex="-1">
+
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+
+        <div class="modal-content">
+
+            <div class="modal-header bg-warning">
+
+                <h5 class="modal-title">
+
+                    🔐 Edición Administrativa
+
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body"
+                 id="editarAdminContenido">
+
+                <div class="text-center p-5">
+
+                    <div class="spinner-border text-warning"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 <script>
 
         function cargarDetalle(id)
@@ -429,4 +538,19 @@
             });
     }
 
+</script>
+
+<script>
+        function cargarEdicionAdmin(id)
+    {
+        fetch('/RegistroTransportistas/EditarAdminModal/' + id)
+            .then(response => response.text())
+            .then(html => {
+
+                document.getElementById(
+                    'editarAdminContenido'
+                ).innerHTML = html;
+
+            });
+    }
 </script>

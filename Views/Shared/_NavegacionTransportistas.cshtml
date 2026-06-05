@@ -1,0 +1,56 @@
+﻿@{
+    string actual =
+    ViewBag.UbicacionActual ?? "";
+}
+
+<div class="card shadow-sm border-0 mb-4">
+
+    <div class="card-body">
+
+        <div class="d-flex flex-wrap gap-2">
+
+            <a asp-controller="DashboardTransportistas"
+               asp-action="Index"
+               class="btn @(actual == "Dashboard" ? "btn-dark" : "btn-outline-dark")">
+
+                🌍 Dashboard Global
+
+            </a>
+
+            <a asp-controller="RegistroTransportistas"
+               asp-action="Patio"
+               class="btn @(actual == "Patio" ? "btn-primary" : "btn-outline-primary")">
+
+                🚛 Cargados
+
+            </a>
+
+            <a asp-controller="RegistroTransportistas"
+               asp-action="Vacios"
+               class="btn @(actual == "Vacios" ? "btn-warning text-dark" : "btn-outline-warning")">
+
+                📦 Vacíos
+
+            </a>
+
+            <a asp-controller="RegistroTransportistas"
+               asp-action="Bodega2000"
+               class="btn @(actual == "Bodega2000" ? "btn-success" : "btn-outline-success")">
+
+                🏭 Bodega 2000
+
+            </a>
+
+            <a asp-controller="RegistroTransportistas"
+               asp-action="Agroquimicos"
+               class="btn @(actual == "Agroquimicos" ? "btn-danger" : "btn-outline-danger")">
+
+                ☣ Agroquímicos
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>

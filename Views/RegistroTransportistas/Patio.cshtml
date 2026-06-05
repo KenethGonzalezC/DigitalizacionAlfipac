@@ -2,7 +2,7 @@
 @model PatioViewModel
 
 @{
-    ViewData["Title"] = "Registro de Transportistas - Patio";
+    ViewData["Title"] = "Registro de Transportistas - Cargados";
 }
 
 @if (TempData["Ok"] != null)
@@ -27,11 +27,11 @@
         <div>
 
             <h2 class="fw-bold mb-1">
-                🚛 Registro de Transportistas - Patio
+                🚛 Registro de Transportistas - Cargados
             </h2>
 
             <small class="text-muted">
-                Control de choferes que ingresan para retirar equipos ubicados en patio.
+                Control de choferes que ingresan para retirar equipos cargados.
             </small>
 
         </div>
@@ -49,6 +49,8 @@
         </a>
 
     </div>
+
+    <partial name="_NavegacionTransportistas" />
 
     <!-- FILTRO -->
     <div class="card shadow-sm border-0 mb-4">
@@ -146,7 +148,7 @@
     <!-- TABLA REGISTRADOS -->
     <div class="card shadow-sm border-0">
 
-        <div class="card-header bg-warning-subtle text-black-50">
+        <div class="card-header bg-danger-subtle text-black-50">
 
             <strong>
                 🚪 Transportistas Registrados
@@ -306,7 +308,7 @@
 
     <div class="card shadow-sm border-0 mt-4">
 
-        <div class="card-header bg-success text-white">
+        <div class="card-header bg-warning text-white">
 
             <strong>
                 🚪 Transportistas Ingresados
@@ -479,7 +481,7 @@
 
     <div class="card shadow-sm border-0 mt-4">
 
-        <div class="card-header bg-secondary text-white">
+        <div class="card-header bg-success text-white">
 
             <strong>
                 🚚 Transportistas Salidos

@@ -1,0 +1,268 @@
+﻿@model BitacoraAlfipac.Models.Entidades.RegistroTransportista
+
+<form asp-controller="RegistroTransportistas"
+      asp-action="EditarAdmin"
+      method="post">
+
+    @Html.AntiForgeryToken()
+
+    <input asp-for="Id" type="hidden" />
+
+    <div class="row g-3">
+
+        <!-- FECHA REGISTRO -->
+        <div class="col-md-6">
+
+            <label asp-for="FechaRegistro"
+                   class="form-label fw-bold">
+            </label>
+
+            <input asp-for="FechaRegistro"
+                   type="datetime-local"
+                   class="form-control"
+                   value="@Model.FechaRegistro.ToString("yyyy-MM-ddTHH:mm")" />
+
+        </div>
+
+        <!-- PLACA -->
+        <div class="col-md-6">
+
+            <label asp-for="Placa"
+                   class="form-label fw-bold">
+            </label>
+
+            <input asp-for="Placa"
+                   class="form-control" />
+
+        </div>
+
+        <!-- CHOFER -->
+        <div class="col-md-6">
+
+            <label asp-for="NombreChofer"
+                   class="form-label fw-bold">
+                Chofer
+            </label>
+
+            <input asp-for="NombreChofer"
+                   class="form-control" />
+
+        </div>
+
+        <!-- CLIENTE -->
+        <div class="col-md-6">
+
+            <label asp-for="Cliente"
+                   class="form-label fw-bold">
+            </label>
+
+            <input asp-for="Cliente"
+                   class="form-control" />
+
+        </div>
+
+        <!-- DUA -->
+        <div class="col-md-6">
+
+            <label asp-for="DUA"
+                   class="form-label fw-bold">
+            </label>
+
+            <input asp-for="DUA"
+                   class="form-control" />
+
+        </div>
+
+        <!-- TIPO -->
+        <div class="col-md-6">
+
+            <label asp-for="Tipo"
+                   class="form-label fw-bold">
+            </label>
+
+            <input asp-for="Tipo"
+                   class="form-control" />
+
+        </div>
+
+    </div>
+
+    <hr />
+
+    <!-- MOVIMIENTO -->
+    <div class="card border-primary mb-3">
+
+        <div class="card-header bg-primary text-white">
+
+            <strong>
+                📍 Movimiento de Ubicación
+            </strong>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="alert alert-info">
+
+                Ubicación actual:
+                <strong>@Model.Ubicacion</strong>
+
+            </div>
+
+            <label class="form-label">
+
+                Mover transportista a:
+
+            </label>
+
+            <select name="nuevaUbicacion"
+                    class="form-select">
+
+                <option value="">
+                    No mover
+                </option>
+
+                <option value="Patio">
+                    Cargados
+                </option>
+
+                <option value="Vacios">
+                    Vacios
+                </option>
+
+                <option value="Bodega2000">
+                    Bodega 2000
+                </option>
+
+                <option value="Agroquimicos">
+                    Agroquímicos
+                </option>
+
+            </select>
+
+            <small class="text-muted">
+
+                Si selecciona una ubicación diferente,
+                el registro será trasladado al guardar.
+
+            </small>
+
+        </div>
+
+    </div>
+
+    <!-- DATOS OPERATIVOS -->
+    <div class="card border-warning mb-3">
+
+        <div class="card-header bg-warning">
+
+            <strong>
+                ⚙ Información Operativa
+            </strong>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+
+                    <label class="form-label fw-bold">
+
+                        Fecha Hora Ingreso
+
+                    </label>
+
+                    <input asp-for="FechaHoraIngreso"
+                           type="datetime-local"
+                           class="form-control"
+                           value="@(Model.FechaHoraIngreso?.ToString("yyyy-MM-ddTHH:mm"))" />
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label class="form-label fw-bold">
+
+                        Fecha Hora Salida
+
+                    </label>
+
+                    <input asp-for="FechaHoraSalida"
+                           type="datetime-local"
+                           class="form-control"
+                           value="@(Model.FechaHoraSalida?.ToString("yyyy-MM-ddTHH:mm"))" />
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label asp-for="UsuarioRegistro"
+                           class="form-label fw-bold">
+                    </label>
+
+                    <input asp-for="UsuarioRegistro"
+                           class="form-control" />
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FIRMA -->
+    <div class="card border-success">
+
+        <div class="card-header bg-success text-white">
+
+            <strong>
+                ✍ Firma
+            </strong>
+
+        </div>
+
+        <div class="card-body text-center">
+
+            @if (!string.IsNullOrWhiteSpace(Model.RutaFirma))
+            {
+                <img src="@Url.Content("~" + Model.RutaFirma)"
+                     class="img-fluid border rounded shadow"
+                     style="max-height:220px;" />
+            }
+            else
+            {
+                <div class="alert alert-secondary">
+
+                    Sin firma registrada
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+    <div class="mt-4 d-flex justify-content-end gap-2">
+
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+
+            Cancelar
+
+        </button>
+
+        <button type="submit"
+                class="btn btn-success">
+
+            <i class="bi bi-save"></i>
+            Guardar Cambios
+
+        </button>
+
+    </div>
+
+</form>

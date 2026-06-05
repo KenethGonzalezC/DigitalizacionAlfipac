@@ -19,7 +19,7 @@ namespace BitacoraAlfipac.Controllers
             return View();
         }
 
-        public async Task<IActionResult> Despachos(int? anio)
+        public async Task<IActionResult> Despachos(int? anio, string tipo = "todos")
         {
             //ESTADISTICA GENERAL REAL
 
@@ -41,6 +41,40 @@ namespace BitacoraAlfipac.Controllers
                     .Where(x =>
                         x.FechaHoraDespacho.Year == anioSeleccionado)
                     .ToList();
+
+            switch (tipo?.ToLower())
+            {
+                case "comercial":
+
+                    despachosAnio =
+                        despachosAnio
+                            .Where(x =>
+                                !string.IsNullOrWhiteSpace(x.ViajeDua) &&
+                                !x.ViajeDua
+                                    .Trim()
+                                    .ToUpper()
+                                    .StartsWith("CCV"))
+                            .ToList();
+
+                    break;
+
+                case "vacios":
+
+                    despachosAnio =
+                        despachosAnio
+                            .Where(x =>
+                                !string.IsNullOrWhiteSpace(x.ViajeDua) &&
+                                x.ViajeDua
+                                    .Trim()
+                                    .ToUpper()
+                                    .StartsWith("CCV"))
+                            .ToList();
+
+                    break;
+
+                default:
+                    break;
+            }
 
             string[] nombresMeses =
             {
@@ -73,6 +107,8 @@ namespace BitacoraAlfipac.Controllers
             var vm =
                 new EstadisticasDespachosVM
                 {
+                    TipoSeleccionado = tipo,
+
                     AnioSeleccionado = anioSeleccionado,
 
                     AniosDisponibles =
@@ -228,15 +264,26 @@ namespace BitacoraAlfipac.Controllers
             }
 
             // ============================================
-            // ESTADÍSTICAS POR CLIENTE
+            // ESTADÍSTICAS POR CLIENTE (SIN CCV)
             // ============================================
 
-            var clientes =
+            var despachosClientes =
                 despachosAnio
                     .Where(x =>
-                        !string.IsNullOrWhiteSpace(x.Informacion))
+                        !string.IsNullOrWhiteSpace(x.Informacion) &&
+                        !string.IsNullOrWhiteSpace(x.ViajeDua) &&
+                        !x.ViajeDua
+                            .Trim()
+                            .ToUpper()
+                            .StartsWith("CCV"))
+                    .ToList();
+
+            var clientes =
+                despachosClientes
                     .GroupBy(x =>
-                        x.Informacion.Trim())
+                        x.Informacion
+                            .Trim()
+                            .ToUpper())
                     .Select(g => new
                     {
                         Cliente = g.Key,
@@ -260,10 +307,10 @@ namespace BitacoraAlfipac.Controllers
                     clientePrincipal.Cantidad;
 
                 vm.PorcentajeClientePrincipal =
-                    vm.TotalAnioSeleccionado > 0
+                    despachosClientes.Any()
                         ? Math.Round(
                             (clientePrincipal.Cantidad * 100.0)
-                            / vm.TotalAnioSeleccionado,
+                            / despachosClientes.Count,
                             1)
                         : 0;
             }
@@ -283,7 +330,91 @@ namespace BitacoraAlfipac.Controllers
                     .Select(x => x.Cantidad)
                     .ToList();
 
-            return View(vm);
+            // ============================================
+            // ESTADÍSTICAS SIN VACÍOS
+            // ============================================
+
+            var despachosComerciales =
+                despachosAnio
+                    .Where(x =>
+                        !string.IsNullOrWhiteSpace(x.ViajeDua) &&
+                        !x.ViajeDua
+                            .Trim()
+                            .ToUpper()
+                            .StartsWith("CCV"))
+                    .ToList();
+
+            var despachosVacios =
+                despachosAnio
+                    .Where(x =>
+                        !string.IsNullOrWhiteSpace(x.ViajeDua) &&
+                        x.ViajeDua
+                            .Trim()
+                            .ToUpper()
+                            .StartsWith("CCV"))
+                    .ToList();
+
+            vm.TotalDespachosComerciales =
+                despachosComerciales.Count;
+
+            vm.TotalDespachosVacios =
+                despachosVacios.Count;
+
+            vm.PorcentajeVacios =
+                vm.TotalAnioSeleccionado > 0
+                    ? Math.Round(
+                        (vm.TotalDespachosVacios * 100.0)
+                        / vm.TotalAnioSeleccionado,
+                        1)
+                    : 0;
+
+            //comercial sin vacios de lunes a viernes
+            var comercialesOperativos =
+            despachosComerciales
+                .Where(x =>
+                    x.FechaHoraDespacho.DayOfWeek != DayOfWeek.Saturday &&
+                    x.FechaHoraDespacho.DayOfWeek != DayOfWeek.Sunday)
+                .ToList();
+
+            var diasComerciales =
+                comercialesOperativos
+                    .GroupBy(x => x.FechaHoraDespacho.Date)
+                    .Count();
+
+            vm.PromedioDiarioComercial =
+                diasComerciales > 0
+                    ? Math.Round(
+                        comercialesOperativos.Count / (double)diasComerciales,
+                        1)
+                    : 0;
+
+            var resumenMensualComercial =
+            Enumerable.Range(1, 12)
+                .Select(mes => new ResumenMesVM
+                {
+                    Mes = nombresMeses[mes],
+
+                    Cantidad =
+                        despachosComerciales.Count(x =>
+                            x.FechaHoraDespacho.Month == mes)
+                })
+                .ToList();
+
+                    vm.ResumenMensualComercial =
+                        resumenMensualComercial;
+
+                    vm.MesesComerciales =
+                        resumenMensualComercial
+                            .Select(x => x.Mes)
+                            .ToList();
+
+                    vm.CantidadesComerciales =
+                        resumenMensualComercial
+                            .Select(x => x.Cantidad)
+                            .ToList();
+
+
+            return View(vm);            
         }
 
         public IActionResult Ingresos()

@@ -108,9 +108,18 @@
 
                             <div>
 
-                                <span class="badge bg-success fs-6">
-                                    @Model.Ubicacion
-                                </span>
+                                @if (Model.Ubicacion == "Patio")
+                                {
+                                    <span class="badge bg-info">
+                                        Cargado
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-info">
+                                        @Model.Ubicacion
+                                    </span>
+                                }
 
                             </div>
 
