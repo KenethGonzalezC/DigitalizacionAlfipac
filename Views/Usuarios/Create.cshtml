@@ -5,107 +5,139 @@
     ViewData["Title"] = "Crear Usuario";
 }
 
-@if (TempData["Ok"] != null)
-{
-    <div class="alert alert-success">@TempData["Ok"]</div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger">@TempData["Error"]</div>
-}
+<div class="mb-4">
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success">@TempData["Success"]</div>
-}
+    <h2 class="fw-bold mb-1">
+        Crear Usuario
+    </h2>
 
-<div class="container mt-4">
+    <p class="text-muted mb-0">
+        Crear un nuevo acceso compartido con SCL.
+    </p>
 
-    <!-- HEADER -->
-    <div class="mb-3">
-        <h3 class="mb-0">➕ Crear usuario</h3>
-        <small class="text-muted">Agregar nuevo acceso al sistema</small>
-    </div>
+</div>
 
-    <!-- CARD FORM -->
-    <div class="card shadow-sm">
+<div class="card shadow-sm">
 
-        <div class="card-body">
+    <div class="card-body p-4">
 
-            <form asp-action="Create" method="post" autocomplete="off">
+        <form asp-action="Create"
+              method="post"
+              autocomplete="off">
 
-                <div class="row g-3">
+            @Html.AntiForgeryToken()
 
-                    <!-- USUARIO -->
-                    <div class="col-md-6">
-                        <label asp-for="NombreUsuario" class="form-label">
-                            Usuario
-                        </label>
+            <div class="row g-4">
+
+                <div class="col-md-6">
+
+                    <label asp-for="NombreUsuario"
+                           class="form-label">
+                    </label>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+                            <i class="bi bi-person"></i>
+                        </span>
 
                         <input asp-for="NombreUsuario"
                                class="form-control"
-                               placeholder=""
                                autocomplete="new-username" />
 
-                        <span asp-validation-for="NombreUsuario"
-                              class="text-danger small"></span>
                     </div>
 
-                    <!-- PASSWORD -->
-                    <div class="col-md-6">
-                        <label asp-for="Password" class="form-label">
-                            Contraseña
-                        </label>
+                    <span asp-validation-for="NombreUsuario"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label asp-for="Password"
+                           class="form-label">
+                    </label>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+                            <i class="bi bi-lock"></i>
+                        </span>
 
                         <input asp-for="Password"
                                type="password"
                                class="form-control"
-                               placeholder=""
                                autocomplete="new-password" />
 
-                        <span asp-validation-for="Password"
-                              class="text-danger small"></span>
                     </div>
 
-                    <!-- ROL -->
-                    <div class="col-md-6">
-                        <label asp-for="Rol" class="form-label">
-                            Rol del usuario
-                        </label>
+                    <span asp-validation-for="Password"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label asp-for="Rol"
+                           class="form-label">
+                        Rol
+                    </label>
+
+                    <div class="input-group">
+
+                        <span class="input-group-text">
+                            <i class="bi bi-shield-lock"></i>
+                        </span>
 
                         <select asp-for="Rol"
                                 asp-items="Model.RolesDisponibles"
                                 class="form-select">
 
-                            <option value="">-- Seleccione un rol --</option>
+                            <option value="">
+                                Seleccione un rol
+                            </option>
 
                         </select>
 
-                        <span asp-validation-for="Rol"
-                              class="text-danger small"></span>
                     </div>
 
-                </div>
-
-                <!-- ACTIONS -->
-                <div class="mt-4 d-flex justify-content-between">
-
-                    <a asp-action="Index"
-                           class="btn btn-outline-secondary">
-                        ← Cancelar
-                    </a>
-
-                    <button type="submit"
-                            class="btn btn-success">
-                        💾 Crear usuario
-                    </button>
+                    <span asp-validation-for="Rol"
+                          class="text-danger small">
+                    </span>
 
                 </div>
 
-            </form>
+            </div>
 
-        </div>
+            <div class="mt-4 d-flex justify-content-between">
+
+                <a asp-action="Index"
+                   class="btn btn-outline-secondary">
+
+                    <i class="bi bi-arrow-left"></i>
+                    Cancelar
+
+                </a>
+
+                <button type="submit"
+                        class="btn btn-primary">
+
+                    <i class="bi bi-floppy"></i>
+                    Crear Usuario
+
+                </button>
+
+            </div>
+
+        </form>
 
     </div>
 
 </div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

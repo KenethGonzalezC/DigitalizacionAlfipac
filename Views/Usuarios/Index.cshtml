@@ -2,150 +2,179 @@
 @model IEnumerable<Usuario>
 
 @{
-    ViewData["Title"] = "Gestion de Usuarios";
+    ViewData["Title"] = "Gestión de Usuarios";
 }
 
-@if (TempData["Ok"] != null)
-{
-    <div class="alert alert-success">@TempData["Ok"]</div>
-}
 @if (TempData["Error"] != null)
 {
-    <div class="alert alert-danger">@TempData["Error"]</div>
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
 }
 
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success">@TempData["Success"]</div>
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
 }
 
-<div class="container mt-4">
+<div class="d-flex justify-content-between align-items-center mb-4">
 
-    <!-- HEADER -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
 
-        <div>
-            <h3 class="mb-0">👥 Gestión de Usuarios</h3>
-            <small class="text-muted">Administración de acceso al sistema</small>
-        </div>
+        <h2 class="fw-bold mb-1">
+            Gestión de Usuarios
+        </h2>
 
-        <a asp-action="Create" class="btn btn-primary">
-            ➕ Nuevo usuario
-        </a>
+        <p class="text-muted mb-0">
+            Administración de accesos y permisos compartidos con SCL.
+        </p>
 
     </div>
 
-    <!-- CARD -->
-    <div class="card shadow-sm">
+    <a asp-action="Create"
+       class="btn btn-primary">
 
-        <div class="card-body p-0">
+        <i class="bi bi-person-plus"></i>
+        Nuevo Usuario
 
-            <div class="table-responsive">
+    </a>
 
-                <table class="table table-hover align-middle mb-0">
+</div>
 
-                    <thead class="table-light">
+<div class="card shadow-sm">
+
+    <div class="card-body p-0">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th style="width:220px;">
+                            Acciones
+                        </th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @foreach (var usuario in Model)
+                    {
                         <tr>
-                            <th>Usuario</th>
-                            <th>Rol</th>
-                            <th>Estado</th>
-                            <th style="width:160px;">Acciones</th>
-                        </tr>
-                    </thead>
 
-                    <tbody>
+                            <td class="fw-semibold">
+                                @usuario.NombreUsuario
+                            </td>
 
-                        @foreach (var u in Model)
-                        {
-                            <tr>
+                            <td>
 
-                                <td class="fw-semibold">
-                                    @u.NombreUsuario
-                                </td>
-
-                                <td>
-                                    @switch (u.Rol)
-                                    {
-                                        case "Administrador":
-                                            <span class="badge bg-danger"> @u.Rol </span>
-                                            break;
-
-                                        case "Patio":
-                                            <span class="badge bg-primary"> @u.Rol </span>
-                                            break;
-
-                                        case "Digitador":
-                                            <span class="badge bg-success"> @u.Rol </span>
-                                            break;
-
-                                        default:
-                                            <span class="badge bg-secondary"> @u.Rol </span>
-                                            break;
-                                    }
-                                </td>
-
-                                <td>
-                                    @if (u.Activo)
-                                    {
-                                        <span class="badge bg-success">
-                                            ● Activo
-                                        </span>
-                                    }
-                                    else
-                                    {
+                                @switch (usuario.Rol)
+                                {
+                                    case "Administrador":
                                         <span class="badge bg-danger">
-                                            ● Inactivo
+                                            @usuario.Rol
                                         </span>
-                                    }
-                                </td>
+                                        break;
 
-                                <td class="d-flex gap-2">
+                                    case "Digitador":
+                                        <span class="badge bg-success">
+                                            @usuario.Rol
+                                        </span>
+                                        break;
 
-                                    <!-- ACTIVAR / DESACTIVAR -->
+                                    case "Patio":
+                                        <span class="badge bg-primary">
+                                            @usuario.Rol
+                                        </span>
+                                        break;
+
+                                    default:
+                                        <span class="badge bg-secondary">
+                                            @usuario.Rol
+                                        </span>
+                                        break;
+                                }
+
+                            </td>
+
+                            <td>
+
+                                @if (usuario.Activo)
+                                {
+                                    <span class="badge bg-success">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        Activo
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">
+                                        <i class="bi bi-x-circle-fill"></i>
+                                        Inactivo
+                                    </span>
+                                }
+
+                            </td>
+
+                            <td>
+
+                                <div class="d-flex gap-2">
+
                                     <form asp-action="ToggleActivo"
-                                          method="post"
-                                          class="d-inline">
+                                          method="post">
 
                                         @Html.AntiForgeryToken()
 
                                         <input type="hidden"
                                                name="id"
-                                               value="@u.Id" />
+                                               value="@usuario.Id" />
 
-                                        <button class="btn btn-sm btn-outline-warning">
-                                            🔁 Estado
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-warning">
+
+                                            <i class="bi bi-arrow-repeat"></i>
+
                                         </button>
 
                                     </form>
 
-                                    <!-- ELIMINAR -->
                                     <form asp-action="Eliminar"
                                           method="post"
-                                          class="d-inline"
-                                          onsubmit="return confirm('⚠️ ¿Eliminar permanentemente este usuario?');">
+                                          onsubmit="return confirm('¿Desea eliminar este usuario?');">
 
                                         @Html.AntiForgeryToken()
 
                                         <input type="hidden"
                                                name="id"
-                                               value="@u.Id" />
+                                               value="@usuario.Id" />
 
-                                        <button class="btn btn-sm btn-outline-danger">
-                                            🗑 Eliminar
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-danger">
+
+                                            <i class="bi bi-trash"></i>
+
                                         </button>
 
                                     </form>
 
-                                </td>
+                                </div>
 
-                            </tr>
-                        }
+                            </td>
 
-                    </tbody>
+                        </tr>
+                    }
 
-                </table>
+                </tbody>
 
-            </div>
+            </table>
 
         </div>
 
